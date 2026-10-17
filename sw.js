@@ -1,7 +1,7 @@
+"use strict";
 
-const CACHE_NAME = "learner-journal-v1";
-
-const APP_FILES = [
+const CACHE_VERSION = "market-journal-v3";
+const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
@@ -9,52 +9,94 @@ const APP_FILES = [
   "./icons/icon-512.png"
 ];
 
-self.addEventListener("install", event => {
+// Install: save the core app files for offline use.
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_FILES))
-      .then(() => self.skipWaiting())
+    (async () => {
+      const cache = await caches.open(CACHE_VERSION);
+      await cache.addAll(APP_SHELL);
+      await self.skipWaiting();
+    })()
   );
 });
 
-self.addEventListener("activate", event => {
+// Activate: remove old versions of this app's cache.
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys()
-      .then(keys =>
-        Promise.all(
-          keys
-            .filter(key => key !== CACHE_NAME)
-            .map(key => caches.delete(key))
-        )
-      )
-      .then(() => self.clients.claim())
+    (async () => {
+      const keys = await caches.keys();
+
+      await Promise.all(
+        keys
+          .filter((key) =>
+            key.startsWith("market-journal-") &&
+            key !== CACHE_VERSION
+          )
+          .map((key) => caches.delete(key))
+      );
+
+      await self.clients.claim();
+    })()
   );
 });
 
-self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET") return;
+// Fetch: prefer fresh HTML, with an offline fallback.
+// Other local app files can be served from cache.
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
 
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
+  if (request.method !== "GET") return;
 
-      return fetch(event.request)
-        .then(response => {
-          if (
-            response &&
-            response.status === 200 &&
-            new URL(event.request.url).origin === self.location.origin
-          ) {
-            const copy = response.clone();
+  const url = new URL(request.url);
 
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, copy);
-            });
+  // Never intercept external websites or resources.
+  if (url.origin !== self.location.origin) return;
+
+  // Handle page navigation separately.
+  if (request.mode === "navigate") {
+    event.respondWith(
+      (async () => {
+        try {
+          const response = await fetch(request);
+
+          if (response.ok) {
+            const cache = await caches.open(CACHE_VERSION);
+            await cache.put("./index.html", response.clone());
           }
 
           return response;
-        })
-        .catch(() => caches.match("./index.html"));
-    })
+        } catch (error) {
+          return (
+            await caches.match(request) ||
+            await caches.match("./index.html") ||
+            Response.error()
+          );
+        }
+      })()
+    );
+
+    return;
+  }
+
+  // Cache-first for local static assets.
+  event.respondWith(
+    (async () => {
+      const cached = await caches.match(request);
+
+      if (cached) return cached;
+
+      try {
+        const response = await fetch(request);
+
+        if (response.ok && response.type === "basic") {
+          const cache = await caches.open(CACHE_VERSION);
+          await cache.put(request, response.clone());
+        }
+
+        return response;
+      } catch (error) {
+        return Response.error();
+      }
+    })()
   );
 });
