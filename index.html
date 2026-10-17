@@ -1,60 +1,146 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b1020">
-  <meta name="description" content="Learner Journal — your daily macro trading journal.">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./icons/icon-192.png">
-  <title>Learner Journal</title>
-  <style>
-    :root{color-scheme:dark;--bg:#080d18;--panel:#111a2b;--panel2:#162238;--border:#26344b;--text:#f0f4fc;--muted:#8e9db5;--accent:#61d5b0;--blue:#79a9ff;--red:#ff808b;--radius:16px}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
-    button,input,textarea{font:inherit}button{cursor:pointer}.app{width:min(100% - 28px,720px);margin:0 auto;padding:24px 0 48px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}
-    .logo{display:grid;place-items:center;width:43px;height:43px;border-radius:13px;background:#183c3a;color:var(--accent);font-size:23px;font-weight:800}
-    h1{margin:0;font-size:21px;letter-spacing:-.7px}.subtitle,.muted{color:var(--muted)}.subtitle,.today{font-size:12px}.today{text-align:right;color:var(--muted)}
-    .panel{padding:18px;margin-bottom:16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--panel)}
-    .rule{border-color:#24564e;background:linear-gradient(135deg,#122a2a,#111a2b)}.eyebrow{margin:0 0 10px;color:var(--muted);font-size:11px;font-weight:750;letter-spacing:1.2px;text-transform:uppercase}
-    .rule-line{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px;font-size:12px;font-weight:750}.rule-line span{padding:7px 9px;border:1px solid #31534f;border-radius:8px;background:#173633}.rule-line .down{color:var(--red);background:#321d2a;border-color:#633140}.rule-note{margin:11px 0 0;font-size:11px;color:var(--muted)}
-    h2{margin:0;font-size:16px;letter-spacing:-.2px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.step{display:grid;place-items:center;min-width:27px;height:27px;border-radius:8px;background:var(--panel2);color:var(--accent);font-size:12px;font-weight:800}
-    .field-grid{display:grid;grid-template-columns:1fr;gap:14px}label{display:block;margin-bottom:7px;color:#c9d4e6;font-size:12px;font-weight:650}
-    input,textarea{width:100%;border:1px solid var(--border);border-radius:10px;outline:none;background:#0b1322;color:var(--text);padding:12px}input:focus,textarea:focus{border-color:var(--accent)}input::placeholder,textarea::placeholder{color:#66758c}
-    textarea{min-height:108px;resize:vertical;line-height:1.6}.hint{margin:6px 0 0;font-size:11px;color:var(--muted)}.journal-fields{display:grid;gap:14px}
-    .journal-fields .field{padding:14px;border:1px solid var(--border);border-radius:12px;background:#0d1524}.field.expectation{border-top:2px solid var(--blue)}.field.market{border-top:2px solid #c5a0ff}.field.lesson{border-top:2px solid var(--accent)}
-    .actions{display:flex;gap:10px;margin:18px 0 25px}.btn{min-height:44px;padding:10px 15px;border:1px solid var(--border);border-radius:11px;background:var(--panel2);color:var(--text);font-weight:750}
-    .btn-primary{flex:1;border-color:var(--accent);background:var(--accent);color:#071b18}.btn-danger{padding:7px 10px;min-height:34px;color:var(--red);font-size:12px;background:#261722;border-color:#4c2937}
-    .install-row{display:flex;gap:10px;align-items:center;margin:0 0 16px}.install-row .btn{flex:1}.install-help{font-size:11px;color:var(--muted)}
-    .history-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:28px 0 14px}.count{color:var(--muted);font-size:12px}
-    .history-card{padding:16px;margin-bottom:12px;border:1px solid var(--border);border-radius:14px;background:var(--panel)}.history-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
-    .history-date{font-size:13px;font-weight:800}.history-time{font-size:11px;color:var(--muted)}.market-snapshot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
-    .snapshot-item{padding:10px;min-width:0;border-radius:9px;background:#0b1322}.snapshot-item:last-child{grid-column:1/-1}.snapshot-label{margin-bottom:4px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
-    .snapshot-value{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}.entry-section{padding-top:11px;margin-top:10px;border-top:1px solid var(--border)}.entry-title{margin-bottom:4px;font-size:11px;font-weight:800;color:var(--accent)}.entry-text{white-space:pre-wrap;overflow-wrap:anywhere;color:#d6deec}
-    .empty{padding:32px 16px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:14px}.status{min-height:20px;margin:0 0 10px;text-align:center;font-size:12px;color:var(--accent)}
-    footer{margin-top:28px;text-align:center;font-size:11px;color:var(--muted)}@media(min-width:560px){.app{padding-top:34px}.field-grid{grid-template-columns:1fr 1fr}.field-grid .field-full{grid-column:1/-1}.panel{padding:22px}h1{font-size:24px}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#09111f">
+<meta name="description" content="Market Journal — macro analysis and trading review.">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png">
+<title>Market Journal</title>
+<style>
+:root{color-scheme:dark;--bg:#09111f;--panel:#111c2d;--panel2:#17263a;--line:#293a50;--text:#edf4ff;--muted:#8fa2bb;--mint:#70e2bf;--blue:#8ab7ff;--purple:#c4a0ff;--red:#ff8997}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 90% 0%,#193047 0,transparent 36%),var(--bg);color:var(--text);font:14px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.app{width:min(100% - 28px,780px);margin:auto;padding:26px 0 50px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:48px;height:48px;flex-shrink:0;display:grid;place-items:center;border-radius:15px;background:linear-gradient(145deg,#9affdf,#42c7a4);color:#082b27;box-shadow:0 8px 25px #4ce0b326}
+.logo svg{width:29px;height:29px}
+h1{font-size:21px;line-height:1.2;letter-spacing:-.7px;margin:0}
+.subtitle{font-size:11px;color:var(--muted);margin-top:5px}
+.today{flex-shrink:0;border:1px solid var(--line);border-radius:12px;background:#111c2d;padding:8px 11px;color:var(--muted);font-size:10px;letter-spacing:.8px}
+.today strong{display:block;color:var(--text);font-size:12px;letter-spacing:0;margin-top:3px}
+.panel{padding:19px;margin-bottom:15px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(155deg,#142033,#101a29);box-shadow:0 12px 32px #00000016}
+.rule{border-color:#28564e;background:linear-gradient(120deg,#14302f,#111c2d)}
+.eyebrow{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;font-weight:800;color:var(--mint);margin:0 0 12px}
+.rule-line{display:flex;flex-wrap:wrap;align-items:center;gap:7px;font-size:11px;font-weight:750}
+.rule-line span{padding:7px 9px;border-radius:9px;background:#1b3c39;border:1px solid #31584f}
+.rule-line b{color:#8ca5b6}
+.rule-line .down{color:#ffabb3;background:#38222c;border-color:#68404c}
+.rule-note{font-size:11px;color:var(--muted);margin:12px 0 0}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+h2{font-size:15px;letter-spacing:-.25px;margin:0;font-weight:800}
+.step{display:grid;place-items:center;width:29px;height:29px;border-radius:9px;background:#183530;color:var(--mint);font-size:11px;font-weight:800;border:1px solid #2a5149}
+.field-grid{display:grid;grid-template-columns:1fr;gap:15px}
+label{display:block;font-size:11px;font-weight:750;color:#cbd8e9;margin-bottom:7px}
+input,textarea{width:100%;border:1px solid #2a3b51;border-radius:11px;background:#0a1422;color:var(--text);padding:12px;outline:none}
+input{min-height:45px}
+input:focus,textarea:focus{border-color:var(--mint);box-shadow:0 0 0 3px #70e2bf14}
+input::placeholder,textarea::placeholder{color:#697d96}
+.hint{font-size:10px;color:#8193aa;margin:6px 0 0}
+.journal-fields{display:grid;gap:12px}
+.field{padding:14px;border:1px solid #2a3a4e;border-radius:14px;background:#0d1726}
+.field.expectation{border-left:3px solid var(--blue)}
+.field.market{border-left:3px solid var(--purple)}
+.field.lesson{border-left:3px solid var(--mint)}
+textarea{min-height:105px;resize:vertical;line-height:1.65}
+.actions{display:flex;gap:9px;margin:18px 0 8px}
+.btn{min-height:44px;padding:10px 15px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--text);font-weight:750}
+.btn-primary{flex:1;background:linear-gradient(135deg,#8df2d1,#55d4b0);border-color:#7ae7c9;color:#08241f}
+.btn-danger{min-height:33px;padding:6px 10px;font-size:11px;color:#ff9ca7;background:#321e29;border-color:#5b3442}
+.status{min-height:20px;margin:9px 0 0;text-align:center;font-size:11px;color:var(--mint)}
+.install-row{display:flex;align-items:center;gap:10px;margin:0 0 15px}
+.install-row .btn{flex-shrink:0}
+.install-help{font-size:10px;color:var(--muted)}
+.history-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:28px 0 14px}
+.count{font-size:11px;color:var(--muted)}
+.history-card{padding:16px;margin-bottom:12px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(155deg,#142033,#101927)}
+.history-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.history-date{font-size:13px;font-weight:800}
+.history-time{font-size:10px;color:var(--muted);margin-top:3px}
+.market-snapshot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.snapshot-item{min-width:0;padding:10px;border-radius:10px;background:#0a1422}
+.snapshot-item:last-child{grid-column:1/-1}
+.snapshot-label{font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.snapshot-value{font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.entry-section{padding-top:11px;margin-top:10px;border-top:1px solid var(--line)}
+.entry-title{font-size:10px;letter-spacing:.7px;font-weight:850;color:var(--mint);margin-bottom:4px}
+.entry-text{font-size:12px;color:#d5dfed;white-space:pre-wrap;overflow-wrap:anywhere}
+.empty{padding:32px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:15px;background:#0d1725}
+.empty strong{display:block;color:var(--text);margin-bottom:4px}
+footer{text-align:center;margin-top:30px;padding-top:18px;border-top:1px solid #1b293b;font-size:10px;color:#778ba3}
+@media(min-width:560px){.app{padding-top:35px}.panel{padding:23px}.field-grid{grid-template-columns:1fr 1fr}.field-full{grid-column:1/-1}h1{font-size:24px}}
+@media(max-width:380px){.app{width:calc(100% - 20px)}.panel{padding:14px}.logo{width:42px;height:42px}.today{padding:7px}.rule-line{gap:5px}.rule-line span{padding:6px;font-size:10px}}
+</style>
 </head>
 <body>
 <main class="app">
-  <header><div class="brand"><div class="logo">L</div><div><h1>Learner Journal</h1><div class="subtitle">Think. Observe. Learn. Repeat.</div></div></div><div class="today"><div>TODAY</div><strong id="todayDate"></strong></div></header>
-  <div class="install-row"><button type="button" class="btn" id="installBtn" hidden>Install Learner Journal</button><span class="install-help" id="installHelp">Install appears when your browser supports it. You can also use Chrome menu → Add to Home screen.</span></div>
-  <section class="panel rule"><p class="eyebrow">Macro relationship · simplified model</p><div class="rule-line"><span>CPI ↑</span><b>→</b><span>DXY ↑</span><b>→</b><span>Yield ↑</span><b>→</b><span class="down">Stocks / Crypto ↓</span></div><p class="rule-note">A possible reaction, not a guaranteed sequence. Markets react to expectations, the surprise, Fed policy and positioning.</p></section>
-  <form id="journalForm">
-    <section class="panel"><div class="section-head"><h2>Today's Market Context</h2><span class="step">01</span></div><div class="field-grid">
+<header>
+  <div class="brand">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 32 32" fill="none">
+        <path d="M5 25V7M5 25H27" stroke="#07352e" stroke-width="2.3" stroke-linecap="round"/>
+        <path d="M9 20L14 15L18 18L26 8" stroke="#07352e" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M21 8H26V13" stroke="#07352e" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Market Journal</h1>
+      <div class="subtitle">Macro analysis · Reflection · Progress</div>
+    </div>
+  </div>
+  <div class="today">TODAY<strong id="todayDate"></strong></div>
+</header>
+
+<div class="install-row">
+  <button type="button" class="btn" id="installBtn" hidden>Install App</button>
+  <span class="install-help" id="installHelp">Use Chrome menu → Add to Home screen to install.</span>
+</div>
+
+<section class="panel rule">
+  <p class="eyebrow">Macro relationship · reference, not a rule</p>
+  <div class="rule-line">
+    <span>CPI surprise ↑</span><b>→</b><span>DXY ↑</span><b>→</b><span>Yields ↑</span><b>→</b><span class="down">Risk assets may ↓</span>
+  </div>
+  <p class="rule-note">A possible reaction, not a guaranteed sequence. Markets react to expectations, the surprise, Fed policy and positioning.</p>
+</section>
+
+<form id="journalForm">
+  <section class="panel">
+    <div class="section-head"><h2>Today's Market Context</h2><span class="step">01</span></div>
+    <div class="field-grid">
       <div><label for="dxy">DXY — Dollar Index</label><input id="dxy" name="dxy" placeholder="e.g. 98.45"><p class="hint">Level, direction or key observation.</p></div>
       <div><label for="us10y">US10Y — Treasury Yield</label><input id="us10y" name="us10y" placeholder="e.g. 4.12%"><p class="hint">Yield level, change or direction.</p></div>
       <div class="field-full"><label for="news">CPI / PPI News</label><input id="news" name="news" placeholder="e.g. CPI 3.1% vs forecast 3.0%"><p class="hint">Record actual, forecast and previous when available.</p></div>
-    </div></section>
-    <section class="panel"><div class="section-head"><h2>My Trading Review</h2><span class="step">02</span></div><div class="journal-fields">
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="section-head"><h2>My Trading Review</h2><span class="step">02</span></div>
+    <div class="journal-fields">
       <div class="field expectation"><label for="expectation">My Expectation</label><textarea id="expectation" name="expectation" placeholder="What did I expect, and why? What was my bias before the move?" required></textarea></div>
       <div class="field market"><label for="market">What Market Did</label><textarea id="market" name="market" placeholder="What actually happened? How did DXY, yields, stocks or crypto react?" required></textarea></div>
       <div class="field lesson"><label for="lesson">Lesson</label><textarea id="lesson" name="lesson" placeholder="Was my analysis correct? What did I miss? What will I do differently?" required></textarea></div>
-    </div><div class="actions"><button type="submit" class="btn btn-primary">Save Journal Entry</button><button type="button" class="btn" id="clearBtn">Clear</button></div><p id="status" class="status" role="status" aria-live="polite"></p></section>
-  </form>
-  <section><div class="history-head"><h2>Journal History</h2><span id="entryCount" class="count">0 entries</span></div><div id="history"></div></section>
-  <footer>Private local storage · No account required<br>Records stay in this browser on this device. Export backups regularly if the journal matters to you.</footer>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn btn-primary">Save Journal Entry</button>
+      <button type="button" class="btn" id="clearBtn">Clear</button>
+    </div>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </section>
+</form>
+
+<section>
+  <div class="history-head"><h2>Journal History</h2><span id="entryCount" class="count">0 entries</span></div>
+  <div id="history"></div>
+</section>
+
+<footer>Private local storage · No account required<br>Entries stay in this browser on this device. Export backups regularly.</footer>
 </main>
+
 <script>
 (() => {
   "use strict";
@@ -62,49 +148,181 @@
   const $ = id => document.getElementById(id);
   const form = $("journalForm"), historyContainer = $("history"), status = $("status");
   let entries = loadEntries(), installPrompt = null;
-  function dateKey(d = new Date()) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
-  function formatDate(s) { const p=s.split("-").map(Number); return new Date(p[0],p[1]-1,p[2]).toLocaleDateString(undefined,{weekday:"short",year:"numeric",month:"short",day:"numeric"}); }
-  function formatTime(t) { const d=new Date(t); return Number.isNaN(d.getTime())?"":d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}); }
+
+  function dateKey(d = new Date()) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+  function formatDate(s) {
+    const p = s.split("-").map(Number);
+    return new Date(p[0],p[1]-1,p[2]).toLocaleDateString(undefined,{weekday:"short",year:"numeric",month:"short",day:"numeric"});
+  }
+  function formatTime(t) {
+    const d = new Date(t);
+    return Number.isNaN(d.getTime()) ? "" : d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
+  }
   $("todayDate").textContent = new Date().toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
-  function loadEntries(){ try { const v=JSON.parse(localStorage.getItem(KEY)||"[]"); return Array.isArray(v)?v:[]; } catch(e){return [];} }
-  function persist(){ try {localStorage.setItem(KEY,JSON.stringify(entries));return true;}catch(e){showStatus("Could not save. Check device storage.");return false;} }
-  function showStatus(s){status.textContent=s;}
-  function readForm(){return {dxy:$("dxy").value.trim(),us10y:$("us10y").value.trim(),news:$("news").value.trim(),expectation:$("expectation").value.trim(),market:$("market").value.trim(),lesson:$("lesson").value.trim()};}
-  function addText(parent,tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;n.textContent=txt||"—";parent.appendChild(n);return n;}
-  function snapshot(parent,label,value){const n=document.createElement("div");n.className="snapshot-item";addText(n,"div","snapshot-label",label);addText(n,"div","snapshot-value",value||"Not recorded");parent.appendChild(n);}
-  function section(parent,title,value){const n=document.createElement("div");n.className="entry-section";addText(n,"div","entry-title",title);addText(n,"div","entry-text",value);parent.appendChild(n);}
-  function render(){
+
+  function loadEntries() {
+    try {
+      const value = JSON.parse(localStorage.getItem(KEY) || "[]");
+      return Array.isArray(value) ? value : [];
+    } catch (e) { return []; }
+  }
+  function persist() {
+    try {
+      localStorage.setItem(KEY,JSON.stringify(entries));
+      return true;
+    } catch (e) {
+      showStatus("Could not save. Check device storage.");
+      return false;
+    }
+  }
+  function showStatus(message) { status.textContent = message; }
+  function readForm() {
+    return {
+      dxy:$("dxy").value.trim(),
+      us10y:$("us10y").value.trim(),
+      news:$("news").value.trim(),
+      expectation:$("expectation").value.trim(),
+      market:$("market").value.trim(),
+      lesson:$("lesson").value.trim()
+    };
+  }
+  function addText(parent,tag,cls,text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    node.textContent = text || "—";
+    parent.appendChild(node);
+    return node;
+  }
+  function snapshot(parent,label,value) {
+    const node = document.createElement("div");
+    node.className = "snapshot-item";
+    addText(node,"div","snapshot-label",label);
+    addText(node,"div","snapshot-value",value || "Not recorded");
+    parent.appendChild(node);
+  }
+  function section(parent,title,value) {
+    const node = document.createElement("div");
+    node.className = "entry-section";
+    addText(node,"div","entry-title",title);
+    addText(node,"div","entry-text",value);
+    parent.appendChild(node);
+  }
+  function render() {
     historyContainer.replaceChildren();
-    const sorted=[...entries].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-    $("entryCount").textContent=`${sorted.length} ${sorted.length===1?"entry":"entries"}`;
-    if(!sorted.length){const e=document.createElement("div");e.className="empty";addText(e,"div","","Your journal starts here.");addText(e,"p","","Save your first market observation above.");historyContainer.appendChild(e);return;}
-    sorted.forEach(entry=>{
-      const card=document.createElement("article");card.className="history-card";
-      const top=document.createElement("div");top.className="history-card-top";
-      const info=document.createElement("div");addText(info,"div","history-date",formatDate(entry.date||dateKey()));addText(info,"div","history-time",`Saved at ${formatTime(entry.createdAt)}`);
-      const del=document.createElement("button");del.type="button";del.className="btn btn-danger";del.textContent="Delete";del.addEventListener("click",()=>{
-        if(!confirm("Delete this entry permanently?"))return;
-        const old=entries;entries=entries.filter(x=>x.id!==entry.id);
-        if(persist()){render();showStatus("Entry deleted.");}else entries=old;
+    const sorted = [...entries].sort((a,b)=>(b.createdAt || 0)-(a.createdAt || 0));
+    $("entryCount").textContent = `${sorted.length} ${sorted.length === 1 ? "entry" : "entries"}`;
+
+    if (!sorted.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      addText(empty,"strong","","Your journal starts here.");
+      addText(empty,"div","","Save your first market observation above.");
+      historyContainer.appendChild(empty);
+      return;
+    }
+
+    sorted.forEach(entry => {
+      const card = document.createElement("article");
+      card.className = "history-card";
+      const top = document.createElement("div");
+      top.className = "history-card-top";
+      const info = document.createElement("div");
+      addText(info,"div","history-date",formatDate(entry.date || dateKey()));
+      addText(info,"div","history-time",`Saved at ${formatTime(entry.createdAt)}`);
+
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "btn btn-danger";
+      del.textContent = "Delete";
+      del.addEventListener("click",() => {
+        if (!confirm("Delete this entry permanently?")) return;
+        const previous = entries;
+        entries = entries.filter(item => item.id !== entry.id);
+        if (persist()) {
+          render();
+          showStatus("Entry deleted.");
+        } else entries = previous;
       });
-      top.append(info,del);card.appendChild(top);
-      const snap=document.createElement("div");snap.className="market-snapshot";snapshot(snap,"DXY",entry.dxy);snapshot(snap,"US10Y",entry.us10y);snapshot(snap,"CPI / PPI News",entry.news);card.appendChild(snap);
-      section(card,"MY EXPECTATION",entry.expectation);section(card,"WHAT MARKET DID",entry.market);section(card,"LESSON",entry.lesson);historyContainer.appendChild(card);
+
+      top.append(info,del);
+      card.appendChild(top);
+      const snap = document.createElement("div");
+      snap.className = "market-snapshot";
+      snapshot(snap,"DXY",entry.dxy);
+      snapshot(snap,"US10Y",entry.us10y);
+      snapshot(snap,"CPI / PPI News",entry.news);
+      card.appendChild(snap);
+      section(card,"MY EXPECTATION",entry.expectation);
+      section(card,"WHAT MARKET DID",entry.market);
+      section(card,"LESSON",entry.lesson);
+      historyContainer.appendChild(card);
     });
   }
-  form.addEventListener("submit",e=>{
-    e.preventDefault();const data=readForm();
-    if(!data.expectation||!data.market||!data.lesson){showStatus("Complete all three review sections.");return;}
-    const entry={id:crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random()}`,date:dateKey(),createdAt:Date.now(),...data};
-    entries.push(entry);if(!persist()){entries.pop();return;}form.reset();render();showStatus("Entry saved on this device.");window.scrollTo({top:0,behavior:"smooth"});
+
+  form.addEventListener("submit",event => {
+    event.preventDefault();
+    const data = readForm();
+    if (!data.expectation || !data.market || !data.lesson) {
+      showStatus("Complete all three review sections.");
+      return;
+    }
+    const entry = {
+      id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+      date: dateKey(),
+      createdAt: Date.now(),
+      ...data
+    };
+    entries.push(entry);
+    if (!persist()) {
+      entries.pop();
+      return;
+    }
+    form.reset();
+    render();
+    showStatus("Entry saved on this device.");
+    window.scrollTo({top:0,behavior:"smooth"});
   });
-  $("clearBtn").addEventListener("click",()=>{if(!formHasContent())return;if(confirm("Clear the unsaved form? Saved entries will stay.")){form.reset();showStatus("Form cleared.");}});
-  function formHasContent(){return [...form.querySelectorAll("input,textarea")].some(x=>x.value.trim());}
-  window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installPrompt=e;$("installBtn").hidden=false;$("installHelp").textContent="Tap Install to add the app to your device.";});
-  $("installBtn").addEventListener("click",async()=>{if(!installPrompt){showStatus("Open Chrome menu and choose Install app or Add to Home screen.");return;}installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$("installBtn").hidden=true;});
-  window.addEventListener("appinstalled",()=>{showStatus("Learner Journal installed.");$("installBtn").hidden=true;});
-  if("serviceWorker" in navigator && location.protocol.startsWith("http")){
-    window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").then(()=>showStatus("App ready. Offline support enabled after the first load.")).catch(()=>showStatus("Offline setup failed. Check hosting and sw.js path.")));
+
+  $("clearBtn").addEventListener("click",() => {
+    const hasContent = [...form.querySelectorAll("input,textarea")].some(field => field.value.trim());
+    if (!hasContent) return;
+    if (confirm("Clear the unsaved form? Saved entries will stay.")) {
+      form.reset();
+      showStatus("Form cleared.");
+    }
+  });
+
+  window.addEventListener("beforeinstallprompt",event => {
+    event.preventDefault();
+    installPrompt = event;
+    $("installBtn").hidden = false;
+    $("installHelp").textContent = "Tap Install to add Market Journal to your device.";
+  });
+
+  $("installBtn").addEventListener("click",async() => {
+    if (!installPrompt) {
+      showStatus("Open Chrome menu and choose Install app or Add to Home screen.");
+      return;
+    }
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt = null;
+    $("installBtn").hidden = true;
+  });
+
+  window.addEventListener("appinstalled",() => {
+    showStatus("Market Journal installed.");
+    $("installBtn").hidden = true;
+  });
+
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+    window.addEventListener("load",() => {
+      navigator.serviceWorker.register("./sw.js")
+        .then(() => showStatus("App ready. Offline support enabled after the first load."))
+        .catch(() => showStatus("Offline setup failed. Check hosting and sw.js path."));
+    });
   }
   render();
 })();
