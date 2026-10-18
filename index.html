@@ -3,24 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#09111f">
+  <meta name="theme-color" content="#080d18">
   <meta name="description" content="MarketSignal — a personal macro trading journal for market context, expectations and lessons.">
   <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./icons/icon-192.png">
-  <title>MarketSignal — Macro Intelligence</title>
+  <link rel="icon" type="image/svg+xml" href="./marketsignal-mark.svg">
+  <title>MarketSignal | Macro Terminal</title>
 
   <style>
     :root {
       color-scheme: dark;
-      --bg: #09111f;
-      --panel: #101b2c;
-      --panel2: #142238;
-      --panel3: #0c1727;
-      --border: #25354b;
+      --bg: #080d18;
+      --panel: #0e1726;
+      --panel2: #14243a;
+      --panel3: #0b1320;
+      --border: #24354a;
       --text: #eef4ff;
       --muted: #8ea1ba;
-      --accent: #68e0bd;
-      --blue: #86b5ff;
+      --accent: #69f0c1;
+      --blue: #78aaff;
       --purple: #c0a1ff;
       --red: #ff8795;
       --yellow: #f1cb7b;
@@ -32,7 +32,7 @@
     body {
       margin: 0;
       background:
-        radial-gradient(ellipse at 8% 0%, #17334a 0%, transparent 36%),
+        radial-gradient(ellipse at 4% 0%, #123b42 0%, transparent 32%),\n        radial-gradient(ellipse at 100% 12%, #1b2440 0%, transparent 28%),
         var(--bg);
       color: var(--text);
       font: 14px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -44,7 +44,7 @@
     .app {
       width: min(100% - 28px, 1000px);
       margin: 0 auto;
-      padding: 24px 0 48px;
+      padding: 18px 0 32px;
     }
 
     .topbar {
@@ -52,7 +52,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 16px;
-      margin-bottom: 28px;
+      margin-bottom: 17px;
     }
 
     .brand {
@@ -130,7 +130,7 @@
     .hero h2 {
       max-width: 530px;
       margin: 0;
-      font-size: clamp(23px, 4vw, 34px);
+      font-size: clamp(23px, 4vw, 30px);
       line-height: 1.15;
       letter-spacing: -1px;
     }
@@ -167,7 +167,7 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
-      margin-bottom: 24px;
+      margin-bottom: 15px;
     }
 
     .stat {
@@ -298,7 +298,7 @@
     }
 
     textarea {
-      min-height: 110px;
+      min-height: 82px;
       resize: vertical;
       line-height: 1.65;
     }
@@ -498,13 +498,13 @@
       h1 { font-size: 19px; }
       .brand-sub { font-size: 9px; letter-spacing: .6px; }
       .logo { width: 42px; height: 42px; }
-      .hero { display: block; padding: 20px; }
+      .hero { display: block; padding: 15px; }
       .mode-pill { margin-top: 16px; }
       .stats { gap: 8px; }
       .stat { padding: 12px 10px; }
       .stat-value { font-size: 21px; }
       .stat-label { font-size: 10px; }
-      .panel { padding: 15px; }
+      .panel { padding: 12px; }
       .form-grid { grid-template-columns: 1fr; gap: 14px; }
       .field.full { grid-column: auto; }
       .macro-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -520,7 +520,7 @@
     }
 
     /* MarketSignal two-view navigation */
-    .app-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 22px;padding:6px;border:1px solid var(--border);border-radius:15px;background:rgba(12,23,39,.9);position:sticky;top:8px;z-index:20;backdrop-filter:blur(12px)}
+    .app-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 14px;padding:5px;border:1px solid var(--border);border-radius:15px;background:rgba(12,23,39,.9);position:sticky;top:8px;z-index:20;backdrop-filter:blur(12px)}
     .app-nav button{border:1px solid transparent;border-radius:10px;padding:12px 10px;background:transparent;color:var(--muted);font:inherit;font-weight:800;cursor:pointer}
     .app-nav button[aria-selected="true"]{background:var(--accent);color:#071a17}
     .app-view[hidden]{display:none!important}
@@ -536,10 +536,10 @@
 <main class="app">
   <header class="topbar">
     <div class="brand">
-      <div class="logo" aria-hidden="true">M<span style="font-size:13px">S</span></div>
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 40 40" width="32" height="32" fill="none"><path d="M4 28V12l8 8 8-13 8 13 8-8v16" stroke="#69f0c1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 33h30" stroke="#78aaff" stroke-width="2" stroke-linecap="round"/></svg></div>
       <div>
         <h1>MarketSignal</h1>
-        <div class="brand-sub">Macro intelligence · Trading journal</div>
+        <div class="brand-sub">MACRO TERMINAL <span style="color:var(--accent)">/</span> TRADING INTELLIGENCE</div>
       </div>
     </div>
     <div class="date-box">
@@ -684,7 +684,7 @@
   </div>
 
   <footer>
-    MarketSignal · Macro Intelligence<br>
+    MarketSignal · Macro Terminal<br>
     Local browser storage · No account or cloud sync
   </footer>
 </main>
