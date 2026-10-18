@@ -11,7 +11,7 @@
   "background_color": "#080d18",
   "theme_color": "#080d18",
   "categories": ["finance", "productivity", "utilities"],
-  "icons": [
+  "icons": [\n    {\n      "src": "./marketsignal-mark.svg",\n      "sizes": "any",\n      "type": "image/svg+xml",\n      "purpose": "any"\n    },
     {
       "src": "./icons/icon-192.png",
       "sizes": "192x192",
