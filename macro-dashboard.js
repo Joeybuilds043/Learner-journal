@@ -2,7 +2,7 @@
 (() => {
   "use strict";
 
-  const API_URL = "PASTE_YOUR_WORKER_URL_HERE";
+  const API_URL = "https://marketsignal-data.asadlang05.workers.dev/";
 
   const style = document.createElement("style");
   style.textContent = `
