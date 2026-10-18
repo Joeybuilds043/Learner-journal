@@ -2,7 +2,7 @@
   "id": "./",
   "name": "MarketSignal — Macro Intelligence",
   "short_name": "MarketSignal",
-  "description": "Macro market data, trading journal and AI-assisted research.",
+  "description": "A macro trading journal for market context, expectations and lessons.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",
@@ -10,11 +10,7 @@
   "orientation": "portrait-primary",
   "background_color": "#09111f",
   "theme_color": "#09111f",
-  "categories": [
-    "finance",
-    "productivity",
-    "utilities"
-  ],
+  "categories": ["finance", "productivity", "utilities"],
   "icons": [
     {
       "src": "./icons/icon-192.png",
@@ -30,4 +26,3 @@
     }
   ]
 }
-
