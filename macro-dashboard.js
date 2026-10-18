@@ -79,8 +79,8 @@
       const vix=num(d.vix?.value);
       grid.replaceChildren();
       grid.appendChild(card("US 10Y YIELD",yieldVal,dateOf(d.us10y),yieldCh===null?null:yieldCh*100,{suffix:"%",changeSuffix:" bps",changeLabel:"change"}));
-      grid.appendChild(card("USD STRENGTH · BROAD INDEX",dollar,dateOf(d.dollar),dollarPct,{changeSuffix:"%",chart:sparkline(dollar,dollarPrev,"#69f0c1")}));
-      grid.appendChild(card("CPI INFLATION · YOY",cpiYoY,dateOf(d.cpiYearOverYear),cpiChange,{suffix:"%",changeSuffix:" pp",changeLabel:"vs prior"}));
+      grid.appendChild(card("USD STRENGTH · % CHANGE",dollarPct,dateOf(d.dollar),null,{suffix:"%",chart:sparkline(dollar,dollarPrev,"#69f0c1"),extra:"<div class=\\"ms-date\\">Broad dollar index · comparison to prior reading</div>"}));
+      grid.appendChild(card("CPI INFLATION · YOY",cpiYoY,dateOf(d.cpiYearOverYear),null,{suffix:"%"}));
       grid.appendChild(card("PPI · MONTHLY CHANGE",ppiPct,dateOf(d.ppi),null,{suffix:"%",decimals:2,chart:""}));
       const vixChart=vix===null?"":gauge(vix);
       grid.appendChild(card("VIX · FEAR / VOLATILITY INDEX",vix,dateOf(d.vix),num(d.vix?.change),{changeSuffix:" pts",changeLabel:"change",extra:vixChart}));
