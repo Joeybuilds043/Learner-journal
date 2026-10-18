@@ -1,9 +1,8 @@
-
 {
-  "id": "market-journal",
-  "name": "Market Journal — Macro Trading Review",
-  "short_name": "Market Journal",
-  "description": "A focused macro trading journal for market context, expectations, outcomes and lessons.",
+  "id": "./",
+  "name": "MarketSignal — Macro Intelligence",
+  "short_name": "MarketSignal",
+  "description": "Macro market data, trading journal and AI-assisted research.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",
@@ -31,3 +30,4 @@
     }
   ]
 }
+
