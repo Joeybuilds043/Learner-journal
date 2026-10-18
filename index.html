@@ -518,6 +518,17 @@
       .stat-value { font-size: 18px; }
       .button-row .btn { width: 100%; }
     }
+
+    /* MarketSignal two-view navigation */
+    .app-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 22px;padding:6px;border:1px solid var(--border);border-radius:15px;background:rgba(12,23,39,.9);position:sticky;top:8px;z-index:20;backdrop-filter:blur(12px)}
+    .app-nav button{border:1px solid transparent;border-radius:10px;padding:12px 10px;background:transparent;color:var(--muted);font:inherit;font-weight:800;cursor:pointer}
+    .app-nav button[aria-selected="true"]{background:var(--accent);color:#071a17}
+    .app-view[hidden]{display:none!important}
+    .view-heading{margin:0 0 18px}
+    .view-heading h2{font-size:22px;margin:0 0 6px}
+    .view-heading p{margin:0;color:var(--muted);font-size:13px}
+    @media(max-width:480px){.app-nav{top:4px}.app-nav button{font-size:13px;padding:11px 6px}}
+
   </style>
 </head>
 
@@ -537,6 +548,12 @@
     </div>
   </header>
 
+
+  <nav class="app-nav" aria-label="Main navigation">
+    <button type="button" id="showDashboard" aria-selected="true">Market Dashboard</button>
+    <button type="button" id="showJournal" aria-selected="false">Trading Journal</button>
+  </nav>
+  <section id="dashboardView" class="app-view" aria-label="Market dashboard">
   <section class="hero">
     <div>
       <p class="eyebrow">Your personal market workspace</p>
@@ -579,6 +596,9 @@
     <p class="note">This is a framework for analysis, not a fixed causal sequence. Actual reactions depend on expectations, positioning, liquidity and the wider economic context.</p>
   </section>
 
+  </section>
+  <section id="journalView" class="app-view" aria-label="Trading journal" hidden>
+    <div class="view-heading"><h2>Trading Journal</h2><p>Record your market expectations, actual moves and lessons. Your saved entries remain on this device.</p></div>
   <div class="section-title">
     <h2>Build today's review</h2>
     <span class="section-kicker">01 / Context · 02 / Reflection</span>
@@ -673,6 +693,7 @@
     <p id="backupStatus" class="status" role="status" aria-live="polite"></p>
   </section>
 
+  </section>
   <div class="disclaimer">
     <strong>Data transparency:</strong> Macro indicators are fetched from the MarketSignal Cloudflare Worker using published FRED observations. Data may be delayed and is not tick-by-tick market pricing or financial advice.
   </div>
@@ -1036,6 +1057,30 @@
   render();
 })();
 </script>
+
+<script>
+(() => {
+  const dashboard = document.getElementById("dashboardView");
+  const journal = document.getElementById("journalView");
+  const dashButton = document.getElementById("showDashboard");
+  const journalButton = document.getElementById("showJournal");
+  function showView(name) {
+    const isDashboard = name !== "journal";
+    dashboard.hidden = !isDashboard;
+    journal.hidden = isDashboard;
+    dashButton.setAttribute("aria-selected", String(isDashboard));
+    journalButton.setAttribute("aria-selected", String(!isDashboard));
+    try { sessionStorage.setItem("marketsignal-active-view", isDashboard ? "dashboard" : "journal"); } catch (_) {}
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
+  dashButton.addEventListener("click", () => showView("dashboard"));
+  journalButton.addEventListener("click", () => showView("journal"));
+  let initial = "dashboard";
+  try { initial = sessionStorage.getItem("marketsignal-active-view") || "dashboard"; } catch (_) {}
+  showView(initial);
+})();
+</script>
+
   <script src="./macro-dashboard.js" defer></script>
 </body>
   </html>
