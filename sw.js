@@ -1,9 +1,10 @@
 "use strict";
 
-const CACHE_VERSION = "market-journal-v4";
+const CACHE_VERSION = "market-journal-v5";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./macro-dashboard.js",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
