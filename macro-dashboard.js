@@ -1,139 +1,100 @@
 (() => {
   "use strict";
-
   const API_URL = "https://marketsignal-data.asadlang05.workers.dev/";
-
   const style = document.createElement("style");
   style.textContent = `
-    .ms-live{margin:18px 0 24px;padding:16px;border:1px solid #25354b;border-radius:18px;background:linear-gradient(145deg,#101b2c,#0c1727);color:#eef4ff}
-    .ms-live *{box-sizing:border-box}
-    .ms-live-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:10px}
-    .ms-live-kicker{margin:0 0 5px;color:#68e0bd!important;font-size:10px!important;letter-spacing:1.4px;font-weight:800}
-    .ms-live h2{margin:0;font-size:20px}
-    .ms-live .ms-subtitle{margin:5px 0 0;color:#9aacc4;font-size:12px}
-    .ms-live button{padding:10px 13px;border:1px solid #68e0bd;border-radius:10px;background:#68e0bd;color:#071a17;font-weight:800;cursor:pointer}
-    .ms-live button:disabled{opacity:.6;cursor:wait}
-    .ms-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:15px}
-    .ms-card{padding:12px;border:1px solid #25354b;border-radius:12px;background:#0a1422;min-width:0}
-    .ms-label{color:#9aacc4;font-size:11px;line-height:1.35}
-    .ms-value{font-size:23px;font-weight:800;letter-spacing:-.5px;margin:7px 0 4px;overflow-wrap:anywhere}
-    .ms-date{color:#8194ad;font-size:10px;line-height:1.4}
-    .ms-change{font-size:11px;margin-top:7px;font-weight:700}
-    .ms-change.up{color:#ffb0a9}.ms-change.down{color:#8fe6c7}.ms-change.flat{color:#c5d0e0}
-    .ms-read{margin-top:12px;padding:13px;border:1px solid #2d435a;border-radius:12px;background:#122136}
-    .ms-read-title{font-size:11px;font-weight:800;letter-spacing:.7px;color:#86b5ff;margin-bottom:6px}
-    .ms-read p{margin:0;color:#d8e3f3;font-size:12px;line-height:1.55}
-    .ms-status{margin:10px 0 0;color:#68e0bd;font-size:11px;line-height:1.45}
-    .ms-footnote{margin:8px 0 0;color:#8194ad;font-size:10px;line-height:1.45}
+    .ms-live{margin:12px 0 18px;padding:14px;border:1px solid #263a50;border-radius:17px;background:linear-gradient(145deg,#101d2b,#0a1220);color:#edf5ff;box-shadow:0 12px 34px #0002}
+    .ms-live *{box-sizing:border-box}.ms-live-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .ms-live-kicker{margin:0 0 3px;color:#69f0c1!important;font-size:9px!important;letter-spacing:1.5px;font-weight:900}
+    .ms-live h2{margin:0;font-size:19px;letter-spacing:-.4px}.ms-live .ms-subtitle{margin:4px 0 0;color:#94a9c2;font-size:10px}
+    .ms-live button{padding:8px 11px;border:1px solid #397966;border-radius:9px;background:#12392f;color:#80f4ce;font-size:11px;font-weight:800;cursor:pointer}
+    .ms-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+    .ms-card{padding:11px;border:1px solid #25384e;border-radius:12px;background:linear-gradient(145deg,#101c2b,#0b1421);min-width:0;overflow:hidden}
+    .ms-label{color:#9badc3;font-size:10px;line-height:1.35;min-height:26px}
+    .ms-value{font-size:23px;font-weight:850;letter-spacing:-.8px;margin:5px 0 2px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+    .ms-date{color:#7188a3;font-size:9px;line-height:1.35}
+    .ms-change{font-size:10px;margin-top:5px;font-weight:750}.ms-change.up{color:#ff9d9d}.ms-change.down{color:#75e8be}.ms-change.flat{color:#c2d0e0}
+    .ms-chart{margin-top:9px;padding-top:7px;border-top:1px solid #24364b}.ms-chart svg{display:block;width:100%;height:38px;overflow:visible}
+    .ms-chart-label{display:flex;justify-content:space-between;color:#7188a3;font-size:9px;margin-top:2px}
+    .ms-read{margin-top:9px;padding:11px;border:1px solid #29465a;border-radius:12px;background:#0e1e2d}
+    .ms-read-title{font-size:9px;font-weight:900;letter-spacing:1px;color:#69f0c1;margin-bottom:5px}
+    .ms-read p{margin:0;color:#d3e0ef;font-size:11px;line-height:1.5}
+    .ms-status{margin:8px 0 0;color:#8ca2ba;font-size:9px;line-height:1.4}
+    .ms-footnote{margin:6px 0 0;color:#71849a;font-size:9px;line-height:1.4}
+    .ms-gauge{height:5px;margin:9px 0 6px;border-radius:8px;background:linear-gradient(90deg,#69f0c1 0%,#d9db83 45%,#ff9d9d 100%);position:relative}
+    .ms-gauge i{position:absolute;top:-3px;width:3px;height:11px;border-radius:2px;background:#fff;box-shadow:0 0 0 2px #0b1421}
     @media(min-width:560px){.ms-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media(max-width:360px){.ms-live{padding:12px}.ms-grid{gap:7px}.ms-card{padding:10px}.ms-value{font-size:20px}.ms-live-head{gap:8px}}
+    @media(max-width:360px){.ms-live{padding:10px}.ms-grid{gap:6px}.ms-card{padding:9px}.ms-value{font-size:20px}}
   `;
   document.head.appendChild(style);
-
   const section = document.createElement("section");
   section.className = "ms-live";
-  section.setAttribute("aria-label", "Macro data dashboard");
+  section.setAttribute("aria-label","Macro market dashboard");
   section.innerHTML = `
-    <div class="ms-live-head">
-      <div>
-        <p class="ms-live-kicker">MARKETSIGNAL / DATA TERMINAL</p>
-        <h2>Macro Dashboard</h2>
-        <p class="ms-subtitle">Published US macro data · quick trader read</p>
-      </div>
-      <button id="ms-refresh" type="button">Refresh</button>
-    </div>
-    <div class="ms-grid" id="ms-grid"><div class="ms-card">Connecting to data source…</div></div>
-    <div class="ms-read">
-      <div class="ms-read-title">TRADER'S READ</div>
-      <p id="ms-read-text">Waiting for the latest observations. Treat macro data as context, not an entry signal.</p>
-    </div>
-    <div class="ms-status" id="ms-status" role="status" aria-live="polite">Connecting to MarketSignal data source…</div>
-    <p class="ms-footnote">Source: FRED. CPI/PPI are release-based indicators; yields and the broad dollar index are not tick-by-tick prices. Broad dollar index is not the ICE DXY. VIX will appear when the data service provides it.</p>
-  `;
-
+    <div class="ms-live-head"><div><p class="ms-live-kicker">MARKETSIGNAL / MACRO TERMINAL</p><h2>Market pulse</h2><p class="ms-subtitle">US macro · latest available readings</p></div><button id="ms-refresh" type="button">↻ Refresh</button></div>
+    <div class="ms-grid" id="ms-grid"><div class="ms-card">Loading data…</div></div>
+    <div class="ms-read"><div class="ms-read-title">MACRO READ</div><p id="ms-read-text">Loading latest observations.</p></div>
+    <div class="ms-status" id="ms-status" role="status" aria-live="polite">Connecting…</div>
+    <p class="ms-footnote">Data source: FRED. Release data can lag. Broad dollar index is not ICE DXY. VIX is shown only when the data service supplies it.</p>`;
   const hero = document.querySelector(".hero");
-  if (hero) hero.insertAdjacentElement("afterend", section);
-  else document.querySelector("main")?.prepend(section);
-
-  const grid = section.querySelector("#ms-grid");
-  const status = section.querySelector("#ms-status");
-  const read = section.querySelector("#ms-read-text");
-  const button = section.querySelector("#ms-refresh");
-
-  function fmt(value, decimals = 3) {
-    if (value == null || value === "" || !Number.isFinite(Number(value))) return "Unavailable";
-    return Number(value).toLocaleString(undefined, { maximumFractionDigits: decimals });
+  if (hero) hero.insertAdjacentElement("afterend",section); else document.querySelector("main")?.prepend(section);
+  const grid=section.querySelector("#ms-grid"), status=section.querySelector("#ms-status"), read=section.querySelector("#ms-read-text"), button=section.querySelector("#ms-refresh");
+  const num = v => v!==null && v!=="" && Number.isFinite(Number(v)) ? Number(v) : null;
+  const fmt = (v,d=2) => num(v)===null ? "—" : Number(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:d,useGrouping:false});
+  const dateOf = x => x?.date || x?.latestDate || x?.observationDate || "";
+  function percentChange(item) {
+    const v=num(item?.value), ch=num(item?.change);
+    if(v===null || ch===null || v===ch) return null;
+    return ch/(v-ch)*100;
   }
-
-  function card(label, item, opts = {}) {
-    const el = document.createElement("div");
-    el.className = "ms-card";
-    const title = document.createElement("div");
-    title.className = "ms-label";
-    title.textContent = label;
-    const value = document.createElement("div");
-    value.className = "ms-value";
-    value.textContent = item?.value == null ? "Unavailable" : fmt(item.value) + (opts.suffix || "");
-    const date = document.createElement("div");
-    date.className = "ms-date";
-    date.textContent = item?.date || item?.latestDate ? "Observation: " + (item.date || item.latestDate) : "No observation date supplied";
-    el.append(title, value, date);
-    if (item?.change != null && Number.isFinite(Number(item.change))) {
-      const change = document.createElement("div");
-      const n = Number(item.change);
-      change.className = "ms-change " + (n > 0 ? "up" : n < 0 ? "down" : "flat");
-      change.textContent = "Change: " + (n > 0 ? "+" : "") + fmt(n, 3) + (opts.changeSuffix || "");
-      el.appendChild(change);
-    }
+  function sparkline(current, previous, color) {
+    const a=num(previous), b=num(current);
+    if(a===null || b===null) return "";
+    const low=Math.min(a,b), high=Math.max(a,b), span=high-low || Math.abs(high)*.01 || 1;
+    const y1=27-((a-low)/span)*19, y2=27-((b-low)/span)*19;
+    return `<div class="ms-chart"><svg viewBox="0 0 220 34" role="img" aria-label="Latest versus previous available reading"><path d="M4 29H216" stroke="#26384d" stroke-width="1"/><path d="M8 ${y1} L212 ${y2}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/><circle cx="8" cy="${y1}" r="3" fill="${color}"/><circle cx="212" cy="${y2}" r="3.5" fill="${color}"/></svg><div class="ms-chart-label"><span>Previous</span><span>Latest</span></div></div>`;
+  }
+  function card(label,value,date,change,opts={}) {
+    const el=document.createElement("article"); el.className="ms-card";
+    const changeHtml=change===null || change===undefined ? "" : `<div class="ms-change ${change>0?"up":change<0?"down":"flat"}">${change>0?"+":""}${fmt(change,2)}${opts.changeSuffix||"%" } ${opts.changeLabel||"vs prior"}</div>`;
+    const valHtml=value===null ? "—" : fmt(value,opts.decimals||2)+(opts.suffix||"");
+    el.innerHTML=`<div class="ms-label">${label}</div><div class="ms-value">${valHtml}</div><div class="ms-date">${date ? "As of "+date : (value===null?"Not provided by data service":"Date unavailable")}</div>${changeHtml}${opts.chart||""}${opts.extra||""}`;
     return el;
   }
-
-  function traderRead(data) {
-    const lines = [];
-    const cpi = data.cpiYearOverYear?.value;
-    const ppi = data.ppi?.value;
-    const yieldChange = Number(data.us10y?.change);
-    const dollarChange = Number(data.dollar?.change);
-
-    if (cpi != null) lines.push("CPI YoY is " + fmt(cpi, 2) + "%; compare it with consensus and the prior release before judging the inflation surprise.");
-    if (ppi != null) lines.push("PPI index is " + fmt(ppi, 3) + "; the index level alone is not an inflation surprise—check its change and release expectations.");
-    if (Number.isFinite(yieldChange)) lines.push("10-year yield change: " + (yieldChange > 0 ? "higher" : yieldChange < 0 ? "lower" : "unchanged") + " (" + (yieldChange > 0 ? "+" : "") + fmt(yieldChange, 3) + ").");
-    if (Number.isFinite(dollarChange)) lines.push("Broad US dollar index change: " + (dollarChange > 0 ? "higher" : dollarChange < 0 ? "lower" : "unchanged") + " (" + (dollarChange > 0 ? "+" : "") + fmt(dollarChange, 3) + ").");
-    if (!lines.length) return "Data loaded, but the service did not provide enough change fields for a directional read. Check release actual vs consensus, yields, dollar and price action.";
-    return lines.join(" ") + " These are context clues, not a buy/sell signal. Confirm with price action, liquidity and the event's market expectations.";
+  function gauge(v) {
+    const pct=Math.max(0,Math.min(100,(v/50)*100));
+    return `<div class="ms-gauge"><i style="left:calc(${pct}% - 1px)"></i></div><div class="ms-date">${v<15?"Low expected volatility":v<25?"Elevated volatility":"High expected volatility"} · descriptive range, not a trade signal</div>`;
   }
-
-  async function refresh() {
-    button.disabled = true;
-    status.textContent = "Fetching latest published observations…";
-    try {
-      const response = await fetch(API_URL, { cache: "no-store" });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Data request failed.");
-      const data = result.data || {};
+  async function refresh(){
+    button.disabled=true; status.textContent="Updating published observations…";
+    try{
+      const response=await fetch(API_URL,{cache:"no-store"});
+      const result=await response.json();
+      if(!response.ok) throw new Error(result.error||"Data request failed");
+      const d=result.data||{};
+      const dollar=num(d.dollar?.value), dollarPct=percentChange(d.dollar), dollarPrev=(dollar!==null&&num(d.dollar?.change)!==null)?dollar-num(d.dollar.change):null;
+      const cpiYoY=num(d.cpiYearOverYear?.value), cpiChange=num(d.cpiYearOverYear?.change);
+      const ppiPct=percentChange(d.ppi);
+      const yieldVal=num(d.us10y?.value), yieldCh=num(d.us10y?.change);
+      const vix=num(d.vix?.value);
       grid.replaceChildren();
-      grid.appendChild(card("US 10-Year Treasury Yield", data.us10y, { suffix: "%", changeSuffix: " pp" }));
-      grid.appendChild(card("Broad US Dollar Index · not ICE DXY", data.dollar));
-      grid.appendChild(card("CPI Index", data.cpi));
-      grid.appendChild(card("CPI Year-over-Year", data.cpiYearOverYear ? { value: data.cpiYearOverYear.value, date: data.cpiYearOverYear.latestDate, change: data.cpiYearOverYear.change } : null, { suffix: "%" }));
-      grid.appendChild(card("PPI Index", data.ppi));
-      if (data.vix) {
-        grid.appendChild(card("VIX · expected equity volatility", data.vix));
-      } else {
-        grid.appendChild(card("VIX · volatility gauge", null));
-      }
-      read.textContent = traderRead(data);
-      status.textContent = "Data request successful. Retrieved: " + (result.fetchedAt ? new Date(result.fetchedAt).toLocaleString() : "timestamp not supplied");
-    } catch (error) {
+      grid.appendChild(card("US 10Y YIELD",yieldVal,dateOf(d.us10y),yieldCh===null?null:yieldCh*100,{suffix:"%",changeSuffix:" bps",changeLabel:"change"}));
+      grid.appendChild(card("USD STRENGTH · BROAD INDEX",dollar,dateOf(d.dollar),dollarPct,{changeSuffix:"%",chart:sparkline(dollar,dollarPrev,"#69f0c1")}));
+      grid.appendChild(card("CPI INFLATION · YOY",cpiYoY,dateOf(d.cpiYearOverYear),cpiChange,{suffix:"%",changeSuffix:" pp",changeLabel:"vs prior"}));
+      grid.appendChild(card("PPI · MONTHLY CHANGE",ppiPct,dateOf(d.ppi),null,{suffix:"%",decimals:2,chart:""}));
+      const vixChart=vix===null?"":gauge(vix);
+      grid.appendChild(card("VIX · FEAR / VOLATILITY INDEX",vix,dateOf(d.vix),num(d.vix?.change),{changeSuffix:" pts",changeLabel:"change",extra:vixChart}));
+      const cpiLine=cpiYoY===null?"CPI YoY unavailable":`CPI inflation: ${fmt(cpiYoY)}% YoY`;
+      const ppiLine=ppiPct===null?"PPI change unavailable":`PPI monthly change: ${fmt(ppiPct)}%`;
+      const dollarLine=dollarPct===null?"Dollar change unavailable":`Broad USD index: ${dollarPct>0?"up":dollarPct<0?"down":"flat"} ${fmt(Math.abs(dollarPct))}% vs prior reading`;
+      read.textContent=[cpiLine,ppiLine,dollarLine,vix===null?"VIX unavailable — not supplied by current data service.":`VIX ${fmt(vix)}: ${vix<15?"low":vix<25?"elevated":"high"} expected volatility.`].join(" · ")+ " Compare release actuals with consensus and confirm with price action.";
+      status.textContent="Updated "+(result.fetchedAt?new Date(result.fetchedAt).toLocaleString():"now")+" · Observation dates shown on each card";
+    }catch(e){
       grid.replaceChildren();
-      ["US 10-Year Treasury Yield","Broad US Dollar Index","CPI Index","CPI Year-over-Year","PPI Index","VIX"].forEach(label => grid.appendChild(card(label, null)));
-      read.textContent = "Macro data could not be loaded. Refresh again; do not infer a market bias from missing data.";
-      status.textContent = "Data unavailable: " + (error.message || "request failed");
-    } finally {
-      button.disabled = false;
-    }
+      ["US 10Y YIELD","USD STRENGTH · BROAD INDEX","CPI INFLATION · YOY","PPI · MONTHLY CHANGE","VIX · FEAR / VOLATILITY INDEX"].forEach(label=>grid.appendChild(card(label,null,"",null)));
+      read.textContent="Macro data could not load. Refresh again; do not infer a bias from missing data.";
+      status.textContent="Data unavailable: "+(e.message||"request failed");
+    }finally{button.disabled=false;}
   }
-
-  button.addEventListener("click", refresh);
-  refresh();
+  button.addEventListener("click",refresh); refresh();
 })();
