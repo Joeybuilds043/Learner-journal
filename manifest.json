@@ -1,15 +1,15 @@
 {
   "id": "./",
-  "name": "MarketSignal — Macro Intelligence",
+  "name": "MarketSignal | Macro Terminal",
   "short_name": "MarketSignal",
-  "description": "A macro trading journal for market context, expectations and lessons.",
+  "description": "A compact macro market dashboard and trading journal.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#09111f",
-  "theme_color": "#09111f",
+  "background_color": "#080d18",
+  "theme_color": "#080d18",
   "categories": ["finance", "productivity", "utilities"],
   "icons": [
     {
