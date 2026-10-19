@@ -156,9 +156,9 @@
       grid.appendChild(card("PPI INDEX",showPpi,overrides.ppi?chosenDate:dateOf(d.ppi),null,{decimals:3,extra:overrides.ppi?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
       const vixChart=showVix===null?"":gauge(showVix);
       grid.appendChild(card("VIX · FEAR / VOLATILITY INDEX",showVix,overrides.vix?chosenDate:dateOf(d.vix),overrides.vix?null:num(d.vix?.change),{changeSuffix:" pts",changeLabel:"change",extra:vixChart+(overrides.vix?'<div class="ms-date">Manual override · '+chosenDate+'</div>':"")}));
-      const cpiLine=cpiYoY===null?"CPI YoY unavailable":`CPI inflation: ${fmt(cpiYoY)}% YoY`;
-      const ppiLine=ppiPct===null?"PPI change unavailable":`PPI monthly change: ${fmt(ppiPct)}%`;
-      const dollarLine=dollarPct===null?"Dollar change unavailable":`Broad USD index: ${dollarPct>0?"up":dollarPct<0?"down":"flat"} ${fmt(Math.abs(dollarPct))}% vs prior reading`;
+      const cpiLine=showCpi===null?"CPI YoY unavailable":`CPI inflation: ${fmt(showCpi)}% YoY`;
+      const ppiLine=showPpi===null?"PPI index unavailable":`PPI index: ${fmt(showPpi,3)}`;
+      const dollarLine=showDollar===null?"Dollar index unavailable":`Broad USD index: ${fmt(showDollar,3)}${overrides.dollar?" (manual override)":""}`;
       read.textContent=[cpiLine,ppiLine,dollarLine,vix===null?"VIX unavailable — not supplied by current data service.":`VIX ${fmt(vix)}: ${vix<15?"low":vix<25?"elevated":"high"} expected volatility.`].join(" · ")+ " Compare release actuals with consensus and confirm with price action.";
       status.textContent="Updated "+(result.fetchedAt?new Date(result.fetchedAt).toLocaleString():"now")+" · Observation dates shown on each card";
     }catch(e){
