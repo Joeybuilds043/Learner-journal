@@ -47,8 +47,8 @@
     <div class="ms-tools">
       <h3>Historical chart</h3>
       <div class="ms-controls">
-        <div><label for="ms-series">Indicator</label><select id="ms-series"><option value="us10y">US 10Y Yield</option><option value="dollar">Broad Dollar Index</option><option value="cpi">CPI Index</option><option value="ppi">PPI Index</option></select></div>
-        <div><label for="ms-range">Period</label><select id="ms-range"><option value="1m">1 month</option><option value="3m">3 months</option><option value="6m">6 months</option><option value="1y" selected>1 year</option></select></div>
+        <div><label for="ms-series">Indicator</label><select id="ms-series"><option value="us10y">US 10Y Yield</option><option value="dollar">Broad Dollar Index</option><option value="cpi">CPI Index</option><option value="ppi">PPI Index</option><option value="vix">VIX / Fear Index</option></select></div>
+        <div><label for="ms-range">Period</label><select id="ms-range"><option value="30d">30 days</option><option value="90d">90 days</option><option value="1y" selected>1 year</option><option value="5y">5 years</option></select></div>
       </div>
       <div class="ms-chartbox" id="ms-history-chart"><div class="empty">Choose an indicator and period. Historical series will appear when the Worker history endpoint is deployed.</div></div>
       <div class="ms-status" id="ms-history-status">Historical data endpoint not confirmed yet.</div>
@@ -67,7 +67,7 @@
       <p class="ms-edit-note">Overrides are saved on this device only for now and marked as manual. They do not alter official FRED data. Cloud database sync is a separate backend step.</p>
     </div>
     <div class="ms-status" id="ms-status" role="status" aria-live="polite">Connecting…</div>
-    <p class="ms-footnote">Data source: FRED. Release data can lag. Broad dollar index is not ICE DXY. VIX is shown only when the data service supplies it.</p>`;
+    <p class="ms-footnote">Data source: FRED. Release data can lag. Broad dollar index is not ICE DXY. VIX is a published volatility index, not a direct measure of all market fear.</p>`;
   const hero = document.querySelector(".hero");
   if (hero) hero.insertAdjacentElement("afterend",section); else document.querySelector("main")?.prepend(section);
   const grid=section.querySelector("#ms-grid"), status=section.querySelector("#ms-status"), read=section.querySelector("#ms-read-text"), button=section.querySelector("#ms-refresh");
@@ -96,8 +96,8 @@
     try{
       const response=await fetch(API_URL+"history?series="+encodeURIComponent(series)+"&range="+encodeURIComponent(range),{cache:"no-store"});
       const data=await response.json(); if(!response.ok)throw new Error(data.error||"History endpoint unavailable");
-      renderHistory(data.observations,data.label||series,data.unit||"");
-      historyStatus.textContent="Fetched "+(data.fetchedAt?new Date(data.fetchedAt).toLocaleString():"now")+" · "+(data.observations||[]).length+" observations";
+      renderHistory(data.points||data.observations,data.label||series,data.unit||"");
+      historyStatus.textContent="Fetched "+(data.fetchedAt?new Date(data.fetchedAt).toLocaleString():"now")+" · "+(data.points||data.observations||[]).length+" observations";
     }catch(e){historyChart.innerHTML='<div class="empty">Historical chart is waiting for the Worker API update. No sample or fabricated data is displayed.</div>';historyStatus.textContent="History unavailable: "+e.message}
   }
   section.querySelector("#ms-save-values").addEventListener("click",()=>{
@@ -151,9 +151,9 @@
       const showYield=manual("us10y",yieldVal), showDollar=manual("dollar",dollar), showCpi=manual("cpi",cpiYoY), showPpi=manual("ppi",num(d.ppi?.value)), showVix=manual("vix",vix);
       grid.replaceChildren();
       grid.appendChild(card("US 10Y YIELD",showYield,overrides.us10y?chosenDate:dateOf(d.us10y),overrides.us10y?null:(yieldCh===null?null:yieldCh*100),{suffix:"%",changeSuffix:" bps",changeLabel:"change",extra:overrides.us10y?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
-      grid.appendChild(card("USD STRENGTH · BROAD INDEX",showDollar,overrides.dollar?chosenDate:dateOf(d.dollar),null,{decimals:3,chart:sparkline(dollar,dollarPrev,"#69f0c1"),extra:'<div class="ms-date">'+(overrides.dollar?"Manual override · "+chosenDate:"Broad dollar index · not ICE DXY")+'</div>'}));
+      grid.appendChild(card("USD STRENGTH · BROAD INDEX",showDollar,overrides.dollar?chosenDate:dateOf(d.dollar),overrides.dollar?null:dollarPct,{decimals:3,chart:sparkline(dollar,dollarPrev,"#69f0c1"),extra:'<div class="ms-date">'+(overrides.dollar?"Manual override · "+chosenDate:"Broad dollar index · not ICE DXY")+'</div>'}));
       grid.appendChild(card("CPI INFLATION · YOY",showCpi,overrides.cpi?chosenDate:dateOf(d.cpiYearOverYear),null,{suffix:"%",extra:overrides.cpi?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
-      grid.appendChild(card("PPI INDEX",showPpi,overrides.ppi?chosenDate:dateOf(d.ppi),null,{decimals:3,extra:overrides.ppi?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
+      grid.appendChild(card("PPI INDEX · CHANGE VS PRIOR MONTH",showPpi,overrides.ppi?chosenDate:dateOf(d.ppi),overrides.ppi?null:ppiPct,{decimals:3,extra:overrides.ppi?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
       const vixChart=showVix===null?"":gauge(showVix);
       grid.appendChild(card("VIX · FEAR / VOLATILITY INDEX",showVix,overrides.vix?chosenDate:dateOf(d.vix),overrides.vix?null:num(d.vix?.change),{changeSuffix:" pts",changeLabel:"change",extra:vixChart+(overrides.vix?'<div class="ms-date">Manual override · '+chosenDate+'</div>':"")}));
       const cpiLine=showCpi===null?"CPI YoY unavailable":`CPI inflation: ${fmt(showCpi)}% YoY`;
