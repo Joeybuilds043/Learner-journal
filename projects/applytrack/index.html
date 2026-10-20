@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101820">
+<meta name="description" content="ApplyTrack is a lightweight, private job application tracker that saves records in your browser.">
+<title>ApplyTrack — Job Search Tracker</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1119;--panel:#121c28;--panel2:#172434;--line:#28384b;--text:#edf4fc;--muted:#94a8bd;--accent:#54e0b5;--accent2:#a8f2dc;--danger:#ff9a9a;--gold:#f0c47a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 0 0,#142b39 0,transparent 38%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.wrap{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:28px 0 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:#173b3b;color:var(--accent);font-weight:900;font-size:22px}.eyebrow{font-size:11px;letter-spacing:.18em;color:var(--accent);font-weight:800}.brand h1{margin:2px 0;font-size:21px}.sub{margin:0;color:var(--muted);font-size:13px}.pill{border:1px solid #31524f;color:var(--accent2);border-radius:99px;padding:7px 11px;font-size:12px;white-space:nowrap}.hero{margin:22px 0 20px}.hero h2{font-size:clamp(27px,4vw,39px);letter-spacing:-.04em;margin:0 0 8px}.hero p{margin:0;color:var(--muted);max-width:650px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}.stat,.panel{background:linear-gradient(145deg,#142231,#101925);border:1px solid var(--line);border-radius:16px}.stat{padding:17px}.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:29px;margin-top:4px;letter-spacing:-.03em}.layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}.panel{padding:20px}.panel h3{font-size:17px;margin:0 0 16px}.field{display:grid;gap:6px;margin:0 0 13px}.field label{font-size:12px;color:#bdcbd9}.field input,.field select,.field textarea,.filters input,.filters select{width:100%;background:#0b131d;border:1px solid #2a3c50;border-radius:9px;padding:10px 11px;color:var(--text);outline:none}.field input:focus,.field select:focus,.field textarea:focus,.filters input:focus,.filters select:focus{border-color:var(--accent)}.field textarea{resize:vertical;min-height:70px}.btn{border:1px solid transparent;border-radius:9px;padding:10px 13px;font-weight:700}.primary{background:var(--accent);color:#06221a}.secondary{background:#192a3b;border-color:#30445a;color:var(--text)}.danger{background:#331d26;border-color:#64303b;color:#ffb7b7}.form-actions{display:flex;gap:8px}.form-actions .btn{flex:1}.list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}.list-head h3{margin:0}.filters{display:grid;grid-template-columns:minmax(0,1fr) 160px;gap:8px;margin-bottom:12px}.records{display:grid;gap:10px}.record{border:1px solid var(--line);background:#0e1722;border-radius:12px;padding:14px}.record-top{display:flex;justify-content:space-between;gap:10px;align-items:start}.record h4{margin:0;font-size:15px}.company{color:var(--muted);font-size:13px;margin-top:2px}.meta{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.tag{font-size:11px;padding:4px 8px;border-radius:99px;border:1px solid #35495d;color:#c6d5e4}.status-applied{color:#b7d8ff;border-color:#365a7b}.status-interview{color:#ffe0a0;border-color:#705b31}.status-offer{color:#72edc8;border-color:#286e5a}.status-rejected{color:#ffaaaa;border-color:#723d46}.record small{color:var(--muted)}.notes{margin:8px 0 0;color:#bac9d8;font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}.record-actions{display:flex;gap:7px;margin-top:12px}.record-actions button{padding:6px 9px;font-size:12px}.empty{border:1px dashed #31455a;border-radius:12px;padding:26px;text-align:center;color:var(--muted)}.footer{color:#71869b;font-size:12px;text-align:center;margin-top:22px}.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);padding:10px 15px;background:#153a33;border:1px solid #317664;color:#d4fff0;border-radius:10px;display:none;max-width:calc(100% - 24px);z-index:10}.toast.show{display:block}
+@media(max-width:820px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.panel{padding:16px}}@media(max-width:460px){.wrap{width:calc(100% - 22px);padding-top:16px}.top{align-items:flex-start}.pill{font-size:10px}.stats{gap:8px}.stat{padding:13px}.stat strong{font-size:25px}.filters{grid-template-columns:1fr}.hero h2{font-size:30px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><div class="brand"><div class="logo">A</div><div><div class="eyebrow">CAREER WORKSPACE</div><h1>ApplyTrack</h1><p class="sub">A small project for a more organized job search.</p></div></div><span class="pill">PRIVATE · SAVED IN THIS BROWSER</span></header>
+<section class="hero"><h2>Keep every application moving.</h2><p>Track roles, follow-ups and outcomes in one place. No account, no backend and no paid service required.</p></section>
+<section class="stats" aria-label="Application summary"><div class="stat"><span>Total applications</span><strong id="totalCount">0</strong></div><div class="stat"><span>Applied</span><strong id="appliedCount">0</strong></div><div class="stat"><span>Interviews</span><strong id="interviewCount">0</strong></div><div class="stat"><span>Offers</span><strong id="offerCount">0</strong></div></section>
+<main class="layout">
+<section class="panel"><h3 id="formHeading">Add an application</h3><form id="applicationForm">
+<input id="editId" type="hidden">
+<div class="field"><label for="role">Role title *</label><input id="role" required maxlength="100" placeholder="e.g. Junior Web Developer"></div>
+<div class="field"><label for="company">Company *</label><input id="company" required maxlength="100" placeholder="Company name"></div>
+<div class="field"><label for="location">Location / work mode</label><input id="location" maxlength="100" placeholder="Lahore / Remote"></div>
+<div class="field"><label for="dateApplied">Date applied *</label><input id="dateApplied" type="date" required></div>
+<div class="field"><label for="status">Application status</label><select id="status"><option>Saved</option><option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option></select></div>
+<div class="field"><label for="followUp">Follow-up date</label><input id="followUp" type="date"></div>
+<div class="field"><label for="link">Job posting URL</label><input id="link" type="url" maxlength="500" placeholder="https://..."></div>
+<div class="field"><label for="notes">Notes</label><textarea id="notes" maxlength="1000" placeholder="Contact, next step, interview prep..."></textarea></div>
+<div class="form-actions"><button class="btn primary" id="saveBtn" type="submit">Save application</button><button class="btn secondary" id="cancelEdit" type="button" hidden>Cancel</button></div>
+</form></section>
+<section class="panel"><div class="list-head"><h3>Application pipeline</h3><button class="btn secondary" id="exportBtn" type="button">Export CSV</button></div>
+<div class="filters"><input id="searchInput" type="search" placeholder="Search role or company..." aria-label="Search applications"><select id="filterStatus" aria-label="Filter by status"><option value="All">All statuses</option><option>Saved</option><option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option></select></div>
+<div class="records" id="records" aria-live="polite"></div>
+</section></main>
+<p class="footer">ApplyTrack · Vanilla HTML, CSS and JavaScript · localStorage · CSV export</p>
+</div><div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  "use strict";
+  const STORAGE_KEY = "applytrack.applications.v1";
+  const $ = id => document.getElementById(id);
+  const form = $("applicationForm");
+  let applications = loadApplications();
+  let toastTimer;
+
+  function loadApplications() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      return Array.isArray(saved) ? saved.filter(item => item && typeof item.id === "string" && typeof item.role === "string" && typeof item.company === "string") : [];
+    } catch (error) {
+      console.error("Could not read saved applications:", error);
+      return [];
+    }
+  }
+  function persist() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(applications));
+      return true;
+    } catch (error) {
+      console.error("Could not save applications:", error);
+      showToast("Browser storage is unavailable. Export your records or check browser settings.");
+      return false;
+    }
+  }
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+  }
+  function safeLink(value) {
+    try { const url = new URL(value); return ["http:","https:"].includes(url.protocol) ? url.href : ""; } catch { return ""; }
+  }
+  function showToast(message) {
+    const node = $("toast"); node.textContent = message; node.classList.add("show");
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => node.classList.remove("show"), 2800);
+  }
+  function resetForm() {
+    form.reset(); $("editId").value = ""; $("dateApplied").value = new Date().toISOString().slice(0,10);
+    $("formHeading").textContent = "Add an application"; $("saveBtn").textContent = "Save application"; $("cancelEdit").hidden = true;
+  }
+  function renderStats() {
+    $("totalCount").textContent = applications.length;
+    $("appliedCount").textContent = applications.filter(a => a.status === "Applied").length;
+    $("interviewCount").textContent = applications.filter(a => a.status === "Interview").length;
+    $("offerCount").textContent = applications.filter(a => a.status === "Offer").length;
+  }
+  function render() {
+    renderStats();
+    const query = $("searchInput").value.trim().toLowerCase();
+    const status = $("filterStatus").value;
+    const shown = applications.filter(a => (status === "All" || a.status === status) && [a.role,a.company,a.location,a.notes].some(value => String(value || "").toLowerCase().includes(query)));
+    shown.sort((a,b) => (b.updatedAt || b.createdAt || "").localeCompare(a.updatedAt || a.createdAt || ""));
+    const root = $("records");
+    if (!shown.length) { root.innerHTML = '<div class="empty">No matching applications yet.<br>Add your first role using the form.</div>'; return; }
+    root.innerHTML = shown.map(a => {
+      const link = safeLink(a.link);
+      const statusClass = "status-" + ({"Applied":"applied","Interview":"interview","Offer":"offer","Rejected":"rejected"}[a.status] || "saved");
+      return '<article class="record"><div class="record-top"><div><h4>'+escapeHtml(a.role)+'</h4><div class="company">'+escapeHtml(a.company)+(a.location ? " · "+escapeHtml(a.location) : "")+'</div></div><span class="tag '+statusClass+'">'+escapeHtml(a.status)+'</span></div><div class="meta"><span class="tag">Applied: '+escapeHtml(a.dateApplied || "—")+'</span>'+(a.followUp?'<span class="tag">Follow up: '+escapeHtml(a.followUp)+'</span>':"")+'</div>'+(a.notes?'<p class="notes">'+escapeHtml(a.notes)+'</p>':"")+'<div class="record-actions">'+(link?'<a class="btn secondary" href="'+escapeHtml(link)+'" target="_blank" rel="noopener noreferrer">Open posting</a>':"")+'<button class="btn secondary" data-edit="'+escapeHtml(a.id)+'" type="button">Edit</button><button class="btn danger" data-delete="'+escapeHtml(a.id)+'" type="button">Delete</button></div></article>';
+    }).join("");
+  }
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    const id = $("editId").value;
+    const prior = applications.find(a => a.id === id);
+    const record = {id: id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)), role:$("role").value.trim(), company:$("company").value.trim(), location:$("location").value.trim(), dateApplied:$("dateApplied").value, status:$("status").value, followUp:$("followUp").value, link:$("link").value.trim(), notes:$("notes").value.trim(), createdAt:prior?.createdAt || new Date().toISOString(), updatedAt:new Date().toISOString()};
+    if (prior) applications = applications.map(a => a.id === id ? record : a); else applications.push(record);
+    if (!persist()) return;
+    resetForm(); render(); showToast(prior ? "Application updated." : "Application saved.");
+  });
+  $("records").addEventListener("click", event => {
+    const editButton = event.target.closest("[data-edit]");
+    const deleteButton = event.target.closest("[data-delete]");
+    if (editButton) {
+      const a = applications.find(item => item.id === editButton.dataset.edit); if (!a) return;
+      $("editId").value=a.id; $("role").value=a.role; $("company").value=a.company; $("location").value=a.location||""; $("dateApplied").value=a.dateApplied||""; $("status").value=a.status||"Saved"; $("followUp").value=a.followUp||""; $("link").value=a.link||""; $("notes").value=a.notes||"";
+      $("formHeading").textContent="Edit application"; $("saveBtn").textContent="Save changes"; $("cancelEdit").hidden=false; $("role").focus(); window.scrollTo({top:0,behavior:"smooth"});
+    }
+    if (deleteButton) {
+      const a=applications.find(item=>item.id===deleteButton.dataset.delete); if(!a)return;
+      if(!window.confirm('Delete "'+a.role+' — '+a.company+'"?'))return;
+      applications=applications.filter(item=>item.id!==a.id); if(persist()){render();showToast("Application deleted.");}
+    }
+  });
+  $("cancelEdit").addEventListener("click",resetForm);
+  $("searchInput").addEventListener("input",render);
+  $("filterStatus").addEventListener("change",render);
+  $("exportBtn").addEventListener("click",() => {
+    if(!applications.length){showToast("There are no applications to export yet.");return;}
+    const columns=["role","company","location","dateApplied","status","followUp","link","notes"];
+    const quote=value=>'"'+String(value??"").replace(/"/g,'""')+'"';
+    const csv=[columns.join(","),...applications.map(a=>columns.map(key=>quote(a[key])).join(","))].join("\r\n");
+    const blob=new Blob(["\uFEFF",csv],{type:"text/csv;charset=utf-8;"});
+    const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="applytrack-applications.csv"; a.click(); URL.revokeObjectURL(url); showToast("CSV export downloaded.");
+  });
+  resetForm(); render();
+})();
+</script>
+</body>
+</html>
