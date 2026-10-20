@@ -88,7 +88,7 @@
     const area=path+" L "+pts[pts.length-1].x+" "+(H-B)+" L "+pts[0].x+" "+(H-B)+" Z";
     const ylabels=[max,(min+max)/2,min].map(v=>v.toLocaleString("en-US",{maximumFractionDigits:3}));
     const first=valid[0].date,last=valid[valid.length-1].date;
-    historyChart.innerHTML='<div class="ms-date">'+label+' · '+valid.length+' observations · source: FRED</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+label+' historical chart"><path d="M'+L+' '+T+'V'+(H-B)+'H'+(W-R)+'" stroke="#26384d" fill="none"/><path d="'+area+'" fill="#69f0c1" opacity=".08"/><path d="'+path+'" stroke="#69f0c1" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="2" y="'+(T+4)+'" fill="#8fa5bd" font-size="10">'+ylabels[0]+'</text><text x="2" y="'+((H+T-B)/2)+'" fill="#8fa5bd" font-size="10">'+ylabels[1]+'</text><text x="2" y="'+(H-B)+'" fill="#8fa5bd" font-size="10">'+ylabels[2]+'</text><text x="'+L+'" y="'+(H-7)+'" fill="#8fa5bd" font-size="10">'+first+'</text><text x="'+(W-R)+'" y="'+(H-7)+'" text-anchor="end" fill="#8fa5bd" font-size="10">'+last+'</text></svg>';
+    historyChart.innerHTML='<div class="ms-date">'+escapeHtml(label)+' · '+valid.length+' observations · source: FRED</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(label)+' historical chart"><path d="M'+L+' '+T+'V'+(H-B)+'H'+(W-R)+'" stroke="#26384d" fill="none"/><path d="'+area+'" fill="#69f0c1" opacity=".08"/><path d="'+path+'" stroke="#69f0c1" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="2" y="'+(T+4)+'" fill="#8fa5bd" font-size="10">'+ylabels[0]+'</text><text x="2" y="'+((H+T-B)/2)+'" fill="#8fa5bd" font-size="10">'+ylabels[1]+'</text><text x="2" y="'+(H-B)+'" fill="#8fa5bd" font-size="10">'+ylabels[2]+'</text><text x="'+L+'" y="'+(H-7)+'" fill="#8fa5bd" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-7)+'" text-anchor="end" fill="#8fa5bd" font-size="10">'+escapeHtml(last)+'</text></svg>';
   }
   async function loadHistory(){
     const series=seriesSelect.value, range=rangeSelect.value;
@@ -107,6 +107,7 @@
   });
   section.querySelector("#ms-clear-values").addEventListener("click",()=>{localStorage.removeItem(overrideKey);loadOverrideInputs();status.textContent="Manual overrides cleared; showing source values.";refresh()});
   seriesSelect.addEventListener("change",loadHistory);rangeSelect.addEventListener("change",loadHistory);
+  const escapeHtml = value => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll(String.fromCharCode(34),"&quot;").replaceAll(String.fromCharCode(39),"&#39;");
   const num = v => v!==null && v!=="" && Number.isFinite(Number(v)) ? Number(v) : null;
   const fmt = (v,d=2) => num(v)===null ? "—" : Number(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:d,useGrouping:false});
   const dateOf = x => x?.date || x?.latestDate || x?.observationDate || "";
@@ -126,7 +127,7 @@
     const el=document.createElement("article"); el.className="ms-card";
     const changeHtml=change===null || change===undefined ? "" : `<div class="ms-change ${change>0?"up":change<0?"down":"flat"}">${change>0?"+":""}${fmt(change,2)}${opts.changeSuffix||"%" } ${opts.changeLabel||"vs prior"}</div>`;
     const valHtml=value===null ? "—" : fmt(value,opts.decimals||2)+(opts.suffix||"");
-    el.innerHTML=`<div class="ms-label">${label}</div><div class="ms-value">${valHtml}</div><div class="ms-date">${date ? "As of "+date : (value===null?"Not provided by data service":"Date unavailable")}</div>${changeHtml}${opts.chart||""}${opts.extra||""}`;
+    el.innerHTML=`<div class="ms-label">${escapeHtml(label)}</div><div class="ms-value">${valHtml}</div><div class="ms-date">${date ? "As of "+escapeHtml(date) : (value===null?"Not provided by data service":"Date unavailable")}</div>${changeHtml}${opts.chart||""}${opts.extra||""}`;
     return el;
   }
   function gauge(v) {
@@ -146,7 +147,7 @@
       const yieldVal=num(d.us10y?.value), yieldCh=num(d.us10y?.change);
       const vix=num(d.vix?.value);
       const overrides=safeOverrides();
-      const chosenDate=overrides.date||"";
+      const chosenDate=escapeHtml(overrides.date||"");
       const manual=(key,source)=>overrides[key]?.value!==undefined?num(overrides[key].value):source;
       const showYield=manual("us10y",yieldVal), showDollar=manual("dollar",dollar), showCpi=manual("cpi",cpiYoY), showPpi=manual("ppi",num(d.ppi?.value)), showVix=manual("vix",vix);
       grid.replaceChildren();
