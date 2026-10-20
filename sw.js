@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_VERSION = "market-journal-v10";
+const CACHE_VERSION = "market-journal-v11";
 const APP_SHELL = [
   "./",
   "./index.html",
