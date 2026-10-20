@@ -3,7 +3,6 @@
 [![Deploy MarketSignal](https://github.com/asadlang05-ctrl/Learner-journal/actions/workflows/deploy.yml/badge.svg)](https://github.com/asadlang05-ctrl/Learner-journal/actions/workflows/deploy.yml)
 
 **Live demo:** https://asadlang05-ctrl.github.io/Learner-journal/  
-**Companion mini-project:** [ApplyTrack Job Application Tracker](https://asadlang05-ctrl.github.io/Learner-journal/projects/applytrack/)  
 **Source code:** https://github.com/asadlang05-ctrl/Learner-journal
 
 ## Dashboard preview
@@ -56,10 +55,6 @@ GitHub stores the source code and commit history. The workflow in .github/workfl
 ## Technology
 
 HTML · CSS · Vanilla JavaScript · Fetch API · Progressive Web App · localStorage · Cloudflare Workers · Cloudflare D1 · FRED API · GitHub Actions · GitHub Pages
-
-## Companion project: ApplyTrack
-
-I also built [ApplyTrack](https://asadlang05-ctrl.github.io/Learner-journal/projects/applytrack/), a small job application tracker. It supports create/edit/delete, status filters, search, follow-up dates and CSV export. It is implemented in vanilla HTML/CSS/JavaScript and stores records in browser localStorage. Source and implementation notes are in projects/applytrack/.
 
 ## Run locally
 
