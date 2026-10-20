@@ -50,3 +50,66 @@ jobs:
       - name: Deploy site
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Smoke test live site and macro API
+        shell: bash
+        run: |
+          node <<'NODE'
+          const assert = require("node:assert/strict");
+
+          const pageUrl = "https://joeybuilds043.github.io/Learner-journal/";
+          const apiUrl = "https://marketsignal-data.joeybuilds043.workers.dev/";
+          const origin = "https://joeybuilds043.github.io";
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+          async function getWithRetry(url, options = {}, attempts = 8) {
+            let lastError;
+            for (let attempt = 1; attempt <= attempts; attempt++) {
+              try {
+                const response = await fetch(url, options);
+                if (response.ok) return response;
+                lastError = new Error(`HTTP ${response.status} for ${url}`);
+              } catch (error) {
+                lastError = error;
+              }
+              if (attempt < attempts) await sleep(5000);
+            }
+            throw lastError || new Error(`Request failed: ${url}`);
+          }
+
+          (async () => {
+            const pageResponse = await getWithRetry(pageUrl);
+            const html = await pageResponse.text();
+            assert.match(html, /macro-dashboard\.js/, "Live page must load the macro dashboard script");
+
+            const apiResponse = await getWithRetry(apiUrl, {
+              headers: { Origin: origin, "Cache-Control": "no-cache" }
+            });
+            assert.equal(apiResponse.headers.get("access-control-allow-origin"), origin,
+              "Worker must allow the current GitHub Pages origin");
+
+            const payload = await apiResponse.json();
+            assert.equal(payload.provider, "Federal Reserve Economic Data (FRED)",
+              "Worker must return the FRED provider payload");
+            for (const key of ["us10y", "dollar", "cpi", "ppi"]) {
+              assert.ok(payload.data?.[key]?.date && payload.data?.[key]?.value !== null,
+                `Missing latest data for ${key}`);
+            }
+
+            const historyResponse = await getWithRetry(
+              apiUrl + "history?series=us10y&range=30d",
+              { headers: { Origin: origin, "Cache-Control": "no-cache" } },
+              3
+            );
+            assert.equal(historyResponse.headers.get("access-control-allow-origin"), origin,
+              "History endpoint must allow the current GitHub Pages origin");
+            const history = await historyResponse.json();
+            assert.ok(Array.isArray(history.points) && history.points.length > 0,
+              "History endpoint must return at least one observation");
+
+            console.log("Smoke test passed: GitHub Pages, Worker CORS, live FRED data, and history endpoint.");
+          })().catch(error => {
+            console.error(error.message || error);
+            process.exitCode = 1;
+          });
+          NODE
