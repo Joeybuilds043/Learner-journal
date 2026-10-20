@@ -80,6 +80,14 @@ jobs:
           (async () => {
             const pageResponse = await getWithRetry(pageUrl);
             const html = await pageResponse.text();
+
+            // Check the published JavaScript itself, not only the HTML reference.
+            const scriptResponse = await getWithRetry(pageUrl + "macro-dashboard.js");
+            const script = await scriptResponse.text();
+            assert.match(script, /marketsignal-data\\.joeybuilds043\\.workers\\.dev/,
+              "Published dashboard must call the current Worker");
+            assert.doesNotMatch(script, /marketsignal-data\\.asadlang05\\.workers\\.dev/,
+              "Published dashboard must not call the retired Worker");
             assert.match(html, /macro-dashboard\.js/, "Live page must load the macro dashboard script");
 
             const apiResponse = await getWithRetry(apiUrl, {
@@ -92,7 +100,7 @@ jobs:
             assert.equal(payload.provider, "Federal Reserve Economic Data (FRED)",
               "Worker must return the FRED provider payload");
             for (const key of ["us10y", "dollar", "cpi", "ppi"]) {
-              assert.ok(payload.data?.[key]?.date && payload.data?.[key]?.value !== null,
+              assert.ok(payload.data?.[key]?.date && Number.isFinite(payload.data?.[key]?.value),
                 `Missing latest data for ${key}`);
             }
 
