@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_VERSION = "market-journal-v9";
+const CACHE_VERSION = "market-journal-v10";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -52,6 +52,28 @@ self.addEventListener("fetch", (event) => {
 
   // Never intercept external websites or resources.
   if (url.origin !== self.location.origin) return;
+
+  // Always try the network for the live macro dashboard first. Older installed
+  // copies must not keep using a stale API URL just because a cached script exists.
+  if (url.pathname.endsWith("/macro-dashboard.js")) {
+    event.respondWith(
+      (async () => {
+        try {
+          const response = await fetch(request, { cache: "no-store" });
+          if (response.ok && response.type === "basic") {
+            const cache = await caches.open(CACHE_VERSION);
+            await cache.put(request, response.clone());
+          }
+          return response;
+        } catch (error) {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          return Response.error();
+        }
+      })()
+    );
+    return;
+  }
 
   // Handle page navigation separately.
   if (request.mode === "navigate") {
