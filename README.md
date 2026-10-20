@@ -1,9 +1,9 @@
 # MarketSignal — Macro Terminal & Trading Journal
 
-[![Deploy MarketSignal](https://github.com/asadlang05-ctrl/Learner-journal/actions/workflows/deploy.yml/badge.svg)](https://github.com/asadlang05-ctrl/Learner-journal/actions/workflows/deploy.yml)
+[![Deploy MarketSignal](https://github.com/Joeybuilds043/Learner-journal/actions/workflows/deploy.yml/badge.svg)](https://github.com/Joeybuilds043/Learner-journal/actions/workflows/deploy.yml)
 
-**Live demo:** https://asadlang05-ctrl.github.io/Learner-journal/  
-**Source code:** https://github.com/asadlang05-ctrl/Learner-journal
+**Live demo:** https://joeybuilds043.github.io/Learner-journal/  
+**Source code:** https://github.com/Joeybuilds043/Learner-journal
 
 ## Dashboard preview
 
