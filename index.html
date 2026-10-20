@@ -1037,7 +1037,7 @@
   // Register the existing service worker.
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch(() => {
+      navigator.serviceWorker.register("./sw.js?v=20261020-live-fix").catch(() => {
         showStatus("Offline setup failed. Check the service worker file.");
       });
     });
@@ -1064,13 +1064,13 @@
   }
   dashButton.addEventListener("click", () => showView("dashboard"));
   journalButton.addEventListener("click", () => showView("journal"));
-  let initial = "dashboard";
-  try { initial = sessionStorage.getItem("marketsignal-active-view") || "dashboard"; } catch (_) {}
-  showView(initial);
+  // Always open on the live dashboard so users see the macro data first.
+  // The selected view can still change during the current session.
+  showView("dashboard");
 })();
 </script>
 
-  <script src="./macro-dashboard.js" defer></script>
+  <script src="./macro-dashboard.js?v=20261020-live-fix" defer></script>
 </body>
   </html>
 
