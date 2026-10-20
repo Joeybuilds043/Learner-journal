@@ -46,7 +46,7 @@ Browser localStorage stores the journal and manual overrides on the current devi
 
 ### 6. Cloudflare Worker — server-side data proxy
 
-The Worker at https://marketsignal-data.asadlang05.workers.dev/ receives requests from the frontend and calls FRED. The FRED_API_KEY is configured as a server-side secret, not embedded in frontend JavaScript. The Worker is also connected to Cloudflare D1 for stored historical observations. Never commit API keys or secret values to GitHub.
+The Worker at https://marketsignal-data.joeybuilds043.workers.dev/ receives requests from the frontend and calls FRED. The FRED_API_KEY is configured as a server-side secret, not embedded in frontend JavaScript. The Worker is also connected to Cloudflare D1 for stored historical observations. Never commit API keys or secret values to GitHub.
 
 ### 7. GitHub Actions and GitHub Pages
 
