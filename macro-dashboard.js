@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const API_URL = "https://marketsignal-data.asadlang05.workers.dev/";
+  const API_URL = "https://marketsignal-data.joeybuilds043.workers.dev/";
   const style = document.createElement("style");
   style.textContent = `
     .ms-live{margin:12px 0 18px;padding:14px;border:1px solid #263a50;border-radius:17px;background:linear-gradient(145deg,#101d2b,#0a1220);color:#edf5ff;box-shadow:0 12px 34px #0002}
