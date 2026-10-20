@@ -958,19 +958,23 @@
     if (!file) return;
 
     try {
+      if (file.size > 2 * 1024 * 1024) throw new Error("Backup file must be 2 MB or smaller.");
       const parsed = JSON.parse(await file.text());
       const imported = Array.isArray(parsed) ? parsed : parsed.entries;
 
       if (!Array.isArray(imported)) {
         throw new Error("This file does not contain a valid journal backup.");
       }
+      if (imported.length > 2000) throw new Error("Backup cannot contain more than 2,000 reviews.");
 
+      const textFields = ["dxy", "us10y", "news", "context", "expectation", "market", "lesson"];
       const valid = imported.every(entry =>
         entry &&
         typeof entry === "object" &&
         typeof entry.expectation === "string" &&
         typeof entry.market === "string" &&
-        typeof entry.lesson === "string"
+        typeof entry.lesson === "string" &&
+        textFields.every(key => entry[key] === undefined || (typeof entry[key] === "string" && entry[key].length <= 10000))
       );
 
       if (!valid) {
