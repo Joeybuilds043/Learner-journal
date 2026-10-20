@@ -1,0 +1,52 @@
+name: Deploy MarketSignal to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Package static site
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/site"
+          cp -R . "$RUNNER_TEMP/site/"
+          rm -rf "$RUNNER_TEMP/site/.git" "$RUNNER_TEMP/site/.github"
+          tar --dereference --hard-dereference \
+            --directory "$RUNNER_TEMP/site" \
+            -cvf "$RUNNER_TEMP/artifact.tar" \
+            --exclude=.git \
+            --exclude=.github \
+            --exclude='.[^/]*' \
+            .
+
+      - name: Upload site artifact with Node 24-compatible action
+        uses: actions/upload-artifact@v7
+        with:
+          name: github-pages
+          path: ${{ runner.temp }}/artifact.tar
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Deploy site
+        id: deployment
+        uses: actions/deploy-pages@v4
