@@ -84,9 +84,9 @@ jobs:
             // Check the published JavaScript itself, not only the HTML reference.
             const scriptResponse = await getWithRetry(pageUrl + "macro-dashboard.js");
             const script = await scriptResponse.text();
-            assert.match(script, /marketsignal-data\\.joeybuilds043\\.workers\\.dev/,
+            assert.ok(script.includes("https://marketsignal-data.joeybuilds043.workers.dev/"),
               "Published dashboard must call the current Worker");
-            assert.doesNotMatch(script, /marketsignal-data\\.asadlang05\\.workers\\.dev/,
+            assert.ok(!script.includes("marketsignal-data.asadlang05.workers.dev"),
               "Published dashboard must not call the retired Worker");
             assert.match(html, /macro-dashboard\.js/, "Live page must load the macro dashboard script");
 
