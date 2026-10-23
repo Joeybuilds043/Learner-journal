@@ -1,10 +1,12 @@
 "use strict";
 
-const CACHE_VERSION = "market-journal-v11";
+const CACHE_VERSION = "marketpilot-v12";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./macro-dashboard.js",
+  "./macro-dashboard.js?v=20261020-live-fix",
+  "./marketpilot-config.js?v=20261024-marketpilot",
+  "./ai-workspace.js?v=20261024-marketpilot",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
@@ -55,7 +57,7 @@ self.addEventListener("fetch", (event) => {
 
   // Always try the network for the live macro dashboard first. Older installed
   // copies must not keep using a stale API URL just because a cached script exists.
-  if (url.pathname.endsWith("/macro-dashboard.js")) {
+  if (url.pathname.endsWith("/macro-dashboard.js") || url.pathname.endsWith("/ai-workspace.js") || url.pathname.endsWith("/marketpilot-config.js")) {
     event.respondWith(
       (async () => {
         try {
