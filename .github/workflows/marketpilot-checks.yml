@@ -14,6 +14,7 @@ on:
       - "backend/**"
       - ".github/workflows/**"
       - ".github/workflows/deploy-marketpilot-worker.yml"
+  workflow_dispatch:
   pull_request:
     paths:
       - "index.html"
@@ -69,6 +70,18 @@ jobs:
           worker = Path('worker/index.js').read_text()
           assert '/api/history' in worker and '/api/news' in worker and 'api.openai.com/v1/responses' in worker
           assert 'OPENAI_API_KEY' in worker and 'HISTORICAL SERIES' in worker
+          assert 'gpt-6.1-sol' in worker, 'Use the selected professional OpenAI model'
+          assert 'citationMap' in worker, 'Live news should preserve source citations'
+          loader_start = js.index('async function fetchAssets()')
+          loader_end = js.index('function usd(n)', loader_start)
+          asset_loader = js[loader_start:loader_end]
+          assert 'const menuButton=document.createElement' not in asset_loader, 'Navigation handlers must not be nested in the crypto loader'
+          assert js.index('const menuButton=document.createElement') > js.index('checkAIService();refreshAssets();showMarketGroup("crypto");setView("markets");'), 'Navigation/menu initialization must run at app scope'
+          assert 'function renderAnswer' in js, 'Financial answers should render structured text'
+          assert 'const macroHistoryTools=document.getElementById("ms-history-tools")' in js, 'Move macro history to the Historical section'
+          assert 'learner-journal-entries-v1' in html, 'Legacy journal storage key must be preserved in index.html'
+          assert 'OPENAI_API_KEY' in Path('.github/workflows/deploy-marketpilot-worker.yml').read_text()
+          assert 'CLOUDFLARE_API_TOKEN' in Path('.github/workflows/deploy-marketpilot-worker.yml').read_text()
           assert 'GEMINI_API_KEY' in Path('backend/main.py').read_text()  # optional Python/CrewAI scaffold only
           print('MarketPilot source checks passed.')
           PY
