@@ -49,8 +49,8 @@ jobs:
           required = {"BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "XRP-USD"}
           assert required <= {item.get("symbol") for item in assets}, data
           assert all(float(item.get("price") or 0) > 0 for item in assets), data
-          assert data.get("source") == "CoinPaprika", data
-          print("CoinPaprika crypto market route returned positive quotes for all five assets.")
+          assert all(item.get("source") in {"CoinPaprika", "Binance spot"} for item in assets), data
+          print("Crypto market route returned positive quotes for all five assets.")
           PY
       - name: Check Forex and commodities routes
         run: |
