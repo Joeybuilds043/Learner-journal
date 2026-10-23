@@ -49,3 +49,20 @@ jobs:
           assert data.get("openAIConfigured") is True, data
           print("OpenAI-backed MarketPilot AI is live.")
           PY
+      - name: Verify financial-education answers are relevant
+        run: |
+          curl --fail --silent --show-error --max-time 90 \
+            -H "Content-Type: application/json" \
+            -X POST \
+            -d '{"question":"Explain the difference between swaps and forwards. Compare contract structure, cash flows, settlement, common use cases and counterparty risk. Include one clearly hypothetical numerical example.","assets":[],"marketGroups":{},"macro":{}}' \
+            https://marketpilot-ai.joeybuilds043.workers.dev/api/analyze -o finance-answer.json
+          python - <<'PY'
+          import json
+          data = json.load(open("finance-answer.json"))
+          assert data.get("ok") is True, data
+          assert data.get("provider") == "OpenAI API", data
+          answer = data.get("answer", "").lower()
+          assert len(answer) > 200 and "swap" in answer and "forward" in answer, data
+          assert any(term in answer for term in ("cash flow", "settlement", "hypothetical", "example")), data
+          print("OpenAI finance education test passed with a direct swaps-vs-forwards answer.")
+          PY
