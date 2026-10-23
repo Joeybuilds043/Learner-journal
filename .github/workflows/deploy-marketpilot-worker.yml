@@ -51,11 +51,16 @@ jobs:
           PY
       - name: Verify financial-education answers are relevant
         run: |
-          curl --fail --silent --show-error --max-time 90 \
+          status=$(curl --silent --show-error --max-time 90 -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -X POST \
             -d '{"question":"Explain the difference between swaps and forwards. Compare contract structure, cash flows, settlement, common use cases and counterparty risk. Include one clearly hypothetical numerical example.","assets":[],"marketGroups":{},"macro":{}}' \
-            https://marketpilot-ai.joeybuilds043.workers.dev/api/analyze -o finance-answer.json
+            https://marketpilot-ai.joeybuilds043.workers.dev/api/analyze -o finance-answer.json)
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            echo "AI endpoint returned HTTP $status. Response details:"
+            cat finance-answer.json
+            exit 1
+          fi
           python - <<'PY'
           import json
           data = json.load(open("finance-answer.json"))
