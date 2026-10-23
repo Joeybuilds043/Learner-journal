@@ -23,8 +23,12 @@ jobs:
           import json
           data = json.load(open("health.json"))
           assert data.get("ok") is True, data
-          assert "llama" in data.get("model", "").lower(), data
-          print("Atlas health endpoint passed.")
+          assert data.get("model"), data
+          if data.get("openAIConfigured"):
+              assert data.get("provider") == "OpenAI API", data
+          else:
+              assert "fallback" in data.get("provider", "").lower(), data
+          print("Atlas health endpoint passed; provider:", data.get("provider"))
           PY
       - name: Check cross-asset market data route
         run: |
@@ -69,6 +73,18 @@ jobs:
               assert required <= symbols, (group, data)
           print("Forex and commodities routes passed.")
           PY
+      - name: Check historical chart API
+        run: |
+          curl --fail --silent --show-error --max-time 35 "https://marketpilot-ai.joeybuilds043.workers.dev/api/history?symbol=%5EGSPC&range=5y" -o history.json
+          python - <<'PY'
+          import json
+          data = json.load(open("history.json"))
+          points = data.get("points", [])
+          assert data.get("symbol") == "^GSPC", data
+          assert len(points) >= 12, data
+          assert all("date" in point and isinstance(point.get("value"), (int, float)) for point in points), data
+          print("Historical chart route returned", len(points), "dated monthly observations.")
+          PY
       - name: Test one real model response
         run: |
           python - <<'PY'
@@ -93,4 +109,17 @@ jobs:
           assert data.get("ok") is True, data
           assert "answer" in data and len(data["answer"].strip()) > 20, data
           print("Live model inference passed using:", data.get("model"))
+          PY
+      - name: Test direct financial-concept answer
+        run: |
+          printf '%s' '{"question":"Explain the difference between a forward contract and an interest-rate swap to a beginner. Give a clear side-by-side comparison and one simple hypothetical numerical example. Do not give a generic market report.","assets":[],"marketGroups":{},"macro":{}}' > concept-request.json
+          curl --fail --silent --show-error --max-time 90 -H "Content-Type: application/json" -X POST -d @concept-request.json https://marketpilot-ai.joeybuilds043.workers.dev/api/analyze -o concept-answer.json
+          python - <<'PY'
+          import json
+          data = json.load(open("concept-answer.json"))
+          assert data.get("ok") is True, data
+          answer = data.get("answer", "").lower()
+          assert "forward" in answer and "swap" in answer, data
+          assert len(answer) > 200, data
+          print("Finance concept response passed using:", data.get("model"))
           PY
