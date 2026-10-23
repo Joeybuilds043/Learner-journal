@@ -19,7 +19,7 @@
       --border: #24354a;
       --text: #eef4ff;
       --muted: #8ea1ba;
-      --accent: #69f0c1;
+      --accent: #9bb5ff;
       --blue: #78aaff;
       --purple: #c0a1ff;
       --red: #ff8795;
@@ -32,11 +32,11 @@
     body {
       margin: 0;
       background:
-        radial-gradient(ellipse at 4% 0%, #123b42 0%, transparent 32%),
+        radial-gradient(ellipse at 4% 0%, #202449 0%, transparent 32%),
         radial-gradient(ellipse at 100% 12%, #1b2440 0%, transparent 28%),
         var(--bg);
       color: var(--text);
-      font: 14px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+      font: 14px/1.55 Inter, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
     }
 
     button, input, textarea, select { font: inherit; }
@@ -69,9 +69,9 @@
       width: 48px;
       height: 48px;
       flex-shrink: 0;
-      border: 1px solid #397c70;
+      border: 1px solid #435c9c;
       border-radius: 15px;
-      background: linear-gradient(145deg, #17443f, #102a34);
+      background: linear-gradient(145deg, #252d52, #121c34);
       color: var(--accent);
       font-size: 22px;
       font-weight: 900;
@@ -114,9 +114,9 @@
       gap: 18px;
       padding: 25px;
       margin-bottom: 18px;
-      border: 1px solid #2a4d52;
+      border: 1px solid #34416c;
       border-radius: 22px;
-      background: linear-gradient(120deg, #15333a, #122238 70%, #171e35);
+      background: linear-gradient(120deg, #171f3d, #122238 70%, #24203f);
     }
 
     .eyebrow {
@@ -291,7 +291,7 @@
 
     input:focus, textarea:focus, select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px #68e0bd15;
+      box-shadow: 0 0 0 3px #9bb5ff15;
     }
 
     input::placeholder, textarea::placeholder {
