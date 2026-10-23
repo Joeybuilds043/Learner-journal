@@ -42,9 +42,10 @@ jobs:
           all_js = js + Path('macro-dashboard.js').read_text()
           assert 'MarketPilot AI' in html
           assert 'ai-workspace.js' in html
-          for section in ['Markets', 'AI Analyst', 'Daily Brief', 'Profile']:
+          for section in ['Markets', 'AI Analyst', 'Daily Brief', 'Profile', 'Trading Journal']:
               assert section in js, f'Missing navigation/section: {section}'
           assert 'learner-journal-entries-v1' in html, 'Legacy journal storage key must be preserved in index.html'
-          assert 'GEMINI_API_KEY' in Path('backend/main.py').read_text()
+          assert 'marketpilot-ai.joeybuilds043.workers.dev' in Path('marketpilot-config.js').read_text(), 'Atlas AI endpoint must be configured in public frontend settings'
+          assert 'GEMINI_API_KEY' in Path('backend/main.py').read_text()  # optional Python/CrewAI scaffold only
           print('MarketPilot source checks passed.')
           PY
