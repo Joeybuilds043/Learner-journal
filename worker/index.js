@@ -15,7 +15,7 @@ export default {
   const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers});
   if(request.method==="OPTIONS")return new Response(null,{status:204,headers});
   const url=new URL(request.url);
-  if(request.method==="GET"&&url.pathname==="/health")return json({ok:true,service:"MarketPilot AI",model:env.OPENAI_API_KEY?(env.OPENAI_MODEL||"gpt-4.1-mini"):"@cf/meta/llama-3.3-70b-instruct-fp8-fast",provider:env.OPENAI_API_KEY?"OpenAI API":"Cloudflare Workers AI fallback",openAIConfigured:Boolean(env.OPENAI_API_KEY)});
+  if(request.method==="GET"&&url.pathname==="/health")return json({ok:true,service:"MarketPilot AI",model:env.OPENAI_API_KEY?(env.OPENAI_MODEL||"gpt-6.1-sol"):"@cf/meta/llama-3.3-70b-instruct-fp8-fast",provider:env.OPENAI_API_KEY?"OpenAI API":"Cloudflare Workers AI fallback",openAIConfigured:Boolean(env.OPENAI_API_KEY)});
   if(request.method==="GET"&&url.pathname==="/api/history"){
    if(rateLimited(request,"history",12))return json({error:"Historical-data rate limit reached. Please wait one minute and retry."},429);
    const allowedHistory={"^GSPC":{name:"S&P 500",unit:"index points"},"^IXIC":{name:"Nasdaq Composite",unit:"index points"},"^DJI":{name:"Dow Jones",unit:"index points"},"^TNX":{name:"US 10Y Treasury Yield",unit:"percent"},"DX-Y.NYB":{name:"US Dollar Index (DXY proxy)",unit:"index points"},"^VIX":{name:"VIX Volatility Index",unit:"index points"},"GC=F":{name:"Gold futures",unit:"USD/oz"},"SI=F":{name:"Silver futures",unit:"USD/oz"},"CL=F":{name:"WTI crude oil",unit:"USD/barrel"},"NG=F":{name:"Natural gas futures",unit:"USD/MMBtu"},"EURUSD=X":{name:"EUR/USD",unit:"USD per EUR"},"GBPUSD=X":{name:"GBP/USD",unit:"USD per GBP"},"AUDUSD=X":{name:"AUD/USD",unit:"USD per AUD"},"USDJPY=X":{name:"USD/JPY",unit:"JPY per USD"},"BTC-USD":{name:"Bitcoin",unit:"USD"},"ETH-USD":{name:"Ethereum",unit:"USD"},"SOL-USD":{name:"Solana",unit:"USD"}};
@@ -50,7 +50,7 @@ export default {
   try{
    if(env.OPENAI_API_KEY){
     const useSearch=url.pathname==="/api/news";
-    const requestBody={model:env.OPENAI_MODEL||"gpt-4.1-mini",instructions:system,input:prompt,max_output_tokens:url.pathname==="/api/daily-brief"?2200:1800};
+    const requestBody={model:env.OPENAI_MODEL||"gpt-6.1-sol",instructions:system,input:prompt,max_output_tokens:url.pathname==="/api/daily-brief"?2200:1800};
     if(useSearch)requestBody.tools=[{type:"web_search"}];
     const response=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},body:JSON.stringify(requestBody)});
     const data=await response.json().catch(()=>({}));
@@ -58,7 +58,7 @@ export default {
     const answer=(data.output||[]).flatMap(item=>item.content||[]).filter(item=>item.type==="output_text").map(item=>item.text||"").join("\n").trim()||data.output_text||"No text was returned by the model.";
     let sections;
     if(url.pathname==="/api/daily-brief"){try{sections=JSON.parse(answer).sections;}catch{sections=[{title:"Daily Cross-Asset Research",content:answer}];}}
-    return json({ok:true,answer,sections,model:env.OPENAI_MODEL||"gpt-4.1-mini",provider:"OpenAI API"+(useSearch?" · web search":""),generatedAt:new Date().toISOString(),webSearch:useSearch});
+    return json({ok:true,answer,sections,model:env.OPENAI_MODEL||"gpt-6.1-sol",provider:"OpenAI API"+(useSearch?" · web search":""),generatedAt:new Date().toISOString(),webSearch:useSearch});
    }
    if(url.pathname==="/api/news")return json({error:"News search requires OPENAI_API_KEY as a server-side Worker secret. Add it through GitHub repository secrets and run the worker deployment workflow."},503);
    const result=await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast",{messages:[{role:"system",content:system},{role:"user",content:prompt}],max_tokens:1800,temperature:0.15});
