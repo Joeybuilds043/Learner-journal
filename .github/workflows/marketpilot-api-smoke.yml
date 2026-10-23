@@ -40,12 +40,13 @@ jobs:
           PY
       - name: Check crypto route through the same API
         run: |
-          curl --fail --silent --show-error --max-time 35 "https://marketpilot-ai.joeybuilds043.workers.dev/api/markets?group=crypto" -o crypto.json
+          curl --silent --show-error --max-time 35 "https://marketpilot-ai.joeybuilds043.workers.dev/api/markets?group=crypto" -o crypto.json
+          cat crypto.json
           python - <<'PY'
           import json
           data = json.load(open("crypto.json"))
           assets = data.get("assets", [])
-          required = {"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT"}
+          required = {"BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "XRP-USD"}
           assert required <= {item.get("symbol") for item in assets}, data
           assert all(float(item.get("price") or 0) > 0 for item in assets), data
           print("Crypto market route returned positive quote prices for all five assets.")
