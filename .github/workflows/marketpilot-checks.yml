@@ -7,6 +7,10 @@ on:
     paths:
       - "index.html"
       - "ai-workspace.js"
+      - "macro-dashboard.js"
+      - "worker/**"
+      - "wrangler.toml"
+      - ".github/workflows/deploy-marketpilot-worker.yml"
       - "marketpilot-config.js"
       - "sw.js"
       - "backend/**"
@@ -31,6 +35,7 @@ jobs:
           node --check ai-workspace.js
           node --check macro-dashboard.js
           node --check marketpilot-config.js
+          node --check worker/index.js
       - name: Check Python syntax
         run: python -m compileall -q backend
       - name: Check required app files and navigation
@@ -42,10 +47,13 @@ jobs:
           all_js = js + Path('macro-dashboard.js').read_text()
           assert 'MarketPilot AI' in html
           assert 'ai-workspace.js' in html
-          for section in ['Markets', 'AI Analyst', 'Daily Brief', 'Profile', 'Trading Journal']:
+          for section in ['Markets', 'AI Analyst', 'Daily Brief', 'Your Journal', 'Profile', 'Historical Patterns', 'News & Impact']:
               assert section in js, f'Missing navigation/section: {section}'
           assert 'learner-journal-entries-v1' in html, 'Legacy journal storage key must be preserved in index.html'
           assert 'marketpilot-ai.joeybuilds043.workers.dev' in Path('marketpilot-config.js').read_text(), 'Atlas AI endpoint must be configured in public frontend settings'
+          worker = Path('worker/index.js').read_text()
+          assert '/api/history' in worker and '/api/news' in worker and 'api.openai.com/v1/responses' in worker
+          assert 'OPENAI_API_KEY' in worker and 'HISTORICAL SERIES' in worker
           assert 'GEMINI_API_KEY' in Path('backend/main.py').read_text()  # optional Python/CrewAI scaffold only
           print('MarketPilot source checks passed.')
           PY
