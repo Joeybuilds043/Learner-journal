@@ -5,9 +5,9 @@
   style.textContent = `
     .ms-live{margin:12px 0 18px;padding:14px;border:1px solid #263a50;border-radius:17px;background:linear-gradient(145deg,#101d2b,#0a1220);color:#edf5ff;box-shadow:0 12px 34px #0002}
     .ms-live *{box-sizing:border-box}.ms-live-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .ms-live-kicker{margin:0 0 3px;color:#69f0c1!important;font-size:9px!important;letter-spacing:1.5px;font-weight:900}
+    .ms-live-kicker{margin:0 0 3px;color:#9bb5ff!important;font-size:9px!important;letter-spacing:1.5px;font-weight:900}
     .ms-live h2{margin:0;font-size:19px;letter-spacing:-.4px}.ms-live .ms-subtitle{margin:4px 0 0;color:#94a9c2;font-size:10px}
-    .ms-live button{padding:8px 11px;border:1px solid #397966;border-radius:9px;background:#12392f;color:#80f4ce;font-size:11px;font-weight:800;cursor:pointer}
+    .ms-live button{padding:8px 11px;border:1px solid #4d6192;border-radius:9px;background:#182745;color:#c4d2ff;font-size:11px;font-weight:800;cursor:pointer}
     .ms-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
     .ms-card{padding:11px;border:1px solid #25384e;border-radius:12px;background:linear-gradient(145deg,#101c2b,#0b1421);min-width:0;overflow:hidden}
     .ms-label{color:#9badc3;font-size:10px;line-height:1.35;min-height:26px}
@@ -17,11 +17,11 @@
     .ms-chart{grid-column:1/-1;width:100%;margin-top:10px;padding-top:9px;border-top:1px solid #24364b}.ms-chart svg{display:block;width:100%;height:58px;overflow:visible}.ms-chart-label{font-size:9px}.ms-card{display:block;padding:14px 16px}.ms-value{font-size:25px}
     .ms-chart-label{display:flex;justify-content:space-between;color:#7188a3;font-size:9px;margin-top:2px}
     .ms-read{margin-top:9px;padding:11px;border:1px solid #29465a;border-radius:12px;background:#0e1e2d}
-    .ms-read-title{font-size:9px;font-weight:900;letter-spacing:1px;color:#69f0c1;margin-bottom:5px}
+    .ms-read-title{font-size:9px;font-weight:900;letter-spacing:1px;color:#9bb5ff;margin-bottom:5px}
     .ms-read p{margin:0;color:#d3e0ef;font-size:11px;line-height:1.5}
     .ms-status{margin:8px 0 0;color:#8ca2ba;font-size:9px;line-height:1.4}
     .ms-footnote{margin:6px 0 0;color:#71849a;font-size:9px;line-height:1.4}
-    .ms-gauge{height:5px;margin:9px 0 6px;border-radius:8px;background:linear-gradient(90deg,#69f0c1 0%,#d9db83 45%,#ff9d9d 100%);position:relative}
+    .ms-gauge{height:5px;margin:9px 0 6px;border-radius:8px;background:linear-gradient(90deg,#9bb5ff 0%,#c0a1ff 45%,#ff9d9d 100%);position:relative}
     .ms-gauge i{position:absolute;top:-3px;width:3px;height:11px;border-radius:2px;background:#fff;box-shadow:0 0 0 2px #0b1421}
     .ms-tools{margin-top:10px;padding:12px;border:1px solid #263a50;border-radius:13px;background:#0b1421}
     .ms-tools h3{font-size:12px;margin:0 0 8px;color:#dce9f7}.ms-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -89,7 +89,7 @@
     const area=path+" L "+pts[pts.length-1].x+" "+(H-B)+" L "+pts[0].x+" "+(H-B)+" Z";
     const ylabels=[max,(min+max)/2,min].map(v=>v.toLocaleString("en-US",{maximumFractionDigits:3}));
     const first=valid[0].date,last=valid[valid.length-1].date;
-    historyChart.innerHTML='<div class="ms-date">'+escapeHtml(label)+' · '+valid.length+' observations · source: FRED</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(label)+' historical chart"><path d="M'+L+' '+T+'V'+(H-B)+'H'+(W-R)+'" stroke="#26384d" fill="none"/><path d="'+area+'" fill="#69f0c1" opacity=".08"/><path d="'+path+'" stroke="#69f0c1" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="2" y="'+(T+4)+'" fill="#8fa5bd" font-size="10">'+ylabels[0]+'</text><text x="2" y="'+((H+T-B)/2)+'" fill="#8fa5bd" font-size="10">'+ylabels[1]+'</text><text x="2" y="'+(H-B)+'" fill="#8fa5bd" font-size="10">'+ylabels[2]+'</text><text x="'+L+'" y="'+(H-7)+'" fill="#8fa5bd" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-7)+'" text-anchor="end" fill="#8fa5bd" font-size="10">'+escapeHtml(last)+'</text></svg>';
+    historyChart.innerHTML='<div class="ms-date">'+escapeHtml(label)+' · '+valid.length+' observations · source: FRED</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(label)+' historical chart"><path d="M'+L+' '+T+'V'+(H-B)+'H'+(W-R)+'" stroke="#26384d" fill="none"/><path d="'+area+'" fill="#9bb5ff" opacity=".08"/><path d="'+path+'" stroke="#9bb5ff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="2" y="'+(T+4)+'" fill="#8fa5bd" font-size="10">'+ylabels[0]+'</text><text x="2" y="'+((H+T-B)/2)+'" fill="#8fa5bd" font-size="10">'+ylabels[1]+'</text><text x="2" y="'+(H-B)+'" fill="#8fa5bd" font-size="10">'+ylabels[2]+'</text><text x="'+L+'" y="'+(H-7)+'" fill="#8fa5bd" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-7)+'" text-anchor="end" fill="#8fa5bd" font-size="10">'+escapeHtml(last)+'</text></svg>';
   }
   async function loadHistory(){
     const series=seriesSelect.value, range=rangeSelect.value;
@@ -153,7 +153,7 @@
       const showYield=manual("us10y",yieldVal), showDollar=manual("dollar",dollar), showCpi=manual("cpi",cpiYoY), showPpi=manual("ppi",num(d.ppi?.value)), showVix=manual("vix",vix);
       grid.replaceChildren();
       grid.appendChild(card("US 10Y YIELD",showYield,overrides.us10y?chosenDate:dateOf(d.us10y),overrides.us10y?null:(yieldCh===null?null:yieldCh*100),{suffix:"%",changeSuffix:" bps",changeLabel:"change",chart:sparkline(yieldVal,yieldVal!==null&&yieldCh!==null?yieldVal-yieldCh:null,"#78aaff"),extra:overrides.us10y?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
-      grid.appendChild(card("USD STRENGTH · BROAD INDEX",showDollar,overrides.dollar?chosenDate:dateOf(d.dollar),overrides.dollar?null:dollarPct,{decimals:3,chart:sparkline(dollar,dollarPrev,"#69f0c1"),extra:'<div class="ms-date">'+(overrides.dollar?"Manual override · "+chosenDate:"Broad dollar index · not ICE DXY")+'</div>'}));
+      grid.appendChild(card("USD STRENGTH · BROAD INDEX",showDollar,overrides.dollar?chosenDate:dateOf(d.dollar),overrides.dollar?null:dollarPct,{decimals:3,chart:sparkline(dollar,dollarPrev,"#9bb5ff"),extra:'<div class="ms-date">'+(overrides.dollar?"Manual override · "+chosenDate:"Broad dollar index · not ICE DXY")+'</div>'}));
       grid.appendChild(card("CPI INFLATION · YOY",showCpi,overrides.cpi?chosenDate:dateOf(d.cpiYearOverYear),null,{suffix:"%",chart:sparkline(cpiYoY,cpiYoY!==null&&cpiChange!==null?cpiYoY-cpiChange:null,"#c0a1ff"),extra:overrides.cpi?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
       grid.appendChild(card("PPI INDEX · CHANGE VS PRIOR MONTH",showPpi,overrides.ppi?chosenDate:dateOf(d.ppi),overrides.ppi?null:ppiPct,{decimals:3,chart:sparkline(num(d.ppi?.value),num(d.ppi?.value)!==null&&num(d.ppi?.change)!==null?num(d.ppi.value)-num(d.ppi.change):null,"#c0a1ff"),extra:overrides.ppi?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
       const vixChart=showVix===null?"":gauge(showVix);
