@@ -74,8 +74,9 @@ jobs:
           python - <<'PY'
           import json
           snapshots = {}
-          for group in ("crypto", "stocks", "forex", "commodities"):
-              snapshots[group] = json.load(open(f"{group}.json"))
+          files = {"crypto": "crypto.json", "stocks": "markets.json", "forex": "forex.json", "commodities": "commodities.json"}
+          for group, filename in files.items():
+              snapshots[group] = json.load(open(filename))
           payload = {
               "question": "Using the supplied market snapshots, explain today's cross-asset picture in plain English. Clearly separate observed quotes from interpretation, and do not invent news.",
               "assets": snapshots["crypto"].get("assets", []),
