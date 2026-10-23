@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "MarketSignal | Macro Terminal",
-  "short_name": "MarketSignal",
-  "description": "A compact macro market dashboard and trading journal.",
+  "name": "MarketPilot AI | Market Research",
+  "short_name": "MarketPilot",
+  "description": "AI-assisted market research, live public market data, daily analysis and a trading journal.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",
