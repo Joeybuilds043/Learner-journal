@@ -50,15 +50,15 @@ export default {
   try{
    if(env.OPENAI_API_KEY){
     const useSearch=url.pathname==="/api/news";
-    const requestBody={model:env.OPENAI_MODEL||"gpt-6.1-sol",instructions:system,input:prompt,max_output_tokens:url.pathname==="/api/daily-brief"?2200:1800};
+    const requestBody={model:env.OPENAI_MODEL||"gpt-6.1-sol",instructions:system,input:prompt,reasoning:{effort:"medium"},max_output_tokens:url.pathname==="/api/daily-brief"?2200:1800};
     if(useSearch)requestBody.tools=[{type:"web_search"}];
     const response=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},body:JSON.stringify(requestBody)});
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error("OpenAI API HTTP "+response.status+": "+String(data.error?.message||"request failed").slice(0,220));
-    const answer=(data.output||[]).flatMap(item=>item.content||[]).filter(item=>item.type==="output_text").map(item=>item.text||"").join("\n").trim()||data.output_text||"No text was returned by the model.";
+    const outputItems=(data.output||[]).flatMap(item=>item.content||[]);\n    const answer=outputItems.filter(item=>item.type==="output_text").map(item=>item.text||"").join("\n").trim()||data.output_text||"No text was returned by the model.";\n    const citationMap=new Map();for(const item of outputItems){for(const annotation of item.annotations||[]){if(annotation.type==="url_citation"&&/^https:\/\//i.test(annotation.url||""))citationMap.set(annotation.url,{title:annotation.title||annotation.url,url:annotation.url});}}const citations=[...citationMap.values()].slice(0,12);
     let sections;
     if(url.pathname==="/api/daily-brief"){try{sections=JSON.parse(answer).sections;}catch{sections=[{title:"Daily Cross-Asset Research",content:answer}];}}
-    return json({ok:true,answer,sections,model:env.OPENAI_MODEL||"gpt-6.1-sol",provider:"OpenAI API"+(useSearch?" · web search":""),generatedAt:new Date().toISOString(),webSearch:useSearch});
+    return json({ok:true,answer,sections,citations,model:env.OPENAI_MODEL||"gpt-6.1-sol",provider:"OpenAI API"+(useSearch?" · web search":""),generatedAt:new Date().toISOString(),webSearch:useSearch});
    }
    if(url.pathname==="/api/news")return json({error:"News search requires OPENAI_API_KEY as a server-side Worker secret. Add it through GitHub repository secrets and run the worker deployment workflow."},503);
    const result=await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast",{messages:[{role:"system",content:system},{role:"user",content:prompt}],max_tokens:1800,temperature:0.15});
