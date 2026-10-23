@@ -142,7 +142,8 @@ jobs:
               assert.match(atlasHealth.provider || "", /openai/i, "Configured OpenAI secret must select the OpenAI provider");
               assert.match(atlasHealth.model || "", /^gpt-/i, "Atlas must report the configured GPT model");
             } else {
-              assert.match(atlasHealth.model || "", /llama/i, "Atlas must report the fallback model when OpenAI is not configured");
+              assert.equal(atlasHealth.provider, "Cloudflare Workers AI", "Atlas must report the free Cloudflare AI provider");
+              assert.match(atlasHealth.model || "", /glm|zai/i, "Atlas must report the configured free GLM model");
             }
 
             const atlasMarketsResponse = await getWithRetry(atlasUrl + "/api/markets?group=stocks", {
