@@ -680,11 +680,11 @@
 
   </section>
   <div class="disclaimer">
-    <strong>Data transparency:</strong> Macro indicators are fetched from the MarketSignal Cloudflare Worker using published FRED observations. Data may be delayed and is not tick-by-tick market pricing or financial advice.
+    <strong>Data transparency:</strong> Macro indicators are fetched from the MarketPilot data Worker using published FRED observations. Data may be delayed and is not tick-by-tick market pricing or financial advice.
   </div>
 
   <footer>
-    MarketSignal · Macro Terminal<br>
+    MarketPilot AI · Market Research Workspace<br>
     Local browser storage · No account or cloud sync
   </footer>
 </main>
@@ -929,7 +929,7 @@
 
   $("exportBtn").addEventListener("click", () => {
     const backup = {
-      app: "MarketSignal",
+      app: "MarketPilot AI",
       version: 1,
       exportedAt: new Date().toISOString(),
       entries
@@ -1031,7 +1031,7 @@
   });
 
   window.addEventListener("appinstalled", () => {
-    showStatus("MarketSignal installed.");
+    showStatus("MarketPilot AI installed.");
   });
 
   // Register the existing service worker.
