@@ -68,9 +68,9 @@ jobs:
           assert 'learner-journal-entries-v1' in html, 'Legacy journal storage key must be preserved in index.html'
           assert 'marketpilot-ai.joeybuilds043.workers.dev' in Path('marketpilot-config.js').read_text(), 'Atlas AI endpoint must be configured in public frontend settings'
           worker = Path('worker/index.js').read_text()
-          assert '/api/history' in worker and '/api/news' in worker and 'api.openai.com/v1/responses' in worker
-          assert 'OPENAI_API_KEY' in worker and 'HISTORICAL SERIES' in worker
-          assert 'gpt-6.1-sol' in worker, 'Use the selected professional OpenAI model'
+          assert '/api/history' in worker and '/api/news' in worker and 'query1.finance.yahoo.com/v1/finance/search' in worker
+          assert '@cf/zai-org/glm-4.7-flash' in worker and 'HISTORICAL SERIES' in worker
+          assert 'You are Atlas, a senior financial-markets analyst' in worker, 'Keep the financial analyst system prompt'
           assert 'citationMap' in worker, 'Live news should preserve source citations'
           loader_start = js.index('async function fetchAssets()')
           loader_end = js.index('function usd(n)', loader_start)
@@ -82,7 +82,7 @@ jobs:
           assert 'const macroHistoryTools=document.getElementById("ms-history-tools")' in js, 'Move macro history to the Historical section'
           assert 'id="asset"' in html and 'id="mistake"' in html and 'id="betterAction"' in html, 'Journal needs the asset and trade-reflection fields'
           assert 'learner-journal-entries-v1' in html, 'Legacy journal storage key must be preserved in index.html'
-          assert 'OPENAI_API_KEY' in Path('.github/workflows/deploy-marketpilot-worker.yml').read_text()
+          assert 'Cloudflare Workers AI' in Path('.github/workflows/deploy-marketpilot-worker.yml').read_text()
           assert 'CLOUDFLARE_API_TOKEN' in Path('.github/workflows/deploy-marketpilot-worker.yml').read_text()
           assert 'GEMINI_API_KEY' in Path('backend/main.py').read_text()  # optional Python/CrewAI scaffold only
           print('MarketPilot source checks passed.')
