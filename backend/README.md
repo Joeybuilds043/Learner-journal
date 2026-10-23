@@ -2,6 +2,10 @@
 
 Python 3.12 + FastAPI + CrewAI. The service retrieves current public Binance spot ticker data and the existing MarketSignal FRED Worker data on the server, then runs a two-agent CrewAI workflow (market analyst and risk reviewer) using the Gemini API.
 
+## Deploy on Render
+
+The repository root includes `render.yaml` as a deployment blueprint. In Render, create a new Blueprint and select this GitHub repository. Review the `marketpilot-ai-api` service, set `GEMINI_API_KEY` as a secret environment variable, and deploy. The free web-service plan can sleep when idle and may have cold-start delays; it is not an always-on unlimited compute tier. After deployment, copy the public service URL into `marketpilot-config.js` as `window.MARKETPILOT_API_BASE`, then commit that public URL configuration (never the API key).
+
 ## Run locally
 
 1. Create a virtual environment and install `requirements.txt`.
