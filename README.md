@@ -1,8 +1,9 @@
-# MarketSignal — Macro Terminal & Trading Journal
+# MarketPilot AI — Market Research Workspace
 
 [![Deploy MarketSignal](https://github.com/Joeybuilds043/Learner-journal/actions/workflows/deploy.yml/badge.svg)](https://github.com/Joeybuilds043/Learner-journal/actions/workflows/deploy.yml)
 
 **Live demo:** https://joeybuilds043.github.io/Learner-journal/  
+**AI backend source:** [backend/](./backend/) · CrewAI + FastAPI  
 **Source code:** https://github.com/Joeybuilds043/Learner-journal
 
 ## Dashboard preview
@@ -13,12 +14,16 @@
 
 ## What it does
 
-MarketSignal is a mobile-first macro dashboard and trading journal. It brings published US economic observations into one place and provides a structured way to record market expectations, actual outcomes and lessons.
+MarketPilot AI is a mobile-first market research workspace. It combines published US macroeconomic observations, public crypto market data, a CrewAI-based AI analyst service scaffold, daily research, and the original local trading journal.
 
 - **Macro dashboard:** latest available US 10-year Treasury yield, broad US dollar index, CPI, PPI and VIX observations from FRED through a Cloudflare Worker.
 - **Historical data:** requests series observations from the Worker when history is available.
 - **Manual values:** records clearly labelled local overrides without replacing the official source data.
-- **Trading journal:** record macro context, expectation, market outcome and lesson.
+- **Trading journal:** record macro context, expectation, market outcome and lesson. The original localStorage key is unchanged.
+- **AI Analyst workspace:** illustrated fictional veteran-investor avatar, follow-up prompt suggestions, live-context analysis UI, and a Python CrewAI backend scaffold.
+- **Daily Research:** current Binance spot ticker snapshots for BTC, ETH, SOL, BNB and XRP, plus a report-generation UI.
+- **Profile workspace:** local preferences now; real sign-in is intentionally not faked and requires identity-provider setup.
+- **Backend scaffold:** FastAPI + CrewAI + Gemini API, server-side data retrieval, basic rate limiting, and a SQL schema draft.
 - **Search and backup:** search saved reviews, delete entries, export JSON and import a previous backup.
 - **Progressive Web App:** manifest and service worker support installation and caching of core app files.
 
@@ -54,7 +59,7 @@ GitHub stores the source code and commit history. The workflow in .github/workfl
 
 ## Technology
 
-HTML · CSS · Vanilla JavaScript · Fetch API · Progressive Web App · localStorage · Cloudflare Workers · Cloudflare D1 · FRED API · GitHub Actions · GitHub Pages
+HTML · CSS · Vanilla JavaScript · PWA · Cloudflare Workers · Cloudflare D1 · FRED API · Python · FastAPI · CrewAI · Gemini API · SQL schema · GitHub Actions · GitHub Pages
 
 ## Run locally
 
@@ -65,3 +70,16 @@ Because this is a static web app, the front end can be served from a local stati
 FRED indicators are published economic observations, not tick-by-tick prices. Journal entries and manual overrides are stored locally in the current browser and do not automatically sync to another device. Export a backup before clearing browser site data.
 
 MarketSignal is a learning and analysis tool, not an automated trading system or financial advice.
+
+
+## MarketPilot AI phase 1 status
+
+The new four-section navigation is **Markets, AI Analyst, Daily Brief, and Profile**. The journal remains accessible from Markets. Public Binance market snapshots and the FRED macro dashboard are independent of the AI service.
+
+The AI backend is scaffolded in `backend/`, but it is **not deployed yet**. Until the service is deployed and `marketpilot-config.js` contains its public base URL, AI answers and generated daily briefs will report that the service is not configured. Add `GEMINI_API_KEY` only to the backend host's secret/environment settings. The Gemini free tier has rate limits; no unlimited free AI API is promised. Binance public market-data endpoints also have rate limits and regional availability can vary.
+
+The Profile view currently saves preferences locally; it is not authentication. A secure login and account-linked SQL storage require an identity/database provider to be configured. The supplied `backend/schema.sql` is a schema draft, not an active migration. Existing journal data remains in the browser under `learner-journal-entries-v1`; do not clear site storage during this phase.
+
+### Backend development
+
+See [backend/README.md](./backend/README.md). CrewAI is Python-based, so the AI orchestration runs in Python. SQL is used for the planned persistent data layer. C++ and Java are not added just to increase the number of languages; they would add deployment complexity without solving a requirement in this stack.
