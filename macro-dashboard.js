@@ -41,7 +41,7 @@
   section.className = "ms-live";
   section.setAttribute("aria-label","Macro market dashboard");
   section.innerHTML = `
-    <div class="ms-live-head"><div><p class="ms-live-kicker">MARKETSIGNAL / MACRO TERMINAL</p><h2>Market pulse</h2><p class="ms-subtitle">US macro · latest available readings</p></div><button id="ms-refresh" type="button">↻ Refresh</button></div>
+    <div class="ms-live-head"><div><p class="ms-live-kicker">MARKETPILOT AI / MACRO TERMINAL</p><h2>Market pulse</h2><p class="ms-subtitle">US macro · latest available readings</p></div><button id="ms-refresh" type="button">↻ Refresh</button></div>
     <div class="ms-grid" id="ms-grid"><div class="ms-card">Loading data…</div></div>
     <div class="ms-read"><div class="ms-read-title">MACRO READ</div><p id="ms-read-text">Loading latest observations.</p></div>
     <div class="ms-tools">
