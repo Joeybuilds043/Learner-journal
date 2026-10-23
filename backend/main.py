@@ -7,6 +7,7 @@ from typing import Any
 import httpx
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field, field_validator
 
 APP_NAME = "MarketPilot AI Research API"
@@ -202,8 +203,10 @@ async def health_check() -> dict[str, str]:
 @app.post("/api/analyze")
 async def analyze(payload: AnalyzeRequest, request: Request) -> dict[str, Any]:
     enforce_rate_limit(request)
+    if not GEMINI_API_KEY:
+        raise HTTPException(status_code=503, detail="AI model key is not configured. Add GEMINI_API_KEY as a server-side environment secret.")
     context = await fetch_live_context()
-    answer = build_crew(payload.question, context)
+    answer = await run_in_threadpool(build_crew, payload.question, context)
     return {
         "answer": answer,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
@@ -216,8 +219,10 @@ async def analyze(payload: AnalyzeRequest, request: Request) -> dict[str, Any]:
 @app.post("/api/daily-brief")
 async def daily_brief(payload: BriefRequest, request: Request) -> dict[str, Any]:
     enforce_rate_limit(request)
+    if not GEMINI_API_KEY:
+        raise HTTPException(status_code=503, detail="AI model key is not configured. Add GEMINI_API_KEY as a server-side environment secret.")
     context = await fetch_live_context()
-    answer = build_crew("Generate the daily market research brief.", context, daily=True)
+    answer = await run_in_threadpool(build_crew, "Generate the daily market research brief.", context, daily=True)
     return {
         "answer": answer,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
