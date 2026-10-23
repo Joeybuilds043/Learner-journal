@@ -1,0 +1,50 @@
+name: MarketPilot live API smoke test
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/marketpilot-api-smoke.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  live-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Check Atlas AI service health
+        run: |
+          curl --fail --silent --show-error --max-time 20 https://marketpilot-ai.joeybuilds043.workers.dev/health -o health.json
+          cat health.json
+          python - <<'PY'
+          import json
+          data = json.load(open("health.json"))
+          assert data.get("ok") is True, data
+          assert "llama" in data.get("model", "").lower(), data
+          print("Atlas health endpoint passed.")
+          PY
+      - name: Check cross-asset market data route
+        run: |
+          curl --fail --silent --show-error --max-time 35 "https://marketpilot-ai.joeybuilds043.workers.dev/api/markets?group=stocks" -o markets.json
+          cat markets.json
+          python - <<'PY'
+          import json
+          data = json.load(open("markets.json"))
+          assets = data.get("assets", [])
+          symbols = {item.get("symbol") for item in assets}
+          assert {"^GSPC", "^IXIC", "^DJI"} <= symbols, data
+          print("Cross-asset market route passed.")
+          PY
+      - name: Test one real model response
+        run: |
+          curl --fail --silent --show-error --max-time 90             -H "Content-Type: application/json"             -X POST             -d '{"question":"In two concise sentences, explain how US Treasury yields can affect growth stocks. Clearly label this as general financial education.","assets":[],"marketGroups":{},"macro":{}}'             https://marketpilot-ai.joeybuilds043.workers.dev/api/analyze -o answer.json
+          cat answer.json
+          python - <<'PY'
+          import json
+          data = json.load(open("answer.json"))
+          assert data.get("ok") is True, data
+          assert "answer" in data and len(data["answer"].strip()) > 20, data
+          print("Live model inference passed using:", data.get("model"))
+          PY
