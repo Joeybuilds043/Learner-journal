@@ -639,9 +639,24 @@
           <textarea id="market" name="market" placeholder="What happened to the dollar, yields, equities or crypto? What surprised me?" required></textarea>
         </div>
 
+        <div class="review-field">
+          <label for="mistake">My mistake today (if any)</label>
+          <textarea id="mistake" name="mistake" placeholder="Chased price, entered too early, ignored the trend, oversized the position, moved my stop, or no mistake today."></textarea>
+        </div>
+
+        <div class="review-field">
+          <label for="betterAction">What should I have done instead?</label>
+          <textarea id="betterAction" name="betterAction" placeholder="Wait for confirmation, define invalidation first, reduce size, skip the trade, or follow my plan."></textarea>
+        </div>
+
+        <div class="review-field">
+          <label for="riskPlan">Risk and trade management</label>
+          <textarea id="riskPlan" name="riskPlan" placeholder="Entry reason, stop/invalidation, planned risk, exit rule and whether I followed them."></textarea>
+        </div>
+
         <div class="review-field lesson">
           <label for="lesson">Lesson and next action</label>
-          <textarea id="lesson" name="lesson" placeholder="Was my reasoning sound? What did I miss? What will I test or change next time?" required></textarea>
+          <textarea id="lesson" name="lesson" placeholder="What rule will I follow next time? Write one action I can check in my next trade." required></textarea>
         </div>
       </div>
 
@@ -761,6 +776,9 @@
       context: $("context").value.trim(),
       expectation: $("expectation").value.trim(),
       market: $("market").value.trim(),
+      mistake: $("mistake").value.trim(),
+      betterAction: $("betterAction").value.trim(),
+      riskPlan: $("riskPlan").value.trim(),
       lesson: $("lesson").value.trim()
     };
   }
@@ -813,7 +831,7 @@
     const filtered = sorted.filter(entry => {
       const searchable = [
         entry.dxy, entry.us10y, entry.news, entry.context,
-        entry.expectation, entry.market, entry.lesson
+        entry.expectation, entry.market, entry.mistake, entry.betterAction, entry.riskPlan, entry.lesson
       ].join(" ").toLowerCase();
 
       return searchable.includes(query);
@@ -872,6 +890,9 @@
       if (entry.context) addSection(card, "ADDITIONAL CONTEXT", entry.context);
       addSection(card, "MY EXPECTATION", entry.expectation);
       addSection(card, "WHAT THE MARKET DID", entry.market);
+      if (entry.mistake) addSection(card, "MY MISTAKE", entry.mistake);
+      if (entry.betterAction) addSection(card, "WHAT I SHOULD HAVE DONE", entry.betterAction);
+      if (entry.riskPlan) addSection(card, "RISK & TRADE MANAGEMENT", entry.riskPlan);
       addSection(card, "LESSON & NEXT ACTION", entry.lesson);
 
       historyContainer.appendChild(card);
@@ -1073,9 +1094,9 @@
 })();
 </script>
 
-  <script src="./macro-dashboard.js?v=20261020-live-fix" defer></script>
-  <script src="./marketpilot-config.js?v=20261024-ai-connected" defer></script>
-  <script src="./ai-workspace.js?v=20261024-ai-connected" defer></script>
+  <script src="./macro-dashboard.js?v=20261024-market-layout" defer></script>
+  <script src="./marketpilot-config.js?v=20261024-pro-workspace" defer></script>
+  <script src="./ai-workspace.js?v=20261024-pro-workspace" defer></script>
 </body>
   </html>
 
