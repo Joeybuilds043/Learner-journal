@@ -2,6 +2,11 @@ name: Deploy MarketPilot AI Worker
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "worker/index.js"
+      - "wrangler.toml"
 
 permissions:
   contents: read
