@@ -52,7 +52,7 @@
       </div>
       <div class="ms-chartbox" id="ms-history-chart"><div class="empty">Choose an indicator and period. Historical series will appear when the Worker history endpoint is deployed.</div></div>
       <div class="ms-status" id="ms-history-status">Historical data endpoint not confirmed yet.</div>
-      <div class="ms-ai-cta"><div><span class="ms-ai-kicker">NEXT STEP</span><strong>Turn the data into a market view</strong><p>Ask the financial research assistant to connect macro trends, price action and risk scenarios.</p></div><button id="ms-open-ai" type="button">Open AI Analyst <span aria-hidden="true">↗</span></button></div>
+      <div class="ms-ai-cta"><div><span class="ms-ai-kicker">NEXT STEP</span><strong>Turn the data into a market view</strong><p>Ask the financial research assistant to connect macro trends, price action and risk scenarios.</p></div><button id="ms-open-ai" type="button">Open Financial Analyst <span aria-hidden="true">↗</span></button></div>
     </div>
     <div class="ms-tools">
       <h3>Edit dashboard values</h3>
