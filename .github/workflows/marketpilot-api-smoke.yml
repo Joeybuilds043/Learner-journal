@@ -37,6 +37,23 @@ jobs:
           assert {"^GSPC", "^IXIC", "^DJI"} <= symbols, data
           print("Cross-asset market route passed.")
           PY
+      - name: Check Forex and commodities routes
+        run: |
+          for group in forex commodities; do
+            curl --fail --silent --show-error --max-time 35 "https://marketpilot-ai.joeybuilds043.workers.dev/api/markets?group=$group" -o "$group.json"
+          done
+          python - <<'PY'
+          import json
+          expectations = {
+              "forex": {"EURUSD=X", "GBPUSD=X", "AUDUSD=X"},
+              "commodities": {"GC=F", "SI=F", "CL=F"},
+          }
+          for group, required in expectations.items():
+              data = json.load(open(f"{group}.json"))
+              symbols = {item.get("symbol") for item in data.get("assets", [])}
+              assert required <= symbols, (group, data)
+          print("Forex and commodities routes passed.")
+          PY
       - name: Test one real model response
         run: |
           curl --fail --silent --show-error --max-time 90             -H "Content-Type: application/json"             -X POST             -d '{"question":"In two concise sentences, explain how US Treasury yields can affect growth stocks. Clearly label this as general financial education.","assets":[],"marketGroups":{},"macro":{}}'             https://marketpilot-ai.joeybuilds043.workers.dev/api/analyze -o answer.json
