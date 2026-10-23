@@ -123,7 +123,38 @@ jobs:
             assert.ok(Array.isArray(history.points) && history.points.length > 0,
               "History endpoint must return at least one observation");
 
-            console.log("Smoke test passed: GitHub Pages, Worker CORS, live FRED data, and history endpoint.");
+            const atlasUrl = "https://marketpilot-ai.joeybuilds043.workers.dev";
+            const atlasHealthResponse = await getWithRetry(atlasUrl + "/health", {
+              headers: { Origin: origin, "Cache-Control": "no-cache" }
+            });
+            const atlasHealth = await atlasHealthResponse.json();
+            assert.equal(atlasHealth.ok, true, "Atlas AI service must be online");
+            assert.match(atlasHealth.model || "", /llama/i, "Atlas must report its configured model");
+
+            const atlasMarketsResponse = await getWithRetry(atlasUrl + "/api/markets?group=stocks", {
+              headers: { Origin: origin, "Cache-Control": "no-cache" }
+            });
+            const atlasMarkets = await atlasMarketsResponse.json();
+            assert.equal(atlasMarkets.group, "stocks", "Atlas must expose cross-asset market quotes");
+            assert.equal(atlasMarkets.assets?.length, 3, "Atlas must return S&P 500, Nasdaq and Dow Jones quote slots");
+
+            const atlasAnalysisResponse = await fetch(atlasUrl + "/api/analyze", {
+              method: "POST",
+              headers: { Origin: origin, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                question: "In two short sentences, explain how rising Treasury yields can affect growth stocks.",
+                assets: [],
+                macro: {},
+                marketGroups: {}
+              }),
+              signal: AbortSignal.timeout(90000)
+            });
+            assert.equal(atlasAnalysisResponse.status, 200, "Atlas AI analysis endpoint must respond successfully");
+            const atlasAnalysis = await atlasAnalysisResponse.json();
+            assert.ok(typeof atlasAnalysis.answer === "string" && atlasAnalysis.answer.length > 30,
+              "Atlas must return a substantive AI-generated answer");
+
+            console.log("Smoke test passed: GitHub Pages, FRED macro API, journal history, Atlas AI inference and cross-asset market endpoint.");
           })().catch(error => {
             console.error(error.message || error);
             process.exitCode = 1;
