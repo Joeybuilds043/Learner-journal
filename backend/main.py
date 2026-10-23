@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import time
@@ -64,7 +65,6 @@ async def fetch_json(client: httpx.AsyncClient, url: str, params: dict[str, str]
 
 
 async def fetch_live_context() -> dict[str, Any]:
-    assets: list[dict[str, Any]] = []
     symbols = [
         ("BTCUSDT", "Bitcoin", "BTC"),
         ("ETHUSDT", "Ethereum", "ETH"),
@@ -73,10 +73,10 @@ async def fetch_live_context() -> dict[str, Any]:
         ("XRPUSDT", "XRP", "XRP"),
     ]
     async with httpx.AsyncClient(timeout=8.0, headers={"User-Agent": "MarketPilotAI/0.1"}) as client:
-        for symbol, name, short in symbols:
+        async def get_asset(symbol: str, name: str, short: str) -> dict[str, Any]:
             try:
                 data = await fetch_json(client, "https://api.binance.com/api/v3/ticker/24hr", {"symbol": symbol})
-                assets.append({
+                return {
                     "symbol": symbol,
                     "name": name,
                     "short": short,
@@ -86,26 +86,31 @@ async def fetch_live_context() -> dict[str, Any]:
                     "trades24h": int(data["count"]),
                     "source": "Binance spot 24-hour ticker",
                     "retrievedAt": datetime.now(timezone.utc).isoformat(),
-                })
+                }
             except (httpx.HTTPError, KeyError, ValueError, TypeError) as exc:
-                assets.append({"symbol": symbol, "name": name, "short": short, "error": str(exc), "source": "Binance spot"})
-        macro: dict[str, Any] = {}
-        try:
-            payload = await fetch_json(client, FRED_WORKER_URL)
-            macro = {
-                "provider": payload.get("provider", "FRED via MarketPilot Worker"),
-                "fetchedAt": payload.get("fetchedAt"),
-                "data": payload.get("data", {}),
-            }
-        except (httpx.HTTPError, ValueError, TypeError) as exc:
-            macro = {"error": str(exc), "data": {}}
+                return {"symbol": symbol, "name": name, "short": short, "error": str(exc), "source": "Binance spot"}
+
+        async def get_macro() -> dict[str, Any]:
+            try:
+                payload = await fetch_json(client, FRED_WORKER_URL)
+                return {
+                    "provider": payload.get("provider", "FRED via MarketPilot Worker"),
+                    "fetchedAt": payload.get("fetchedAt"),
+                    "data": payload.get("data", {}),
+                }
+            except (httpx.HTTPError, ValueError, TypeError) as exc:
+                return {"error": str(exc), "data": {}}
+
+        assets, macro = await asyncio.gather(
+            asyncio.gather(*(get_asset(*item) for item in symbols)),
+            get_macro(),
+        )
     return {
         "retrievedAt": datetime.now(timezone.utc).isoformat(),
         "cryptoSource": "Binance public spot market endpoint",
         "assets": assets,
         "macro": macro,
     }
-
 
 def build_crew(question: str, context: dict[str, Any], daily: bool = False) -> str:
     if not GEMINI_API_KEY:
