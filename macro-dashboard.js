@@ -8,13 +8,13 @@
     .ms-live-kicker{margin:0 0 3px;color:#69f0c1!important;font-size:9px!important;letter-spacing:1.5px;font-weight:900}
     .ms-live h2{margin:0;font-size:19px;letter-spacing:-.4px}.ms-live .ms-subtitle{margin:4px 0 0;color:#94a9c2;font-size:10px}
     .ms-live button{padding:8px 11px;border:1px solid #397966;border-radius:9px;background:#12392f;color:#80f4ce;font-size:11px;font-weight:800;cursor:pointer}
-    .ms-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+    .ms-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
     .ms-card{padding:11px;border:1px solid #25384e;border-radius:12px;background:linear-gradient(145deg,#101c2b,#0b1421);min-width:0;overflow:hidden}
     .ms-label{color:#9badc3;font-size:10px;line-height:1.35;min-height:26px}
     .ms-value{font-size:23px;font-weight:850;letter-spacing:-.8px;margin:5px 0 2px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
     .ms-date{color:#7188a3;font-size:9px;line-height:1.35}
     .ms-change{font-size:10px;margin-top:5px;font-weight:750}.ms-change.up{color:#ff9d9d}.ms-change.down{color:#75e8be}.ms-change.flat{color:#c2d0e0}
-    .ms-chart{margin-top:9px;padding-top:7px;border-top:1px solid #24364b}.ms-chart svg{display:block;width:100%;height:38px;overflow:visible}
+    .ms-chart{grid-column:1/-1;width:100%;margin-top:10px;padding-top:9px;border-top:1px solid #24364b}.ms-chart svg{display:block;width:100%;height:58px;overflow:visible}.ms-chart-label{font-size:9px}.ms-card{display:block;padding:14px 16px}.ms-value{font-size:25px}
     .ms-chart-label{display:flex;justify-content:space-between;color:#7188a3;font-size:9px;margin-top:2px}
     .ms-read{margin-top:9px;padding:11px;border:1px solid #29465a;border-radius:12px;background:#0e1e2d}
     .ms-read-title{font-size:9px;font-weight:900;letter-spacing:1px;color:#69f0c1;margin-bottom:5px}
@@ -33,7 +33,7 @@
     .ms-chartbox svg{display:block;width:100%;height:170px}.ms-chartbox .empty{font-size:10px;color:#8fa5bd;line-height:1.5}
     .ms-edit-note{font-size:9px;line-height:1.4;color:#8fa5bd;margin:8px 0 0}
     .ms-hidden{display:none!important}
-    @media(min-width:560px){.ms-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(min-width:560px){.ms-grid{grid-template-columns:1fr}}
     @media(max-width:360px){.ms-live{padding:10px}.ms-grid{gap:6px}.ms-card{padding:9px}.ms-value{font-size:20px}}
   `;
   document.head.appendChild(style);
@@ -68,7 +68,7 @@
     </div>
     <div class="ms-status" id="ms-status" role="status" aria-live="polite">Connecting…</div>
     <p class="ms-footnote">Data source: FRED. Release data can lag. Broad dollar index is not ICE DXY. VIX is a published volatility index, not a direct measure of all market fear.</p>`;
-  const hero = document.querySelector(".hero");
+  const historyTools=section.querySelector(".ms-tools"); if(historyTools) historyTools.id="ms-history-tools";\n  const hero = document.querySelector(".hero");
   if (hero) hero.insertAdjacentElement("afterend",section); else document.querySelector("main")?.prepend(section);
   const grid=section.querySelector("#ms-grid"), status=section.querySelector("#ms-status"), read=section.querySelector("#ms-read-text"), button=section.querySelector("#ms-refresh");
   const historyChart=section.querySelector("#ms-history-chart"), historyStatus=section.querySelector("#ms-history-status");
@@ -151,10 +151,10 @@
       const manual=(key,source)=>overrides[key]?.value!==undefined?num(overrides[key].value):source;
       const showYield=manual("us10y",yieldVal), showDollar=manual("dollar",dollar), showCpi=manual("cpi",cpiYoY), showPpi=manual("ppi",num(d.ppi?.value)), showVix=manual("vix",vix);
       grid.replaceChildren();
-      grid.appendChild(card("US 10Y YIELD",showYield,overrides.us10y?chosenDate:dateOf(d.us10y),overrides.us10y?null:(yieldCh===null?null:yieldCh*100),{suffix:"%",changeSuffix:" bps",changeLabel:"change",extra:overrides.us10y?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
+      grid.appendChild(card("US 10Y YIELD",showYield,overrides.us10y?chosenDate:dateOf(d.us10y),overrides.us10y?null:(yieldCh===null?null:yieldCh*100),{suffix:"%",changeSuffix:" bps",changeLabel:"change",chart:sparkline(yieldVal,yieldVal!==null&&yieldCh!==null?yieldVal-yieldCh:null,"#78aaff"),extra:overrides.us10y?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
       grid.appendChild(card("USD STRENGTH · BROAD INDEX",showDollar,overrides.dollar?chosenDate:dateOf(d.dollar),overrides.dollar?null:dollarPct,{decimals:3,chart:sparkline(dollar,dollarPrev,"#69f0c1"),extra:'<div class="ms-date">'+(overrides.dollar?"Manual override · "+chosenDate:"Broad dollar index · not ICE DXY")+'</div>'}));
-      grid.appendChild(card("CPI INFLATION · YOY",showCpi,overrides.cpi?chosenDate:dateOf(d.cpiYearOverYear),null,{suffix:"%",extra:overrides.cpi?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
-      grid.appendChild(card("PPI INDEX · CHANGE VS PRIOR MONTH",showPpi,overrides.ppi?chosenDate:dateOf(d.ppi),overrides.ppi?null:ppiPct,{decimals:3,extra:overrides.ppi?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
+      grid.appendChild(card("CPI INFLATION · YOY",showCpi,overrides.cpi?chosenDate:dateOf(d.cpiYearOverYear),null,{suffix:"%",chart:sparkline(cpiYoY,cpiYoY!==null&&cpiChange!==null?cpiYoY-cpiChange:null,"#c0a1ff"),extra:overrides.cpi?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
+      grid.appendChild(card("PPI INDEX · CHANGE VS PRIOR MONTH",showPpi,overrides.ppi?chosenDate:dateOf(d.ppi),overrides.ppi?null:ppiPct,{decimals:3,chart:sparkline(num(d.ppi?.value),num(d.ppi?.value)!==null&&num(d.ppi?.change)!==null?num(d.ppi.value)-num(d.ppi.change):null,"#c0a1ff"),extra:overrides.ppi?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
       const vixChart=showVix===null?"":gauge(showVix);
       grid.appendChild(card("VIX · FEAR / VOLATILITY INDEX",showVix,overrides.vix?chosenDate:dateOf(d.vix),overrides.vix?null:num(d.vix?.change),{changeSuffix:" pts",changeLabel:"change",extra:vixChart+(overrides.vix?'<div class="ms-date">Manual override · '+chosenDate+'</div>':"")}));
       const cpiLine=showCpi===null?"CPI YoY unavailable":`CPI inflation: ${fmt(showCpi)}% YoY`;
