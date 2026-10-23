@@ -1,0 +1,8 @@
+name = "marketpilot-ai"
+main = "worker/index.js"
+compatibility_date = "2026-10-24"
+account_id = "407babe753dcb5f3a6c2c0bcad2da2b6"
+workers_dev = true
+
+[ai]
+binding = "AI"
