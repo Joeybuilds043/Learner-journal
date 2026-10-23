@@ -94,7 +94,7 @@ jobs:
 
             const aiResponse = await getWithRetry(pageUrl + "ai-workspace.js?v=20261024-marketpilot");
             const aiScript = await aiResponse.text();
-            for (const marker of ["AI Market Analyst", "Daily Research", "mpAssetPrompts", "Profile"]) {
+            for (const marker of ["AI Market Analyst", "Daily Research", "Historical Patterns", "News & Impact", "Your Journal", "mpAssetPrompts", "Profile"]) {
               assert.ok(aiScript.includes(marker), `Published AI workspace is missing ${marker}`);
             }
 
@@ -129,7 +129,12 @@ jobs:
             });
             const atlasHealth = await atlasHealthResponse.json();
             assert.equal(atlasHealth.ok, true, "Atlas AI service must be online");
-            assert.match(atlasHealth.model || "", /llama/i, "Atlas must report its configured model");
+            if (atlasHealth.openAIConfigured) {
+              assert.match(atlasHealth.provider || "", /openai/i, "Configured OpenAI secret must select the OpenAI provider");
+              assert.match(atlasHealth.model || "", /^gpt-/i, "Atlas must report the configured GPT model");
+            } else {
+              assert.match(atlasHealth.model || "", /llama/i, "Atlas must report the fallback model when OpenAI is not configured");
+            }
 
             const atlasMarketsResponse = await getWithRetry(atlasUrl + "/api/markets?group=stocks", {
               headers: { Origin: origin, "Cache-Control": "no-cache" }
