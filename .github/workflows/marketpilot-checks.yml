@@ -1,0 +1,49 @@
+name: MarketPilot source checks
+
+on:
+  push:
+    branches: ["feature/marketpilot-ai-phase1"]
+  pull_request:
+    paths:
+      - "index.html"
+      - "ai-workspace.js"
+      - "marketpilot-config.js"
+      - "sw.js"
+      - "backend/**"
+      - ".github/workflows/marketpilot-checks.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check frontend JavaScript syntax
+        run: |
+          node --check ai-workspace.js
+          node --check macro-dashboard.js
+          node --check marketpilot-config.js
+      - name: Check Python syntax
+        run: python -m compileall -q backend
+      - name: Check required app files and navigation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          html = Path('index.html').read_text()
+          js = Path('ai-workspace.js').read_text()
+          assert 'MarketPilot AI' in html
+          assert 'ai-workspace.js' in html
+          for section in ['Markets', 'AI Analyst', 'Daily Brief', 'Profile']:
+              assert section in js, f'Missing navigation/section: {section}'
+          assert 'learner-journal-entries-v1' in html, 'Legacy journal storage key must be preserved'
+          assert 'GEMINI_API_KEY' in Path('backend/main.py').read_text()
+          print('MarketPilot source checks passed.')
+          PY
