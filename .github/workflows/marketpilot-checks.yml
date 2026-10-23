@@ -3,6 +3,17 @@ name: MarketPilot source checks
 on:
   push:
     branches: ["main", "feature/marketpilot-ai-phase1"]
+    paths:
+      - "index.html"
+      - "ai-workspace.js"
+      - "macro-dashboard.js"
+      - "marketpilot-config.js"
+      - "sw.js"
+      - "worker/**"
+      - "wrangler.toml"
+      - "backend/**"
+      - ".github/workflows/marketpilot-checks.yml"
+      - ".github/workflows/deploy-marketpilot-worker.yml"
   pull_request:
     paths:
       - "index.html"
@@ -15,6 +26,10 @@ on:
       - "sw.js"
       - "backend/**"
       - ".github/workflows/marketpilot-checks.yml"
+
+concurrency:
+  group: marketpilot-source-checks-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
