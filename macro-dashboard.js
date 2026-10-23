@@ -68,7 +68,8 @@
     </div>
     <div class="ms-status" id="ms-status" role="status" aria-live="polite">Connecting…</div>
     <p class="ms-footnote">Data source: FRED. Release data can lag. Broad dollar index is not ICE DXY. VIX is a published volatility index, not a direct measure of all market fear.</p>`;
-  const historyTools=section.querySelector(".ms-tools"); if(historyTools) historyTools.id="ms-history-tools";\n  const hero = document.querySelector(".hero");
+  const historyTools=section.querySelector(".ms-tools"); if(historyTools) historyTools.id="ms-history-tools";
+  const hero = document.querySelector(".hero");
   if (hero) hero.insertAdjacentElement("afterend",section); else document.querySelector("main")?.prepend(section);
   const grid=section.querySelector("#ms-grid"), status=section.querySelector("#ms-status"), read=section.querySelector("#ms-read-text"), button=section.querySelector("#ms-refresh");
   const historyChart=section.querySelector("#ms-history-chart"), historyStatus=section.querySelector("#ms-history-status");
