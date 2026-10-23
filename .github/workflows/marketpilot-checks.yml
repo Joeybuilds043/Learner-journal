@@ -78,7 +78,9 @@ jobs:
           assert 'const menuButton=document.createElement' not in asset_loader, 'Navigation handlers must not be nested in the crypto loader'
           assert js.index('const menuButton=document.createElement') > js.index('checkAIService();refreshAssets();showMarketGroup("crypto");setView("markets");'), 'Navigation/menu initialization must run at app scope'
           assert 'function renderAnswer' in js, 'Financial answers should render structured text'
+          assert 'if($("mpDrawer"))$("mpDrawer").hidden=true' in js, 'Opening markets before the menu exists must not throw'
           assert 'const macroHistoryTools=document.getElementById("ms-history-tools")' in js, 'Move macro history to the Historical section'
+          assert 'id="asset"' in html and 'id="mistake"' in html and 'id="betterAction"' in html, 'Journal needs the asset and trade-reflection fields'
           assert 'learner-journal-entries-v1' in html, 'Legacy journal storage key must be preserved in index.html'
           assert 'OPENAI_API_KEY' in Path('.github/workflows/deploy-marketpilot-worker.yml').read_text()
           assert 'CLOUDFLARE_API_TOKEN' in Path('.github/workflows/deploy-marketpilot-worker.yml').read_text()
