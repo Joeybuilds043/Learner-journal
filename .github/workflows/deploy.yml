@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "index.html"
+      - "ai-workspace.js"
+      - "macro-dashboard.js"
+      - "marketpilot-config.js"
+      - "sw.js"
+      - "manifest.json"
+      - "marketsignal-mark.svg"
+      - "icons/**"
   workflow_dispatch:
 
 permissions:
