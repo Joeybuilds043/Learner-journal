@@ -89,6 +89,14 @@ jobs:
             assert.ok(!script.includes("marketsignal-data.asadlang05.workers.dev"),
               "Published dashboard must not call the retired Worker");
             assert.match(html, /macro-dashboard\.js/, "Live page must load the macro dashboard script");
+            assert.match(html, /MarketPilot AI/, "Live page must use the MarketPilot AI brand");
+            assert.match(html, /ai-workspace\.js/, "Live page must load the new workspace script");
+
+            const aiResponse = await getWithRetry(pageUrl + "ai-workspace.js?v=20261024-marketpilot");
+            const aiScript = await aiResponse.text();
+            for (const marker of ["AI Market Analyst", "Daily Research", "mpAssetPrompts", "Profile"]) {
+              assert.ok(aiScript.includes(marker), `Published AI workspace is missing ${marker}`);
+            }
 
             const apiResponse = await getWithRetry(apiUrl, {
               headers: { Origin: origin, "Cache-Control": "no-cache" }
