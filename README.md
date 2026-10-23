@@ -8,9 +8,9 @@
 
 ## Dashboard preview
 
-![MarketSignal dashboard portfolio preview](assets/marketsignal-dashboard-preview.svg)
+![MarketPilot AI dashboard portfolio preview](assets/marketsignal-dashboard-preview.svg)
 
-*This is an illustrative portfolio preview of the dashboard design, not a captured screenshot of the live page. The macro values and chart shown in this image are illustrative; use the live app for current source data.*
+*Illustrative portfolio preview, not a captured screenshot of the live page. Macro values and chart are illustrative; use the live app for current source data.*
 
 ## What it does
 
