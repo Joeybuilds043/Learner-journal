@@ -10,6 +10,7 @@ on:
       - "macro-dashboard.js"
       - "marketpilot-config.js"
       - "sw.js"
+      - ".github/workflows/deploy.yml"
       - "manifest.json"
       - "marketsignal-mark.svg"
       - "icons/**"
