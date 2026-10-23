@@ -74,7 +74,7 @@ MarketSignal is a learning and analysis tool, not an automated trading system or
 
 ## MarketPilot AI phase 1 status
 
-The new four-section navigation is **Markets, AI Analyst, Daily Brief, and Profile**. The journal remains accessible from Markets. Public Binance market snapshots and the FRED macro dashboard are independent of the AI service.
+The four main navigation options are **Markets, Journal, AI Analyst, and Profile**. Daily Research is nested inside AI Analyst so the main navigation stays focused. Public Binance market snapshots and the FRED macro dashboard are independent of the AI service.
 
 The AI backend is scaffolded in `backend/`, but it is **not deployed yet**. Until the service is deployed and `marketpilot-config.js` contains its public base URL, AI answers and generated daily briefs will report that the service is not configured. Add `GEMINI_API_KEY` only to the backend host's secret/environment settings. The Gemini free tier has rate limits; no unlimited free AI API is promised. Binance public market-data endpoints also have rate limits and regional availability can vary.
 
