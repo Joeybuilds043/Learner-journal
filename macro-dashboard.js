@@ -14,7 +14,7 @@
     .ms-value{font-size:23px;font-weight:850;letter-spacing:-.8px;margin:5px 0 2px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
     .ms-date{color:#7188a3;font-size:9px;line-height:1.35}
     .ms-change{font-size:10px;margin-top:5px;font-weight:750}.ms-change.up{color:#ff9d9d}.ms-change.down{color:#75e8be}.ms-change.flat{color:#c2d0e0}
-    .ms-chart{grid-column:1/-1;width:100%;margin-top:10px;padding-top:9px;border-top:1px solid #24364b}.ms-chart svg{display:block;width:100%;height:58px;overflow:visible}.ms-chart-label{font-size:9px}.ms-card{display:block;padding:14px 16px}.ms-value{font-size:25px}
+    .ms-chart{grid-column:1/-1;width:100%;margin-top:10px;padding-top:9px;border-top:1px solid #24364b}.ms-chart svg{display:block;width:100%;height:58px;overflow:visible}.ms-chart-label{font-size:9px}.ms-card{display:block;padding:14px 16px}.ms-card-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}.ms-card-top .ms-label{min-height:0;flex:1}.ms-card-top .ms-value{font-size:25px;margin:0 0 0 12px;text-align:right;flex-shrink:0}.ms-card .ms-date{margin-top:5px}.ms-card-extra{margin-top:5px}.ms-value{font-size:25px}
     .ms-chart-label{display:flex;justify-content:space-between;color:#7188a3;font-size:9px;margin-top:2px}
     .ms-read{margin-top:9px;padding:11px;border:1px solid #29465a;border-radius:12px;background:#0e1e2d}
     .ms-read-title{font-size:9px;font-weight:900;letter-spacing:1px;color:#9bb5ff;margin-bottom:5px}
@@ -128,7 +128,7 @@
     const el=document.createElement("article"); el.className="ms-card";
     const changeHtml=change===null || change===undefined ? "" : `<div class="ms-change ${change>0?"up":change<0?"down":"flat"}">${change>0?"+":""}${fmt(change,2)}${opts.changeSuffix||"%" } ${opts.changeLabel||"vs prior"}</div>`;
     const valHtml=value===null ? "—" : fmt(value,opts.decimals||2)+(opts.suffix||"");
-    el.innerHTML=`<div class="ms-label">${escapeHtml(label)}</div><div class="ms-value">${valHtml}</div><div class="ms-date">${date ? "As of "+escapeHtml(date) : (value===null?"Not provided by data service":"Date unavailable")}</div>${changeHtml}${opts.chart||""}${opts.extra||""}`;
+    el.innerHTML=`<div class="ms-card-top"><div class="ms-label">${escapeHtml(label)}</div><div class="ms-value">${valHtml}</div></div><div class="ms-date">${date ? "As of "+escapeHtml(date) : (value===null?"Not provided by data service":"Date unavailable")}</div>${changeHtml}${opts.chart||""}<div class="ms-card-extra">${opts.extra||""}</div>`;
     return el;
   }
   function gauge(v) {
