@@ -11,6 +11,7 @@ on:
       - "marketpilot-config.js"
       - "sw.js"
       - ".github/workflows/deploy.yml"
+      - ".github/workflows/marketpilot-checks.yml"
       - "manifest.json"
       - "marketsignal-mark.svg"
       - "icons/**"
@@ -104,7 +105,7 @@ jobs:
 
             const aiResponse = await getWithRetry(pageUrl + "ai-workspace.js?v=20261024-marketpilot");
             const aiScript = await aiResponse.text();
-            for (const marker of ["AI Market Analyst", "Daily Research", "Historical Patterns", "News & Impact", "Your Journal", "mpAssetPrompts", "Profile"]) {
+            for (const marker of ["Financial Research Desk", "Daily Market Briefing", "Macro &amp; Market History", "News &amp; Market Impact", "Trade Journal", "mpAssetPrompts", "Workspace Settings", "Financial Analyst", "mpClearChat", "Inspired by Saad Hashmani"]) {
               assert.ok(aiScript.includes(marker), `Published AI workspace is missing ${marker}`);
             }
 
