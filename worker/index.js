@@ -1,0 +1,70 @@
+const RATE_LIMITS = new Map();
+function rateLimited(request, bucket, limit) {
+ const ip=request.headers.get("CF-Connecting-IP") || "unknown";
+ const key=bucket+":"+ip, now=Date.now();
+ let entry=RATE_LIMITS.get(key);
+ if(!entry || now-entry.start>=60000){entry={start:now,count:1};RATE_LIMITS.set(key,entry);} else entry.count+=1;
+ if(RATE_LIMITS.size>3000){for(const [k,v] of RATE_LIMITS){if(now-v.start>=60000)RATE_LIMITS.delete(k);}while(RATE_LIMITS.size>3000)RATE_LIMITS.delete(RATE_LIMITS.keys().next().value);}
+ return entry.count>limit;
+}
+export default {
+ async fetch(request, env) {
+  const origin=request.headers.get("Origin")||"",allowed="https://joeybuilds043.github.io";
+  const headers={"Content-Type":"application/json; charset=utf-8","Cache-Control":"no-store","Vary":"Origin","Access-Control-Allow-Methods":"GET, POST, OPTIONS","Access-Control-Allow-Headers":"Content-Type"};
+  if(origin===allowed)headers["Access-Control-Allow-Origin"]=origin;
+  const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers});
+  if(request.method==="OPTIONS")return new Response(null,{status:204,headers});
+  const url=new URL(request.url);
+  if(request.method==="GET"&&url.pathname==="/health")return json({ok:true,service:"MarketPilot AI",model:env.OPENAI_API_KEY?(env.OPENAI_MODEL||"gpt-4.1-mini"):"@cf/meta/llama-3.3-70b-instruct-fp8-fast",provider:env.OPENAI_API_KEY?"OpenAI API":"Cloudflare Workers AI fallback",openAIConfigured:Boolean(env.OPENAI_API_KEY)});
+  if(request.method==="GET"&&url.pathname==="/api/history"){
+   if(rateLimited(request,"history",12))return json({error:"Historical-data rate limit reached. Please wait one minute and retry."},429);
+   const allowedHistory={"^GSPC":{name:"S&P 500",unit:"index points"},"^IXIC":{name:"Nasdaq Composite",unit:"index points"},"^DJI":{name:"Dow Jones",unit:"index points"},"^TNX":{name:"US 10Y Treasury Yield",unit:"percent"},"DX-Y.NYB":{name:"US Dollar Index (DXY proxy)",unit:"index points"},"^VIX":{name:"VIX Volatility Index",unit:"index points"},"GC=F":{name:"Gold futures",unit:"USD/oz"},"SI=F":{name:"Silver futures",unit:"USD/oz"},"CL=F":{name:"WTI crude oil",unit:"USD/barrel"},"NG=F":{name:"Natural gas futures",unit:"USD/MMBtu"},"EURUSD=X":{name:"EUR/USD",unit:"USD per EUR"},"GBPUSD=X":{name:"GBP/USD",unit:"USD per GBP"},"AUDUSD=X":{name:"AUD/USD",unit:"USD per AUD"},"USDJPY=X":{name:"USD/JPY",unit:"JPY per USD"},"BTC-USD":{name:"Bitcoin",unit:"USD"},"ETH-USD":{name:"Ethereum",unit:"USD"},"SOL-USD":{name:"Solana",unit:"USD"}};
+   const symbol=url.searchParams.get("symbol")||"^GSPC",meta=allowedHistory[symbol],range=["1y","5y"].includes(url.searchParams.get("range"))?url.searchParams.get("range"):"5y";
+   if(!meta)return json({error:"Unsupported historical symbol."},400);
+   try{const r=await fetch("https://query1.finance.yahoo.com/v8/finance/chart/"+encodeURIComponent(symbol)+"?range="+range+"&interval=1mo",{headers:{"Accept":"application/json","User-Agent":"Mozilla/5.0 MarketPilotAI/1.0"}});if(!r.ok)throw new Error("Historical provider HTTP "+r.status);const d=await r.json(),result=d.chart?.result?.[0],closes=result?.indicators?.quote?.[0]?.close||[],times=result?.timestamp||[];if(!result||!times.length)throw new Error("No historical observations returned");const points=times.map((t,i)=>({date:new Date(t*1000).toISOString().slice(0,10),value:Number(closes[i])})).filter(p=>Number.isFinite(p.value)).map(p=>symbol==="^TNX"?{...p,value:p.value/10}:p);return json({symbol,name:meta.name,unit:meta.unit,range,interval:"1mo",points,source:"Yahoo Finance chart",fetchedAt:new Date().toISOString(),latest:points.at(-1)||null});}catch(e){return json({error:"Historical quotes unavailable from provider",detail:String(e?.message||e).slice(0,180)},502);}
+  }
+  if(request.method==="GET"&&url.pathname==="/api/markets"&&rateLimited(request,"markets",20))return json({error:"Market quote rate limit reached. Please wait one minute and retry."},429);
+  if(request.method==="GET"&&url.pathname==="/api/markets"){
+   const groups={stocks:[{symbol:"^GSPC",name:"S&P 500"},{symbol:"^IXIC",name:"Nasdaq Composite"},{symbol:"^DJI",name:"Dow Jones"}],forex:[{symbol:"EURUSD=X",name:"EUR/USD"},{symbol:"GBPUSD=X",name:"GBP/USD"},{symbol:"AUDUSD=X",name:"AUD/USD"},{symbol:"USDJPY=X",name:"USD/JPY"}],commodities:[{symbol:"GC=F",name:"Gold futures"},{symbol:"SI=F",name:"Silver futures"},{symbol:"CL=F",name:"WTI crude oil"},{symbol:"NG=F",name:"Natural gas"}]};
+   const group=url.searchParams.get("group")||"stocks",list=groups[group];
+   if(group==="crypto"){
+    const coins=[{id:"btc-bitcoin",name:"Bitcoin",symbol:"BTC-USD",short:"BTC",binance:"BTCUSDT"},{id:"eth-ethereum",name:"Ethereum",symbol:"ETH-USD",short:"ETH",binance:"ETHUSDT"},{id:"sol-solana",name:"Solana",symbol:"SOL-USD",short:"SOL",binance:"SOLUSDT"},{id:"bnb-binance-coin",name:"BNB",symbol:"BNB-USD",short:"BNB",binance:"BNBUSDT"},{id:"xrp-xrp",name:"XRP",symbol:"XRP-USD",short:"XRP",binance:"XRPUSDT"}];
+    const assets=await Promise.all(coins.map(async coin=>{try{const r=await fetch("https://api.coinpaprika.com/v1/tickers/"+coin.id+"?quotes=USD",{headers:{"Accept":"application/json","User-Agent":"MarketPilotAI/1.0"}});if(!r.ok)throw new Error("CoinPaprika HTTP "+r.status);const item=await r.json(),q=item.quotes?.USD;if(!q||!Number.isFinite(Number(q.price)))throw new Error("CoinPaprika quote missing");return {...coin,price:Number(q.price),change:Number(q.percent_change_24h),volume:Number(q.volume_24h),trades:null,currency:"USD",source:"CoinPaprika",asOf:item.last_updated};}catch(primary){try{const r=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+coin.binance,{headers:{"Accept":"application/json","User-Agent":"MarketPilotAI/1.0"}});if(!r.ok)throw new Error("Binance HTTP "+r.status);const item=await r.json();return {...coin,price:Number(item.lastPrice),change:Number(item.priceChangePercent),volume:Number(item.quoteVolume),trades:Number(item.count),currency:"USD",source:"Binance spot",asOf:new Date().toISOString()};}catch(fallback){return {...coin,error:"Quote unavailable from both public providers",source:"Unavailable"};}}}));
+    const valid=assets.filter(item=>Number.isFinite(item.price)&&item.price>0);if(!valid.length)return json({error:"Crypto quote providers unavailable",assets},502);return json({group,asOf:new Date().toISOString(),assets,source:"Public crypto market data"});
+   }
+   if(!list)return json({error:"Unknown market group"},400);
+   const rows=await Promise.all(list.map(async item=>{try{const r=await fetch("https://query1.finance.yahoo.com/v8/finance/chart/"+encodeURIComponent(item.symbol)+"?range=5d&interval=1d",{headers:{"Accept":"application/json","User-Agent":"Mozilla/5.0 MarketPilotResearch/1.0"}});if(!r.ok)throw new Error("Provider HTTP "+r.status);const d=await r.json(),result=d.chart?.result?.[0],q=result?.indicators?.quote?.[0],closes=(q?.close||[]).filter(v=>Number.isFinite(v)),price=closes.at(-1),prev=closes.at(-2);if(!Number.isFinite(price))throw new Error("No recent quote");return {...item,price,change:Number.isFinite(prev)&&prev!==0?(price-prev)/prev*100:null,currency:result.meta?.currency||"",asOf:result.timestamp?.at(-1)?new Date(result.timestamp.at(-1)*1000).toISOString():null,source:"Yahoo Finance chart"};}catch(e){return {...item,error:"Quote unavailable",source:"Yahoo Finance chart"};}}));
+   return json({group,asOf:new Date().toISOString(),assets:rows});
+  }
+  if(request.method==="POST"&&["/api/analyze","/api/daily-brief","/api/news"].includes(url.pathname)&&rateLimited(request,"ai",6))return json({error:"Atlas AI rate limit reached. Please wait one minute and retry."},429);
+  if(request.method!=="POST"||!["/api/analyze","/api/daily-brief","/api/news"].includes(url.pathname))return json({error:"Not found"},404);
+  let body;try{body=await request.json();}catch{return json({error:"Send valid JSON."},400);}
+  const question=String(body.question||"").trim().slice(0,1200);if(url.pathname==="/api/analyze"&&question.length<3)return json({error:"Please enter a market research question."},400);
+  const safe=v=>JSON.stringify(v??null).slice(0,14000);
+  const system="You are Atlas, a senior financial-markets analyst and finance educator. For conceptual questions such as swaps versus forwards, futures versus options, duration, convexity, basis, carry, repo, yield curves, FX forwards, options Greeks, margin and hedging: answer the exact question first, define each term, compare structure/cash flows/purpose/users/risks, give one clearly hypothetical numerical example, explain typical use and end with a memory aid. Do not force market-snapshot headings onto a textbook question. For market questions, separate supplied observations from interpretation, explain mechanisms and uncertainty, and never invent prices, news, citations or timestamps. Never promise returns or provide personalized financial advice.";
+  const marketContext="\\n\\nCURRENT ASSETS: "+safe(body.assets)+"\\nCROSS-ASSET SNAPSHOTS: "+safe(body.marketGroups)+"\\nMACRO CONTEXT: "+safe(body.macro)+"\\nHISTORICAL SERIES: "+safe(body.historical);
+  let prompt;
+  if(url.pathname==="/api/news")prompt="Use current web search to find the latest material financial-market news about: "+String(body.topic||body.question||"US markets, Federal Reserve, Treasury yields, US dollar, major FX, commodities and crypto").slice(0,500)+". Return 5-8 items with headline, publisher, date/time if available, verified facts, affected assets, plausible transmission mechanism, whether impact is confirmed or only a scenario, and source URL. Prioritize official institutions and established financial newsrooms. Never invent headlines or links.";
+  else if(url.pathname==="/api/daily-brief")prompt="Return valid JSON only with schema {\"sections\":[{\"title\":\"...\",\"content\":\"...\"}]}. Include: Market Regime; Rates & Dollar; US Equities; Forex; Commodities; Crypto; Cross-Asset Relationships; Bull vs Bear; Risk Checklist; News & Events (state if no news search was run). Use only supplied quotes and macro observations. Flag stale/missing data and do not invent news.\nDATA:"+marketContext+"\nAS OF: "+String(body.asOf||new Date().toISOString());
+  else prompt="USER QUESTION: "+question+marketContext+"\nIf this is a financial concept question, answer the concept directly and completely; live prices are not required to explain a definition. If it asks for a current market view, use only supplied observations and label inference. If historical series are supplied, discuss repeated directional behaviour and divergences without claiming correlation proves causation. Include a simple example when teaching a term.";
+  try{
+   if(env.OPENAI_API_KEY){
+    const useSearch=url.pathname==="/api/news";
+    const requestBody={model:env.OPENAI_MODEL||"gpt-4.1-mini",instructions:system,input:prompt,max_output_tokens:url.pathname==="/api/daily-brief"?2200:1800};
+    if(useSearch)requestBody.tools=[{type:"web_search"}];
+    const response=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},body:JSON.stringify(requestBody)});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error("OpenAI API HTTP "+response.status+": "+String(data.error?.message||"request failed").slice(0,220));
+    const answer=(data.output||[]).flatMap(item=>item.content||[]).filter(item=>item.type==="output_text").map(item=>item.text||"").join("\n").trim()||data.output_text||"No text was returned by the model.";
+    let sections;
+    if(url.pathname==="/api/daily-brief"){try{sections=JSON.parse(answer).sections;}catch{sections=[{title:"Daily Cross-Asset Research",content:answer}];}}
+    return json({ok:true,answer,sections,model:env.OPENAI_MODEL||"gpt-4.1-mini",provider:"OpenAI API"+(useSearch?" · web search":""),generatedAt:new Date().toISOString(),webSearch:useSearch});
+   }
+   if(url.pathname==="/api/news")return json({error:"News search requires OPENAI_API_KEY as a server-side Worker secret. Add it through GitHub repository secrets and run the worker deployment workflow."},503);
+   const result=await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast",{messages:[{role:"system",content:system},{role:"user",content:prompt}],max_tokens:1800,temperature:0.15});
+   const answer=typeof result==="string"?result:(result.response||result.output_text||JSON.stringify(result));let sections;
+   if(url.pathname==="/api/daily-brief"){try{sections=JSON.parse(answer).sections;}catch{sections=[{title:"Daily Cross-Asset Research",content:answer}];}}
+   return json({ok:true,answer,sections,model:"@cf/meta/llama-3.3-70b-instruct-fp8-fast",provider:"Cloudflare Workers AI fallback",generatedAt:new Date().toISOString()});
+  }catch(e){return json({error:"AI provider could not complete the request.",detail:String(e?.message||e).slice(0,300),provider:env.OPENAI_API_KEY?"OpenAI API":"Cloudflare Workers AI"},502);}
+ }
+};
