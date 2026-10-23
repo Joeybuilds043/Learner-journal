@@ -44,7 +44,7 @@ jobs:
           assert 'ai-workspace.js' in html
           for section in ['Markets', 'AI Analyst', 'Daily Brief', 'Profile']:
               assert section in js, f'Missing navigation/section: {section}'
-          assert 'learner-journal-entries-v1' in all_js, 'Legacy journal storage key must be preserved in JavaScript'
+          assert 'learner-journal-entries-v1' in html, 'Legacy journal storage key must be preserved in index.html'
           assert 'GEMINI_API_KEY' in Path('backend/main.py').read_text()
           print('MarketPilot source checks passed.')
           PY
