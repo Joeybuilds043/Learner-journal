@@ -32,7 +32,7 @@ self.addEventListener("activate", (event) => {
       await Promise.all(
         keys
           .filter((key) =>
-            key.startsWith("market-journal-") &&
+            (key.startsWith("market-journal-") || key.startsWith("marketpilot-")) &&
             key !== CACHE_VERSION
           )
           .map((key) => caches.delete(key))
