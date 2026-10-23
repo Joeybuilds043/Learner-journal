@@ -30,9 +30,9 @@
     .ms-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.ms-actions button{flex:1}
     .ms-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
     .ms-chartbox{margin-top:9px;border:1px solid #263a50;border-radius:12px;background:#0a1320;padding:10px;min-height:120px}
-    .ms-chartbox svg{display:block;width:100%;height:170px}.ms-chartbox .empty{font-size:10px;color:#8fa5bd;line-height:1.5}
+    .ms-chartbox{border-color:#314660;background:radial-gradient(ellipse at 10% 0%,#172842 0%,#0a1320 66%);box-shadow:inset 0 1px 0 #ffffff08}.ms-chartbox svg{display:block;width:100%;height:220px;overflow:visible}.ms-chartbox svg text{font-variant-numeric:tabular-nums}.ms-chartbox svg .ms-gridline{stroke:#24364b;stroke-dasharray:3 5}.ms-chartbox svg .ms-data-point{cursor:crosshair;transition:r .15s}.ms-chartbox svg .ms-data-point:hover{r:5}.ms-chartbox .empty{font-size:10px;color:#8fa5bd;line-height:1.5}
     .ms-edit-note{font-size:9px;line-height:1.4;color:#8fa5bd;margin:8px 0 0}
-    .ms-hidden{display:none!important}
+    .ms-ai-cta{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px;padding:15px;border:1px solid #53658c;border-radius:15px;background:linear-gradient(115deg,#1c2b47,#18243b 55%,#282442);box-shadow:0 12px 28px #0003}.ms-ai-cta strong{display:block;font-size:13px;color:#f0f4ff}.ms-ai-cta p{margin:5px 0 0;color:#b4c4dc;font-size:10px;line-height:1.5}.ms-ai-kicker{display:block;margin-bottom:5px;color:#c1b3ff;font-size:9px;letter-spacing:1.4px;font-weight:900}.ms-ai-cta button{flex-shrink:0;padding:11px 13px;border:1px solid #c0caff;border-radius:10px;background:linear-gradient(135deg,#cbd5ff,#a6b8ff);color:#101729;font-size:11px;font-weight:900;box-shadow:0 5px 16px #7f9cff20}.ms-hidden{display:none!important}@media(max-width:480px){.ms-ai-cta{align-items:flex-start;flex-direction:column}.ms-ai-cta button{width:100%}}
     @media(min-width:560px){.ms-grid{grid-template-columns:1fr}}
     @media(max-width:360px){.ms-live{padding:10px}.ms-grid{gap:6px}.ms-card{padding:9px}.ms-value{font-size:20px}}
   `;
@@ -47,11 +47,12 @@
     <div class="ms-tools">
       <h3>Historical chart</h3>
       <div class="ms-controls">
-        <div><label for="ms-series">Indicator</label><select id="ms-series"><option value="us10y">US 10Y Yield</option><option value="dollar">Broad Dollar Index</option><option value="cpi">CPI Index</option><option value="ppi">PPI Index</option><option value="vix">VIX / Fear Index</option></select></div>
+        <div><label for="ms-series">Indicator</label><select id="ms-series"><option value="us10y">US 10Y Yield</option><option value="dollar">Broad Dollar Index</option><option value="cpi_yoy">CPI Inflation (YoY)</option><option value="cpi">CPI Index</option><option value="ppi">PPI Index</option><option value="vix">VIX / Fear Index</option></select></div>
         <div><label for="ms-range">Period</label><select id="ms-range"><option value="30d">30 days</option><option value="90d">90 days</option><option value="1y" selected>1 year</option><option value="5y">5 years</option></select></div>
       </div>
       <div class="ms-chartbox" id="ms-history-chart"><div class="empty">Choose an indicator and period. Historical series will appear when the Worker history endpoint is deployed.</div></div>
       <div class="ms-status" id="ms-history-status">Historical data endpoint not confirmed yet.</div>
+      <div class="ms-ai-cta"><div><span class="ms-ai-kicker">NEXT STEP</span><strong>Turn the data into a market view</strong><p>Ask the financial research assistant to connect macro trends, price action and risk scenarios.</p></div><button id="ms-open-ai" type="button">Open AI Analyst <span aria-hidden="true">↗</span></button></div>
     </div>
     <div class="ms-tools">
       <h3>Edit dashboard values</h3>
@@ -80,26 +81,40 @@
   const safeOverrides=()=>{try{return JSON.parse(localStorage.getItem(overrideKey)||"{}")}catch(_){return {}}};
   function loadOverrideInputs(){const o=safeOverrides();Object.keys(editFields).forEach(k=>editFields[k].value=o[k]?.value??"");dateInput.value=o.date||new Date().toISOString().slice(0,10)}
   function renderHistory(points,label,unit){
-    const valid=(points||[]).filter(p=>Number.isFinite(Number(p.value))&&p.date);
-    if(valid.length<2){historyChart.innerHTML='<div class="empty">Not enough historical observations returned for this period. The backend must return a dated series; the two-point sparkline is not a historical chart.</div>';return}
-    const values=valid.map(p=>Number(p.value)), min=Math.min(...values), max=Math.max(...values), span=max-min||Math.abs(max)*.01||1;
-    const W=600,H=170,L=42,R=8,T=10,B=25;
-    const pts=values.map((v,i)=>({x:L+i*(W-L-R)/(values.length-1),y:T+(max-v)*(H-T-B)/span}));
-    const path=pts.map((p,i)=>(i?"L":"M")+p.x.toFixed(1)+" "+p.y.toFixed(1)).join(" ");
-    const area=path+" L "+pts[pts.length-1].x+" "+(H-B)+" L "+pts[0].x+" "+(H-B)+" Z";
-    const ylabels=[max,(min+max)/2,min].map(v=>v.toLocaleString("en-US",{maximumFractionDigits:3}));
+    const valid=(points||[]).filter(p=>Number.isFinite(Number(p.value))&&p.date).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    if(valid.length<2){historyChart.innerHTML='<div class="empty">Not enough dated observations for this range. Choose a longer period; no sample data is shown.</div>';return}
+    const values=valid.map(p=>Number(p.value)),min=Math.min(...values),max=Math.max(...values),span=max-min||Math.max(Math.abs(max)*.01,.01);
+    const W=720,H=220,L=56,R=18,T=22,B=35,plotW=W-L-R,plotH=H-T-B;
+    const pts=values.map((v,i)=>({x:L+i*plotW/(values.length-1),y:T+(max-v)/span*plotH,v,date:valid[i].date}));
+    let path="M "+pts[0].x.toFixed(2)+" "+pts[0].y.toFixed(2);
+    for(let i=1;i<pts.length;i++){const prev=pts[i-1],cur=pts[i],mx=(prev.x+cur.x)/2;path+=" Q "+prev.x.toFixed(2)+" "+prev.y.toFixed(2)+" "+mx.toFixed(2)+" "+((prev.y+cur.y)/2).toFixed(2);if(i===pts.length-1)path+=" T "+cur.x.toFixed(2)+" "+cur.y.toFixed(2);}
+    const area=path+" L "+pts[pts.length-1].x.toFixed(2)+" "+(H-B)+" L "+L+" "+(H-B)+" Z";
+    const fmt=v=>Number(v).toLocaleString("en-US",{maximumFractionDigits:3});
+    const yTicks=[max,(max+min)/2,min],grid=yTicks.map((v,i)=>{const y=T+i*plotH/2;return '<line class="ms-gridline" x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'"/><text x="'+(L-9)+'" y="'+(y+4)+'" text-anchor="end" fill="#91a6c1" font-size="10">'+fmt(v)+(unit==="percent"?"%":"")+'</text>'}).join("");
+    const step=Math.max(1,Math.floor(pts.length/7));
+    const dots=pts.filter((p,i)=>i===0||i===pts.length-1||i%step===0).map(p=>'<circle class="ms-data-point" cx="'+p.x.toFixed(2)+'" cy="'+p.y.toFixed(2)+'" r="3" fill="#dce5ff" stroke="#8eaaff" stroke-width="2"><title>'+escapeHtml(p.date)+' · '+fmt(p.v)+(unit==="percent"?"%":"")+'</title></circle>').join("");
     const first=valid[0].date,last=valid[valid.length-1].date;
-    historyChart.innerHTML='<div class="ms-date">'+escapeHtml(label)+' · '+valid.length+' observations · source: FRED</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(label)+' historical chart"><path d="M'+L+' '+T+'V'+(H-B)+'H'+(W-R)+'" stroke="#26384d" fill="none"/><path d="'+area+'" fill="#9bb5ff" opacity=".08"/><path d="'+path+'" stroke="#9bb5ff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="2" y="'+(T+4)+'" fill="#8fa5bd" font-size="10">'+ylabels[0]+'</text><text x="2" y="'+((H+T-B)/2)+'" fill="#8fa5bd" font-size="10">'+ylabels[1]+'</text><text x="2" y="'+(H-B)+'" fill="#8fa5bd" font-size="10">'+ylabels[2]+'</text><text x="'+L+'" y="'+(H-7)+'" fill="#8fa5bd" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-7)+'" text-anchor="end" fill="#8fa5bd" font-size="10">'+escapeHtml(last)+'</text></svg>';
+    const lineColor=label.toLowerCase().includes("inflation")?"#f0b5ff":label.toLowerCase().includes("yield")?"#86d9e8":"#9bb5ff";
+    historyChart.innerHTML='<div class="ms-date">'+escapeHtml(label)+' · '+valid.length+' observations · source: published historical data</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(label)+' historical chart" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="msAreaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+lineColor+'" stop-opacity=".34"/><stop offset="100%" stop-color="'+lineColor+'" stop-opacity=".015"/></linearGradient><linearGradient id="msStrokeGradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="'+lineColor+'"/><stop offset="100%" stop-color="#c5d2ff"/></linearGradient></defs>'+grid+'<path d="'+area+'" fill="url(#msAreaGradient)"/><path d="'+path+'" stroke="url(#msStrokeGradient)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'<text x="'+L+'" y="'+(H-10)+'" fill="#8196b2" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end" fill="#8196b2" font-size="10">'+escapeHtml(last)+'</text></svg><div class="ms-chart-label"><span>Low '+fmt(min)+(unit==="percent"?"%":"")+'</span><span>Latest '+fmt(values[values.length-1])+(unit==="percent"?"%":"")+'</span></div>';
   }
   async function loadHistory(){
-    const series=seriesSelect.value, range=rangeSelect.value;
-    historyStatus.textContent="Loading "+series+" history…";
+    const selected=seriesSelect.value,range=rangeSelect.value,series=selected==="cpi_yoy"?"cpi":selected;
+    historyStatus.textContent="Loading "+(selected==="cpi_yoy"?"CPI inflation (year over year)":selected)+" history…";
     try{
-      const response=await fetch(API_URL+"history?series="+encodeURIComponent(series)+"&range="+encodeURIComponent(range),{cache:"no-store"});
-      const data=await response.json(); if(!response.ok)throw new Error(data.error||"History endpoint unavailable");
-      renderHistory(data.points||data.observations,data.label||series,data.unit||"");
-      historyStatus.textContent="Fetched "+(data.fetchedAt?new Date(data.fetchedAt).toLocaleString():"now")+" · "+(data.points||data.observations||[]).length+" observations";
-    }catch(e){historyChart.innerHTML='<div class="empty">Historical chart is waiting for the Worker API update. No sample or fabricated data is displayed.</div>';historyStatus.textContent="History unavailable: "+e.message}
+      const response=await fetch(API_URL+"history?series="+encodeURIComponent(series)+"&range="+encodeURIComponent(selected==="cpi_yoy"?"5y":range),{cache:"no-store"});
+      const data=await response.json();if(!response.ok)throw new Error(data.error||"History endpoint unavailable");
+      let points=(data.points||data.observations||[]).filter(p=>p&&p.date&&Number.isFinite(Number(p.value)));
+      let label=data.label||series,unit=data.unit||"";
+      if(selected==="cpi_yoy"){
+        const byMonth=new Map(points.map(p=>[String(p.date).slice(0,7),Number(p.value)]));
+        points=points.map(p=>{const d=new Date(String(p.date)+"T00:00:00Z");d.setUTCMonth(d.getUTCMonth()-12);const prior=byMonth.get(d.toISOString().slice(0,7)),current=Number(p.value);return prior&&prior!==0?{date:p.date,value:(current/prior-1)*100}:null;}).filter(Boolean);
+        const months={"30d":1,"90d":3,"1y":12,"5y":60},keep=months[range]||12;
+        if(points.length){const last=new Date(String(points[points.length-1].date)+"T00:00:00Z");last.setUTCMonth(last.getUTCMonth()-keep);const cutoff=last.toISOString().slice(0,10);points=points.filter(p=>p.date>=cutoff);}
+        label="CPI Inflation (YoY)";unit="percent";
+      }
+      renderHistory(points,label,unit);
+      historyStatus.textContent=(selected==="cpi_yoy"?"Calculated year-over-year from published monthly CPI index · ":"Fetched ")+(data.fetchedAt?new Date(data.fetchedAt).toLocaleString():"now")+" · "+points.length+" observations";
+    }catch(e){historyChart.innerHTML='<div class="empty">Historical chart unavailable. No sample or fabricated data is displayed.</div>';historyStatus.textContent="History unavailable: "+e.message}
   }
   section.querySelector("#ms-save-values").addEventListener("click",()=>{
     const values={};Object.entries(editFields).forEach(([k,input])=>{if(input.value.trim()!==""){const v=Number(input.value);if(Number.isFinite(v))values[k]={value:v,source:"manual"}}});
