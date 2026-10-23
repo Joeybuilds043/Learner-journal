@@ -12,7 +12,7 @@ on:
       - "worker/**"
       - "wrangler.toml"
       - "backend/**"
-      - ".github/workflows/marketpilot-checks.yml"
+      - ".github/workflows/**"
       - ".github/workflows/deploy-marketpilot-worker.yml"
   pull_request:
     paths:
