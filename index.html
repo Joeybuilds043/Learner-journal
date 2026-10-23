@@ -967,7 +967,7 @@
       }
       if (imported.length > 2000) throw new Error("Backup cannot contain more than 2,000 reviews.");
 
-      const textFields = ["dxy", "us10y", "news", "context", "expectation", "market", "lesson"];
+      const textFields = ["asset", "dxy", "us10y", "news", "context", "expectation", "market", "mistake", "betterAction", "lesson"];
       const valid = imported.every(entry =>
         entry &&
         typeof entry === "object" &&
@@ -992,6 +992,9 @@
         id: entry.id || `import-${Date.now()}-${index}`,
         date: entry.date || localDateKey(),
         createdAt: Number(entry.createdAt) || Date.now(),
+        asset: entry.asset || "",
+        mistake: entry.mistake || "",
+        betterAction: entry.betterAction || "",
         dxy: entry.dxy || "",
         us10y: entry.us10y || "",
         news: entry.news || "",
