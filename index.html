@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080d18">
-  <meta name="description" content="MarketSignal — a personal macro trading journal for market context, expectations and lessons.">
+  <meta name="description" content="MarketPilot AI — market research, live public market data, daily analysis and a learning workspace.">
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="./marketsignal-mark.svg">
-  <title>MarketSignal | Macro Terminal</title>
+  <title>MarketPilot AI | Market Research Workspace</title>
 
   <style>
     :root {
@@ -539,8 +539,8 @@
     <div class="brand">
       <div class="logo" aria-hidden="true"><svg viewBox="0 0 40 40" width="32" height="32" fill="none"><path d="M4 28V12l8 8 8-13 8 13 8-8v16" stroke="#69f0c1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 33h30" stroke="#78aaff" stroke-width="2" stroke-linecap="round"/></svg></div>
       <div>
-        <h1>MarketSignal</h1>
-        <div class="brand-sub">MACRO TERMINAL <span style="color:var(--accent)">/</span> TRADING INTELLIGENCE</div>
+        <h1>MarketPilot AI</h1>
+        <div class="brand-sub">AI MARKET RESEARCH <span style="color:var(--accent)">/</span> DAILY INTELLIGENCE</div>
       </div>
     </div>
     <div class="date-box">
@@ -1037,7 +1037,7 @@
   // Register the existing service worker.
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=20261020-live-fix").catch(() => {
+      navigator.serviceWorker.register("./sw.js?v=20261024-marketpilot").catch(() => {
         showStatus("Offline setup failed. Check the service worker file.");
       });
     });
@@ -1071,6 +1071,8 @@
 </script>
 
   <script src="./macro-dashboard.js?v=20261020-live-fix" defer></script>
+  <script src="./marketpilot-config.js?v=20261024-marketpilot" defer></script>
+  <script src="./ai-workspace.js?v=20261024-marketpilot" defer></script>
 </body>
   </html>
 
