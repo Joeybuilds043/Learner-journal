@@ -13,8 +13,7 @@ from urllib.parse import quote
 
 APP_NAME = "CandleDesk"
 ASSISTANT_NAME = "Pip"
-GEMINI_DEFAULT_MODEL = "gemini-3.8-flash"
-GEMINI_FALLBACK_MODEL = "gemini-3.6-flash"
+GROK_DEFAULT_MODEL = "grok-4.7"
 
 st.set_page_config(
     page_title="CandleDesk | Market Intelligence",
@@ -378,37 +377,59 @@ def current_context(data, news=None):
         "data_note": "Economic series are releases with their own observation dates. Exchange quotes can be delayed and are not guaranteed real-time."
     }
 
-def gemini_answer(prompt: str) -> tuple[str, str]:
-    api_key = get_secret("GEMINI_API_KEY")
+def grok_answer(prompt: str) -> tuple[str, str]:
+    """Call xAI's Responses API without exposing the API key to the browser or logs."""
+    api_key = get_secret("XAI_API_KEY")
     if not api_key:
-        raise RuntimeError("Gemini API key is not connected yet.")
-    from google import genai
-    from google.genai import types
+        raise RuntimeError("Grok API key is not connected. Add XAI_API_KEY in Streamlit Settings → Secrets.")
 
-    client = genai.Client(api_key=api_key)
-    configured_model = get_secret("GEMINI_MODEL") or GEMINI_DEFAULT_MODEL
-    models_to_try = [configured_model]
-    if GEMINI_FALLBACK_MODEL != configured_model:
-        models_to_try.append(GEMINI_FALLBACK_MODEL)
-    errors = []
-    for model in models_to_try:
-        try:
-            response = client.models.generate_content(
-                model=model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT,
-                    temperature=0.25,
-                    max_output_tokens=1700,
-                ),
-            )
-            answer = (response.text or "").strip()
-            if answer:
-                return answer, model
-            errors.append(f"{model}: no text was returned")
-        except Exception as exc:
-            errors.append(f"{model}: {str(exc)[:180]}")
-    raise RuntimeError("Gemini request failed: " + " | ".join(errors))
+    model = get_secret("GROK_MODEL") or GROK_DEFAULT_MODEL
+    url = "https://api.x.ai/v1/responses"
+    payload = {
+        "model": model,
+        "input": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ],
+        "reasoning": {"effort": "medium"},
+        "max_output_tokens": 1700,
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "store": False,
+    }
+    try:
+        response = requests.post(
+            url,
+            headers={
+                "Authorization": "Bearer " + api_key,
+                "Content-Type": "application/json",
+            },
+            json=payload,
+            timeout=120,
+        )
+    except requests.RequestException as exc:
+        raise RuntimeError("Grok API network request failed. Please retry in a moment.") from exc
+
+    try:
+        result = response.json()
+    except ValueError:
+        result = {}
+
+    if not response.ok:
+        detail = result.get("error", {})
+        if isinstance(detail, dict):
+            detail = detail.get("message") or detail.get("code") or "request rejected"
+        raise RuntimeError(f"Grok API HTTP {response.status_code}: {str(detail)[:220]}")
+
+    parts = []
+    for item in result.get("output", []) or []:
+        for part in item.get("content", []) or []:
+            if part.get("type") == "output_text" and part.get("text"):
+                parts.append(part["text"])
+    answer = "\n".join(parts).strip()
+    if not answer:
+        raise RuntimeError("Grok API returned no readable text.")
+    return answer, str(result.get("model") or model)
 
 def build_prompt(question: str, data: dict, news: list, history: list) -> str:
     context = current_context(data, news)
@@ -561,7 +582,7 @@ if page == "Markets":
 elif page == "Research":
     st.markdown('<div class="eyebrow">Headlines and context</div>', unsafe_allow_html=True)
     st.title("Research brief")
-    st.markdown('<div class="section-note">Headline discovery first; AI summary only when Gemini API is configured.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-note">Headline discovery first; AI summary only when Grok API is configured.</div>', unsafe_allow_html=True)
 
     query = st.text_input("News topic", value="US inflation Federal Reserve Treasury yields dollar stocks", max_chars=180)
     try:
@@ -584,7 +605,7 @@ elif page == "Research":
                         "Create a concise market brief from the supplied observations and current headlines. Organize it into: key developments, macro transmission, affected assets, bull case, bear case, and what to watch. Cite headline links. Label any interpretation as interpretation.",
                         data, news_items, [],
                     )
-                    answer, model = gemini_answer(prompt)
+                    answer, model = grok_answer(prompt)
                     st.session_state["last_brief"] = answer
                     st.session_state["last_brief_model"] = model
                 except Exception as exc:
@@ -594,7 +615,7 @@ elif page == "Research":
     if st.session_state.get("last_brief"):
         st.markdown("### Market brief")
         st.markdown(st.session_state["last_brief"])
-        st.caption("Generated with " + str(st.session_state.get("last_brief_model", GEMINI_DEFAULT_MODEL)))
+        st.caption("Generated with " + str(st.session_state.get("last_brief_model", GROK_DEFAULT_MODEL)))
 
 # ----- PIP AI -----
 elif page == "Pip AI":
@@ -613,11 +634,11 @@ elif page == "Pip AI":
     if "pip_messages" not in st.session_state:
         st.session_state["pip_messages"] = []
 
-    api_ready = bool(get_secret("GEMINI_API_KEY"))
+    api_ready = bool(get_secret("XAI_API_KEY"))
     if api_ready:
-        st.markdown('<span class="status-pill"><span class="status-dot"></span>Gemini connected · free tier may be rate-limited</span>', unsafe_allow_html=True)
+        st.markdown('<span class="status-pill"><span class="status-dot"></span>Grok connected · free tier may be rate-limited</span>', unsafe_allow_html=True)
     else:
-        st.info("Dashboard mode is ready. Pip's AI replies activate after GEMINI_API_KEY is added in Streamlit Cloud → Settings → Secrets. The key will not be stored in source code.")
+        st.info("Dashboard mode is ready. Pip's AI replies activate after XAI_API_KEY is added in Streamlit Cloud → Settings → Secrets. The key will not be stored in source code.")
 
     with st.container(border=True):
         st.markdown("**Try a question**")
@@ -645,8 +666,8 @@ elif page == "Pip AI":
         with st.chat_message("user"):
             st.markdown(user_prompt)
 
-        if not get_secret("GEMINI_API_KEY"):
-            answer = "Pip ka dashboard aur charts setup ho raha hai, lekin AI response ke liye Gemini API key abhi connect nahin hui. Deployment ke baad Streamlit Cloud ke Settings → Secrets mein GEMINI_API_KEY add karni hogi. API key ko chat, HTML ya GitHub code mein paste na karein."
+        if not get_secret("XAI_API_KEY"):
+            answer = "Pip ka dashboard aur charts setup ho raha hai, lekin AI response ke liye Grok API key abhi connect nahin hui. Deployment ke baad Streamlit Cloud ke Settings → Secrets mein XAI_API_KEY add karni hogi. API key ko chat, HTML ya GitHub code mein paste na karein."
             model_used = "not connected"
         else:
             try:
@@ -656,14 +677,14 @@ elif page == "Pip AI":
                     except Exception:
                         headlines = []
                     prompt = build_prompt(user_prompt, data, headlines, st.session_state["pip_messages"][:-1])
-                    answer, model_used = gemini_answer(prompt)
+                    answer, model_used = grok_answer(prompt)
             except Exception as exc:
                 answer = (
                     "AI request complete nahin ho saki. Agar 429 aaye to free-tier request limit khatam ho sakti hai; "
                     "503 temporary service load ho sakta hai. API key ko code mein na daalein.\n\n"
                     "Technical detail: " + str(exc)[:260]
                 )
-                model_used = "Gemini unavailable"
+                model_used = "Grok unavailable"
 
         st.session_state["pip_messages"].append({"role": "assistant", "content": answer})
         st.session_state["pip_model_used"] = model_used
