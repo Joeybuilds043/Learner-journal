@@ -107,7 +107,7 @@
   seriesSelect.addEventListener("change",loadHistory);rangeSelect.addEventListener("change",loadHistory);
   const escapeHtml = value => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll(String.fromCharCode(34),"&quot;").replaceAll(String.fromCharCode(39),"&#39;");
   const num = v => v!==null && v!=="" && Number.isFinite(Number(v)) ? Number(v) : null;
-  const fmt = (v,d=2) => num(v)===null ? "—" : Number(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:d,useGrouping:false});
+  const fmt = (v,d=2) => num(v)===null ? "—" : Number(v).toLocaleString("en-US",{minimumFractionDigits:Math.min(2,d),maximumFractionDigits:d,useGrouping:false});
   const dateOf = x => x?.date || x?.latestDate || x?.observationDate || "";
   async function loadCpiTrend(){
     const host=section.querySelector("#ms-cpi-bars"),statusEl=section.querySelector("#ms-cpi-status");
