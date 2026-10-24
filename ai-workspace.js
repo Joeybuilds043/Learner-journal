@@ -27,14 +27,7 @@ views.insertAdjacentHTML("beforeend", `
 `);
 main.insertBefore(views, main.querySelector('.disclaimer') || null);
 
-const macroHistoryTools=document.getElementById("ms-history-tools");
-const historyPage=document.querySelector("#historyView .mp-page");
-if(macroHistoryTools&&historyPage){
- const macroHistoryTitle=macroHistoryTools.querySelector("h3");
- if(macroHistoryTitle)macroHistoryTitle.textContent="Macro history · FRED observations";
- const historyPageHeader=historyPage.querySelector(".mp-head");
- if(historyPageHeader)historyPageHeader.insertAdjacentElement("afterend",macroHistoryTools);
-}
+// Keep the macro chart on the opening Markets dashboard; the Charts menu remains available for cross-market comparisons.
 
 function setView(name){market.hidden=name!=="markets";journal.hidden=name!=="journal";$("aiView").hidden=name!=="ai";$("researchView").hidden=name!=="research";$("profileView").hidden=name!=="profile";$("historyView").hidden=name!=="history";$("newsView").hidden=name!=="news";[ $("showDashboard"),chartsButton].forEach(b=>b.setAttribute("aria-selected","false"));const active={markets:$("showDashboard"),history:chartsButton}[name];if(active)active.setAttribute("aria-selected","true");if($("mpDrawer"))if($("mpDrawer"))$("mpDrawer").hidden=true;window.scrollTo({top:0,behavior:"smooth"});}
 $("showDashboard").textContent="Markets";$("showDashboard").addEventListener("click",()=>setView("markets"));chartsButton.addEventListener("click",()=>setView("history"));aiButton.addEventListener("click",()=>setView("ai"));researchButton.addEventListener("click",()=>setView("research"));profileButton.addEventListener("click",()=>setView("profile"));journalNavButton.addEventListener("click",()=>setView("journal"));const back=document.createElement("button");back.className="mp-button";back.type="button";back.textContent="← Back to markets";back.style.marginBottom="12px";journal.prepend(back);back.addEventListener("click",()=>setView("markets"));const briefBack=document.createElement("button");briefBack.className="mp-button";briefBack.type="button";briefBack.textContent="← Back to AI Analyst";briefBack.style.marginBottom="12px";$("researchView").querySelector(".mp-page").prepend(briefBack);briefBack.addEventListener("click",()=>setView("ai"));const briefLink=document.createElement("button");briefLink.type="button";briefLink.className="mp-button";briefLink.textContent="Open daily research brief →";briefLink.style.margin="0 0 12px";$("aiView").querySelector(".mp-prompts").insertAdjacentElement("afterend",briefLink);briefLink.addEventListener("click",()=>setView("research"));
