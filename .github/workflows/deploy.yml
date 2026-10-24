@@ -36,6 +36,24 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
+      - name: Validate browser JavaScript
+        shell: bash
+        run: |
+          node --check macro-dashboard.js
+          node --check ai-workspace.js
+          node --check marketpilot-config.js
+          node --check sw.js
+          node <<'NODE'
+          const fs = require("node:fs");
+          const vm = require("node:vm");
+          const html = fs.readFileSync("index.html", "utf8");
+          const scripts = [...html.matchAll(/<script(?![^>]*\\bsrc=)[^>]*>([\\s\\S]*?)<\\/script>/gi)];
+          for (let i = 0; i < scripts.length; i++) {
+            new vm.Script(scripts[i][1], { filename: `index-inline-${i + 1}.js` });
+          }
+          console.log(`JavaScript syntax validated: 4 external files and ${scripts.length} inline scripts.`);
+          NODE
+
       - name: Package static site
         shell: bash
         run: |
@@ -102,10 +120,14 @@ jobs:
             assert.match(html, /macro-dashboard\.js/, "Live page must load the macro dashboard script");
             assert.match(html, /<h1>MarketPilot<\/h1>/, "Live page must use the MarketPilot brand");
             assert.match(html, /ai-workspace\.js/, "Live page must load the new workspace script");
+            assert.match(html, /id="showCharts"/, "Live page must show the compact Markets / Charts navigation");
+            assert.match(html, /ai-workspace\.js\?v=20261024-financial-assistant-v4/, "Live page must reference the updated assistant bundle");
+            assert.ok(script.includes("INFLATION TRACKER / FRED CPI"), "Macro dashboard must include the CPI inflation chart");
+            assert.ok(script.includes("const bars=pts.map") && script.includes("+grid+bars+"), "Historical macro chart must use columns with the smoothed trend area");
 
-            const aiResponse = await getWithRetry(pageUrl + "ai-workspace.js?v=20261024-analyst-polish");
+            const aiResponse = await getWithRetry(pageUrl + "ai-workspace.js?v=20261024-financial-assistant-v4");
             const aiScript = await aiResponse.text();
-            for (const marker of ["Financial Research Desk", "Daily Market Briefing", "Macro &amp; Market History", "News &amp; Market Impact", "Your Journal", "mpAssetPrompts", "Profile &amp; Preferences", "AI Market Analyst", "Historical Patterns", "mpClearChat", "Saad Hashmani’s market-focused content sparked my interest"]) {
+            for (const marker of ["Financial Assistant", "Daily Market Briefing", "Macro &amp; Market History", "News &amp; Market Impact", "Your Journal", "mpAssetPrompts", "Profile &amp; Preferences", "Historical Relationships", "mpClearChat", "Saad Hashmani’s market-focused content first sparked my interest", "Stylized editorial portrait illustration inspired by Saad Hashmani", "ASK MARKETPILOT FINANCIAL ASSISTANT", "nav.replaceChildren"]) {
               assert.ok(aiScript.includes(marker), `Published AI workspace is missing ${marker}`);
             }
 
