@@ -7,7 +7,7 @@ CandleDesk is the new Python/Streamlit version of the market dashboard. The exis
 - TradingView-inspired dark interface with straightforward horizontal navigation.
 - Separate macro/market charts: CPI YoY, PPI YoY, US 10-year Treasury yield, DXY candlesticks, VIX fear-index bars, S&P 500, gold and Bitcoin.
 - Public observations from FRED and Yahoo Finance; Google News RSS headlines for research.
-- Pip, a conversational financial research assistant powered by Gemini once its server-side key is configured.
+- Pip, a conversational financial research assistant powered by Grok (xAI API) once its server-side key is configured.
 - Clear-chat control, session-based journal, CSV export, and historical correlation heatmap.
 
 ## Deploy on Streamlit Community Cloud
@@ -23,17 +23,19 @@ CandleDesk is the new Python/Streamlit version of the market dashboard. The exis
 
 The new app will receive a Streamlit URL such as `https://<chosen-name>.streamlit.app`. The exact URL is assigned by Streamlit during deployment; it is not available until that step succeeds.
 
-## Add Gemini later (server-side secret)
+## Connect Grok (xAI API)
 
-After deployment, open the app's Settings → Secrets and add:
+After the Streamlit app is deployed, open the app's **Settings → Secrets** and add:
 
 ```toml
-GEMINI_API_KEY = "your-key-here"
-# Optional. Default model is gemini-3.8-flash.
-# GEMINI_MODEL = "gemini-3.8-flash"
+XAI_API_KEY = "your-xai-api-key"
+# Optional: defaults to grok-4.7
+GROK_MODEL = "grok-4.7"
 ```
 
-Do not put a real API key in source files or public GitHub. Use Google AI Studio to create the key, and confirm the account's free-tier quotas. Free use is rate-limited and is not unlimited. The code tries `gemini-3.8-flash` first and `gemini-3.6-flash` as a fallback.
+Create the API key in the [xAI Console](https://console.x.ai/). Do not put the key in source files, public GitHub, screenshots, or chat messages. The app sends requests server-side to the official xAI Responses API and sets `store = false` for API responses.
+
+**Billing note:** Grok API access is separate from the consumer Grok chat subscription and may require billing/credits. It is not assumed to be free or unlimited. Check current API pricing and limits in the xAI Console before using it heavily.
 
 ## Data notes
 
