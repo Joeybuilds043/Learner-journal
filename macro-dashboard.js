@@ -30,7 +30,7 @@
     .ms-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.ms-actions button{flex:1}
     .ms-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
     .ms-chartbox{margin-top:9px;border:1px solid #263a50;border-radius:12px;background:#0a1320;padding:10px;min-height:120px}
-    .ms-chartbox{border-color:#314660;background:radial-gradient(ellipse at 10% 0%,#172842 0%,#0a1320 66%);box-shadow:inset 0 1px 0 #ffffff08}.ms-chartbox svg{display:block;width:100%;height:220px;overflow:visible}.ms-chartbox svg text{font-variant-numeric:tabular-nums}.ms-chartbox svg .ms-gridline{stroke:#24364b;stroke-dasharray:3 5}.ms-chartbox svg .ms-data-point{cursor:crosshair;transition:r .15s}.ms-chartbox svg .ms-data-point:hover{r:5}.ms-chartbox .empty{font-size:10px;color:#8fa5bd;line-height:1.5}
+    .ms-chartbox{border-color:#314660;background:radial-gradient(ellipse at 10% 0%,#172842 0%,#0a1320 66%);box-shadow:inset 0 1px 0 #ffffff08}.ms-chartbox svg{display:block;width:100%;height:250px;overflow:visible}.ms-chartbox svg text{font-variant-numeric:tabular-nums}.ms-chartbox svg .ms-gridline{stroke:#24364b;stroke-dasharray:3 5}.ms-chartbox svg .ms-data-point{cursor:crosshair;transition:r .15s}.ms-chartbox svg .ms-data-point:hover{r:5}.ms-chartbox .empty{font-size:10px;color:#8fa5bd;line-height:1.5}
     .ms-edit-note{font-size:9px;line-height:1.4;color:#8fa5bd;margin:8px 0 0}
     .ms-ai-cta{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px;padding:15px;border:1px solid #53658c;border-radius:15px;background:linear-gradient(115deg,#1c2b47,#18243b 55%,#282442);box-shadow:0 12px 28px #0003}.ms-ai-cta strong{display:block;font-size:13px;color:#f0f4ff}.ms-ai-cta p{margin:5px 0 0;color:#b4c4dc;font-size:10px;line-height:1.5}.ms-ai-kicker{display:block;margin-bottom:5px;color:#c1b3ff;font-size:9px;letter-spacing:1.4px;font-weight:900}.ms-ai-cta button{flex-shrink:0;padding:11px 13px;border:1px solid #c0caff;border-radius:10px;background:linear-gradient(135deg,#cbd5ff,#a6b8ff);color:#101729;font-size:11px;font-weight:900;box-shadow:0 5px 16px #7f9cff20}.ms-hidden{display:none!important}@media(max-width:480px){.ms-ai-cta{align-items:flex-start;flex-direction:column}.ms-ai-cta button{width:100%}}
     @media(min-width:560px){.ms-grid{grid-template-columns:1fr}}
@@ -54,19 +54,6 @@
       <div class="ms-status" id="ms-history-status">Historical data endpoint not confirmed yet.</div>
       <div class="ms-ai-cta"><div><span class="ms-ai-kicker">NEXT STEP</span><strong>Turn the data into a market view</strong><p>Ask the financial research assistant to connect macro trends, price action and risk scenarios.</p></div><button id="ms-open-ai" type="button">Open Financial Analyst <span aria-hidden="true">↗</span></button></div>
     </div>
-    <div class="ms-tools">
-      <h3>Edit dashboard values</h3>
-      <div class="ms-edit-grid">
-        <div><label for="ms-edit-yield">US 10Y yield (%)</label><input id="ms-edit-yield" type="number" step="0.001" placeholder="e.g. 4.25"></div>
-        <div><label for="ms-edit-dollar">Broad dollar index</label><input id="ms-edit-dollar" type="number" step="0.001" placeholder="e.g. 121.6"></div>
-        <div><label for="ms-edit-cpi">CPI YoY (%)</label><input id="ms-edit-cpi" type="number" step="0.01" placeholder="e.g. 3.1"></div>
-        <div><label for="ms-edit-ppi">PPI index</label><input id="ms-edit-ppi" type="number" step="0.001" placeholder="e.g. 295.7"></div>
-        <div><label for="ms-edit-vix">VIX (optional)</label><input id="ms-edit-vix" type="number" step="0.01" placeholder="No data by default"></div>
-        <div><label for="ms-edit-date">As-of date</label><input id="ms-edit-date" type="date"></div>
-      </div>
-      <div class="ms-actions"><button id="ms-save-values" type="button">Save overrides</button><button id="ms-clear-values" type="button">Reset to source</button></div>
-      <p class="ms-edit-note">Overrides are saved on this device only for now and marked as manual. They do not alter official FRED data. Cloud database sync is a separate backend step.</p>
-    </div>
     <div class="ms-status" id="ms-status" role="status" aria-live="polite">Connecting…</div>
     <p class="ms-footnote">Data source: FRED. Release data can lag. Broad dollar index is not ICE DXY. VIX is a published volatility index, not a direct measure of all market fear.</p>`;
   const historyTools=section.querySelector(".ms-tools"); if(historyTools) historyTools.id="ms-history-tools";
@@ -75,11 +62,6 @@
   const grid=section.querySelector("#ms-grid"), status=section.querySelector("#ms-status"), read=section.querySelector("#ms-read-text"), button=section.querySelector("#ms-refresh");
   const historyChart=section.querySelector("#ms-history-chart"), historyStatus=section.querySelector("#ms-history-status");
   const seriesSelect=section.querySelector("#ms-series"), rangeSelect=section.querySelector("#ms-range");
-  const overrideKey="marketsignal-manual-overrides-v1";
-  const editFields={us10y:section.querySelector("#ms-edit-yield"),dollar:section.querySelector("#ms-edit-dollar"),cpi:section.querySelector("#ms-edit-cpi"),ppi:section.querySelector("#ms-edit-ppi"),vix:section.querySelector("#ms-edit-vix")};
-  const dateInput=section.querySelector("#ms-edit-date");
-  const safeOverrides=()=>{try{return JSON.parse(localStorage.getItem(overrideKey)||"{}")}catch(_){return {}}};
-  function loadOverrideInputs(){const o=safeOverrides();Object.keys(editFields).forEach(k=>editFields[k].value=o[k]?.value??"");dateInput.value=o.date||new Date().toISOString().slice(0,10)}
   function renderHistory(points,label,unit){
     const valid=(points||[]).filter(p=>Number.isFinite(Number(p.value))&&p.date).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
     if(valid.length<2){historyChart.innerHTML='<div class="empty">Not enough dated observations for this range. Choose a longer period; no sample data is shown.</div>';return}
@@ -94,34 +76,30 @@
     const step=Math.max(1,Math.floor(pts.length/7));
     const dots=pts.filter((p,i)=>i===0||i===pts.length-1||i%step===0).map(p=>'<circle class="ms-data-point" cx="'+p.x.toFixed(2)+'" cy="'+p.y.toFixed(2)+'" r="3" fill="#dce5ff" stroke="#8eaaff" stroke-width="2"><title>'+escapeHtml(p.date)+' · '+fmt(p.v)+(unit==="percent"?"%":"")+'</title></circle>').join("");
     const first=valid[0].date,last=valid[valid.length-1].date;
-    const lineColor=label.toLowerCase().includes("inflation")?"#f0b5ff":label.toLowerCase().includes("yield")?"#86d9e8":"#9bb5ff";
+    const lineColor=label.toLowerCase().includes("inflation")?"#b18cff":label.toLowerCase().includes("yield")?"#26a69a":"#579dff";
     historyChart.innerHTML='<div class="ms-date">'+escapeHtml(label)+' · '+valid.length+' observations · source: published historical data</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(label)+' historical chart" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="msAreaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+lineColor+'" stop-opacity=".34"/><stop offset="100%" stop-color="'+lineColor+'" stop-opacity=".015"/></linearGradient><linearGradient id="msStrokeGradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="'+lineColor+'"/><stop offset="100%" stop-color="#c5d2ff"/></linearGradient></defs>'+grid+'<path d="'+area+'" fill="url(#msAreaGradient)"/><path d="'+path+'" stroke="url(#msStrokeGradient)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'<text x="'+L+'" y="'+(H-10)+'" fill="#8196b2" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end" fill="#8196b2" font-size="10">'+escapeHtml(last)+'</text></svg><div class="ms-chart-label"><span>Low '+fmt(min)+(unit==="percent"?"%":"")+'</span><span>Latest '+fmt(values[values.length-1])+(unit==="percent"?"%":"")+'</span></div>';
   }
   async function loadHistory(){
-    const selected=seriesSelect.value,range=rangeSelect.value,series=selected==="cpi_yoy"?"cpi":selected;
-    historyStatus.textContent="Loading "+(selected==="cpi_yoy"?"CPI inflation (year over year)":selected)+" history…";
+    const selected=seriesSelect.value,range=rangeSelect.value;
+    const macroSeries={us10y:"DGS10",dollar:"DTWEXBGS",cpi:"CPIAUCSL",ppi:"PPIACO",vix:"VIXCLS"};
+    historyStatus.textContent="Loading "+(selected==="cpi_yoy"?"CPI inflation year over year":selected)+" history…";
     try{
-      const response=await fetch(API_URL+"history?series="+encodeURIComponent(series)+"&range="+encodeURIComponent(selected==="cpi_yoy"?"5y":range),{cache:"no-store"});
-      const data=await response.json();if(!response.ok)throw new Error(data.error||"History endpoint unavailable");
+      const macro=selected==="cpi_yoy"||Object.prototype.hasOwnProperty.call(macroSeries,selected);
+      const series=selected==="cpi_yoy"?"CPIAUCSL":macro?macroSeries[selected]:selected;
+      const endpoint=macro?"https://marketpilot-ai.joeybuilds043.workers.dev/api/macro-history?series="+encodeURIComponent(series)+"&range=5y":"https://marketpilot-ai.joeybuilds043.workers.dev/api/history?symbol="+encodeURIComponent(series)+"&range="+encodeURIComponent(range==="1y"?"1y":"5y");
+      const response=await fetch(endpoint,{cache:"no-store"});const data=await response.json();if(!response.ok)throw new Error(data.detail||data.error||"History endpoint unavailable");
       let points=(data.points||data.observations||[]).filter(p=>p&&p.date&&Number.isFinite(Number(p.value)));
-      let label=data.label||series,unit=data.unit||"";
+      let label=data.name||data.label||series,unit=data.unit||"";
       if(selected==="cpi_yoy"){
         const byMonth=new Map(points.map(p=>[String(p.date).slice(0,7),Number(p.value)]));
         points=points.map(p=>{const d=new Date(String(p.date)+"T00:00:00Z");d.setUTCMonth(d.getUTCMonth()-12);const prior=byMonth.get(d.toISOString().slice(0,7)),current=Number(p.value);return prior&&prior!==0?{date:p.date,value:(current/prior-1)*100}:null;}).filter(Boolean);
-        const months={"30d":1,"90d":3,"1y":12,"5y":60},keep=months[range]||12;
-        if(points.length){const last=new Date(String(points[points.length-1].date)+"T00:00:00Z");last.setUTCMonth(last.getUTCMonth()-keep);const cutoff=last.toISOString().slice(0,10);points=points.filter(p=>p.date>=cutoff);}
         label="CPI Inflation (YoY)";unit="percent";
       }
-      renderHistory(points,label,unit);
-      historyStatus.textContent=(selected==="cpi_yoy"?"Calculated year-over-year from published monthly CPI index · ":"Fetched ")+(data.fetchedAt?new Date(data.fetchedAt).toLocaleString():"now")+" · "+points.length+" observations";
-    }catch(e){historyChart.innerHTML='<div class="empty">Historical chart unavailable. No sample or fabricated data is displayed.</div>';historyStatus.textContent="History unavailable: "+e.message}
+      const days={"30d":30,"90d":90,"1y":365,"5y":1825}[range]||365;
+      if(points.length){const cutoff=new Date(String(points[points.length-1].date)+"T00:00:00Z");cutoff.setUTCDate(cutoff.getUTCDate()-days);points=points.filter(p=>p.date>=cutoff.toISOString().slice(0,10));}
+      renderHistory(points,label,unit);historyStatus.textContent="Source: "+(data.source||"published data")+" · "+points.length+" observations · fetched "+new Date(data.fetchedAt||Date.now()).toLocaleString();
+    }catch(e){historyChart.innerHTML='<div class="empty">Historical chart unavailable. No sample data is shown.</div>';historyStatus.textContent="History unavailable: "+e.message}
   }
-  section.querySelector("#ms-save-values").addEventListener("click",()=>{
-    const values={};Object.entries(editFields).forEach(([k,input])=>{if(input.value.trim()!==""){const v=Number(input.value);if(Number.isFinite(v))values[k]={value:v,source:"manual"}}});
-    const payload={...values,date:dateInput.value||new Date().toISOString().slice(0,10),savedAt:new Date().toISOString()};
-    localStorage.setItem(overrideKey,JSON.stringify(payload));status.textContent="Manual overrides saved on this device. Official source data remains unchanged.";refresh();
-  });
-  section.querySelector("#ms-clear-values").addEventListener("click",()=>{localStorage.removeItem(overrideKey);loadOverrideInputs();status.textContent="Manual overrides cleared; showing source values.";refresh()});
   seriesSelect.addEventListener("change",loadHistory);rangeSelect.addEventListener("change",loadHistory);
   const escapeHtml = value => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll(String.fromCharCode(34),"&quot;").replaceAll(String.fromCharCode(39),"&#39;");
   const num = v => v!==null && v!=="" && Number.isFinite(Number(v)) ? Number(v) : null;
@@ -151,39 +129,22 @@
     return `<div class="ms-gauge"><i style="left:calc(${pct}% - 1px)"></i></div><div class="ms-date">${v<15?"Low expected volatility":v<25?"Elevated volatility":"High expected volatility"} · descriptive range, not a trade signal</div>`;
   }
   async function refresh(){
-    button.disabled=true; status.textContent="Updating published observations…";
+    button.disabled=true;status.textContent="Updating published observations…";
     try{
-      const response=await fetch(API_URL,{cache:"no-store"});
-      const result=await response.json();
-      if(!response.ok) throw new Error(result.error||"Data request failed");
-      const d=result.data||{};
-      const dollar=num(d.dollar?.value), dollarPct=percentChange(d.dollar), dollarPrev=(dollar!==null&&num(d.dollar?.change)!==null)?dollar-num(d.dollar.change):null;
-      const cpiYoY=num(d.cpiYearOverYear?.value), cpiChange=num(d.cpiYearOverYear?.change);
-      const ppiPct=percentChange(d.ppi);
-      const yieldVal=num(d.us10y?.value), yieldCh=num(d.us10y?.change);
-      const vix=num(d.vix?.value);
-      const overrides=safeOverrides();
-      const chosenDate=escapeHtml(overrides.date||"");
-      const manual=(key,source)=>overrides[key]?.value!==undefined?num(overrides[key].value):source;
-      const showYield=manual("us10y",yieldVal), showDollar=manual("dollar",dollar), showCpi=manual("cpi",cpiYoY), showPpi=manual("ppi",num(d.ppi?.value)), showVix=manual("vix",vix);
+      const response=await fetch(API_URL,{cache:"no-store"}),result=await response.json();if(!response.ok)throw new Error(result.error||"Data request failed");
+      const d=result.data||{};const dollar=num(d.dollar?.value),dollarPct=percentChange(d.dollar),dollarPrev=dollar!==null&&num(d.dollar?.change)!==null?dollar-num(d.dollar.change):null;
+      const cpiYoY=num(d.cpiYearOverYear?.value),cpiChange=num(d.cpiYearOverYear?.change),ppiPct=percentChange(d.ppi);const yieldVal=num(d.us10y?.value),yieldCh=num(d.us10y?.change),vix=num(d.vix?.value);
       grid.replaceChildren();
-      grid.appendChild(card("US 10Y YIELD",showYield,overrides.us10y?chosenDate:dateOf(d.us10y),overrides.us10y?null:(yieldCh===null?null:yieldCh*100),{suffix:"%",changeSuffix:" bps",changeLabel:"change",chart:sparkline(yieldVal,yieldVal!==null&&yieldCh!==null?yieldVal-yieldCh:null,"#78aaff"),extra:overrides.us10y?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
-      grid.appendChild(card("USD STRENGTH · BROAD INDEX",showDollar,overrides.dollar?chosenDate:dateOf(d.dollar),overrides.dollar?null:dollarPct,{decimals:3,chart:sparkline(dollar,dollarPrev,"#9bb5ff"),extra:'<div class="ms-date">'+(overrides.dollar?"Manual override · "+chosenDate:"Broad dollar index · not ICE DXY")+'</div>'}));
-      grid.appendChild(card("CPI INFLATION · YOY",showCpi,overrides.cpi?chosenDate:dateOf(d.cpiYearOverYear),null,{suffix:"%",chart:sparkline(cpiYoY,cpiYoY!==null&&cpiChange!==null?cpiYoY-cpiChange:null,"#c0a1ff"),extra:overrides.cpi?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
-      grid.appendChild(card("PPI INDEX · CHANGE VS PRIOR MONTH",showPpi,overrides.ppi?chosenDate:dateOf(d.ppi),overrides.ppi?null:ppiPct,{decimals:3,chart:sparkline(num(d.ppi?.value),num(d.ppi?.value)!==null&&num(d.ppi?.change)!==null?num(d.ppi.value)-num(d.ppi.change):null,"#c0a1ff"),extra:overrides.ppi?'<div class="ms-date">Manual override · '+chosenDate+'</div>':""}));
-      const vixChart=showVix===null?"":gauge(showVix);
-      grid.appendChild(card("VIX · FEAR / VOLATILITY INDEX",showVix,overrides.vix?chosenDate:dateOf(d.vix),overrides.vix?null:num(d.vix?.change),{changeSuffix:" pts",changeLabel:"change",extra:vixChart+(overrides.vix?'<div class="ms-date">Manual override · '+chosenDate+'</div>':"")}));
-      const cpiLine=showCpi===null?"CPI YoY unavailable":`CPI inflation: ${fmt(showCpi)}% YoY`;
-      const ppiLine=showPpi===null?"PPI index unavailable":`PPI index: ${fmt(showPpi,3)}`;
-      const dollarLine=showDollar===null?"Dollar index unavailable":`Broad USD index: ${fmt(showDollar,3)}${overrides.dollar?" (manual override)":""}`;
-      read.textContent=[cpiLine,ppiLine,dollarLine,vix===null?"VIX unavailable — not supplied by current data service.":`VIX ${fmt(vix)}: ${vix<15?"low":vix<25?"elevated":"high"} expected volatility.`].join(" · ")+ " Compare release actuals with consensus and confirm with price action.";
-      status.textContent="Updated "+(result.fetchedAt?new Date(result.fetchedAt).toLocaleString():"now")+" · Observation dates shown on each card";
-    }catch(e){
-      grid.replaceChildren();
-      ["US 10Y YIELD","USD STRENGTH · BROAD INDEX","CPI INFLATION · YOY","PPI · MONTHLY CHANGE","VIX · FEAR / VOLATILITY INDEX"].forEach(label=>grid.appendChild(card(label,null,"",null)));
-      read.textContent="Macro data could not load. Refresh again; do not infer a bias from missing data.";
-      status.textContent="Data unavailable: "+(e.message||"request failed");
-    }finally{button.disabled=false;}
+      grid.appendChild(card("US 10Y TREASURY YIELD",yieldVal,dateOf(d.us10y),yieldCh===null?null:yieldCh*100,{suffix:"%",changeSuffix:" bps",changeLabel:"change",chart:sparkline(yieldVal,yieldVal!==null&&yieldCh!==null?yieldVal-yieldCh:null,"#26a69a")}));
+      grid.appendChild(card("BROAD US DOLLAR INDEX",dollar,dateOf(d.dollar),dollarPct,{decimals:3,chart:sparkline(dollar,dollarPrev,"#579dff"),extra:'<div class="ms-date">Broad dollar index, not ICE DXY</div>'}));
+      grid.appendChild(card("CPI INFLATION · YEAR OVER YEAR",cpiYoY,dateOf(d.cpiYearOverYear),null,{suffix:"%",chart:sparkline(cpiYoY,cpiYoY!==null&&cpiChange!==null?cpiYoY-cpiChange:null,"#b18cff")}));
+      grid.appendChild(card("PPI PRODUCER PRICE INDEX",num(d.ppi?.value),dateOf(d.ppi),ppiPct,{decimals:3,chart:sparkline(num(d.ppi?.value),num(d.ppi?.value)!==null&&num(d.ppi?.change)!==null?num(d.ppi.value)-num(d.ppi.change):null,"#f5a45d")}));
+      grid.appendChild(card("VIX · IMPLIED VOLATILITY",vix,dateOf(d.vix),num(d.vix?.change),{changeSuffix:" pts",changeLabel:"change",extra:vix===null?"<div class=\"ms-date\">No current observation supplied</div>":gauge(vix)}));
+      const cpiLine=cpiYoY===null?"CPI inflation unavailable":"CPI inflation: "+fmt(cpiYoY)+"% year over year";const ppiLine=num(d.ppi?.value)===null?"PPI unavailable":"PPI index: "+fmt(d.ppi.value,3);const dollarLine=dollar===null?"Dollar index unavailable":"Broad USD index: "+fmt(dollar,3);
+      read.textContent=[cpiLine,ppiLine,dollarLine,vix===null?"VIX unavailable":"VIX "+fmt(vix)+": "+(vix<15?"low":vix<25?"elevated":"high")+" expected volatility"].join(" · ")+". Compare release actuals with consensus and price action.";
+      status.textContent="Updated "+(result.fetchedAt?new Date(result.fetchedAt).toLocaleString():"now")+" · Observation dates shown on each card.";
+    }catch(e){grid.replaceChildren();["US 10Y TREASURY YIELD","BROAD US DOLLAR INDEX","CPI INFLATION · YEAR OVER YEAR","PPI PRODUCER PRICE INDEX","VIX · IMPLIED VOLATILITY"].forEach(label=>grid.appendChild(card(label,null,"",null)));read.textContent="Macro data could not load. Refresh before drawing a conclusion.";status.textContent="Data unavailable: "+(e.message||"request failed");}
+    finally{button.disabled=false;}
   }
-  button.addEventListener("click",()=>{refresh();loadHistory()}); loadOverrideInputs(); refresh(); loadHistory();
+  button.addEventListener("click",()=>{refresh();loadHistory()}); refresh(); loadHistory();
 })();
