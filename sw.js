@@ -1,12 +1,12 @@
 "use strict";
 
-const CACHE_VERSION = "marketpilot-v18";
+const CACHE_VERSION = "marketpilot-v19";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./macro-dashboard.js?v=20261024-cpi-bars-v2",
   "./marketpilot-config.js?v=20261024-pro-workspace",
-  "./ai-workspace.js?v=20261024-menu-credit-v2",
+  "./ai-workspace.js?v=20261024-credit-neutral-v3",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
