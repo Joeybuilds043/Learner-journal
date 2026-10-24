@@ -123,6 +123,7 @@ jobs:
             assert.match(html, /id="showCharts"/, "Live page must show the compact Markets / Charts navigation");
             assert.match(html, /ai-workspace\.js\?v=20261024-financial-assistant-v4/, "Live page must reference the updated assistant bundle");
             assert.ok(script.includes("INFLATION TRACKER / FRED CPI"), "Macro dashboard must include the CPI inflation chart");
+          assert.ok(script.includes("baseY=H-B"), "Historical macro chart must define its bar baseline before rendering");
             assert.ok(script.includes("const bars=pts.map") && script.includes("+grid+bars+"), "Historical macro chart must use columns with the smoothed trend area");
 
             const aiResponse = await getWithRetry(pageUrl + "ai-workspace.js?v=20261024-financial-assistant-v4");
@@ -155,6 +156,15 @@ jobs:
             const history = await historyResponse.json();
             assert.ok(Array.isArray(history.points) && history.points.length > 0,
               "History endpoint must return at least one observation");
+
+            const cpiHistoryResponse = await getWithRetry(
+              apiUrl + "history?series=cpi&range=5y",
+              { headers: { Origin: origin, "Cache-Control": "no-cache" } },
+              3
+            );
+            const cpiHistory = await cpiHistoryResponse.json();
+            assert.ok(Array.isArray(cpiHistory.points) && cpiHistory.points.length >= 13,
+              "CPI history must return enough monthly observations to calculate year-over-year inflation");
 
             const atlasUrl = "https://marketpilot-ai.joeybuilds043.workers.dev";
             const atlasHealthResponse = await getWithRetry(atlasUrl + "/health", {
