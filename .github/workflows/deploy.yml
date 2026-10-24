@@ -105,7 +105,7 @@ jobs:
 
             const aiResponse = await getWithRetry(pageUrl + "ai-workspace.js?v=20261024-analyst-polish");
             const aiScript = await aiResponse.text();
-            for (const marker of ["Financial Research Desk", "Daily Market Briefing", "Macro &amp; Market History", "News &amp; Market Impact", "Trade Journal", "mpAssetPrompts", "Workspace Settings", "Financial Analyst", "mpClearChat", "Saad Hashmani sparked my interest in markets"]) {
+            for (const marker of ["Financial Research Desk", "Daily Market Briefing", "Macro &amp; Market History", "News &amp; Market Impact", "Your Journal", "mpAssetPrompts", "Profile &amp; Preferences", "AI Market Analyst", "Historical Patterns", "mpClearChat", "Saad Hashmani’s market-focused content sparked my interest"]) {
               assert.ok(aiScript.includes(marker), `Published AI workspace is missing ${marker}`);
             }
 
