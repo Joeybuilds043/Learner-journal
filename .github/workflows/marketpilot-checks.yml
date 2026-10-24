@@ -70,11 +70,11 @@ jobs:
           worker = Path('worker/index.js').read_text()
           assert '/api/history' in worker and '/api/news' in worker and 'query1.finance.yahoo.com/v1/finance/search' in worker
           assert '@cf/zai-org/glm-4.7-flash' in worker and 'HISTORICAL SERIES' in worker
-          assert 'You are Atlas, a senior financial-markets analyst' in worker, 'Keep the financial analyst system prompt'
+          assert 'You are the MarketPilot Market Analyst' in worker, 'Keep the financial analyst system prompt'
           assert 'cpi_yoy' in Path('macro-dashboard.js').read_text(), 'CPI year-over-year history chart must be available'
           assert 'msAreaGradient' in Path('macro-dashboard.js').read_text(), 'Historical charts must use enhanced visual treatment'
           assert 'mpClearChat' in js, 'Financial analyst chat must have a clear-chat control'
-          assert 'Inspired by Saad Hashmani' in js, 'Project inspiration credit must remain visible'
+          assert 'Saad Hashmani sparked my interest in markets' in js, 'Project inspiration credit must remain visible'
           assert 'citationMap' in worker, 'Live news should preserve source citations'
           loader_start = js.index('async function fetchAssets()')
           loader_end = js.index('function usd(n)', loader_start)
@@ -83,7 +83,9 @@ jobs:
           assert js.index('const menuButton=document.createElement') > js.index('checkAIService();refreshAssets();showMarketGroup("crypto");setView("markets");'), 'Navigation/menu initialization must run at app scope'
           assert 'function renderAnswer' in js, 'Financial answers should render structured text'
           assert 'if($("mpDrawer"))$("mpDrawer").hidden=true' in js, 'Opening markets before the menu exists must not throw'
-          assert 'const macroHistoryTools=document.getElementById("ms-history-tools")' in js, 'Move macro history to the Historical section'
+          assert 'const macroHistoryTools=document.getElementById("ms-history-tools")' not in js, 'Macro history should stay on the opening dashboard'
+          assert '/api/macro-history' in worker, 'Source-backed macro history endpoint must be available'
+          assert 'Clear chat conversation?' not in js and 'Chat cleared. Ask a new market question' not in js, 'Clearing chat should not insert a system message'
           assert 'id="asset"' in html and 'id="mistake"' in html and 'id="betterAction"' in html, 'Journal needs the asset and trade-reflection fields'
           assert 'learner-journal-entries-v1' in html, 'Legacy journal storage key must be preserved in index.html'
           assert 'Cloudflare Workers AI' in Path('.github/workflows/deploy-marketpilot-worker.yml').read_text()
