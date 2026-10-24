@@ -100,12 +100,12 @@ jobs:
             assert.ok(!script.includes("marketsignal-data.asadlang05.workers.dev"),
               "Published dashboard must not call the retired Worker");
             assert.match(html, /macro-dashboard\.js/, "Live page must load the macro dashboard script");
-            assert.match(html, /MarketPilot AI/, "Live page must use the MarketPilot AI brand");
+            assert.match(html, /<h1>MarketPilot<\/h1>/, "Live page must use the MarketPilot brand");
             assert.match(html, /ai-workspace\.js/, "Live page must load the new workspace script");
 
-            const aiResponse = await getWithRetry(pageUrl + "ai-workspace.js?v=20261024-marketpilot");
+            const aiResponse = await getWithRetry(pageUrl + "ai-workspace.js?v=20261024-analyst-polish");
             const aiScript = await aiResponse.text();
-            for (const marker of ["Financial Research Desk", "Daily Market Briefing", "Macro &amp; Market History", "News &amp; Market Impact", "Trade Journal", "mpAssetPrompts", "Workspace Settings", "Financial Analyst", "mpClearChat", "Inspired by Saad Hashmani"]) {
+            for (const marker of ["Financial Research Desk", "Daily Market Briefing", "Macro &amp; Market History", "News &amp; Market Impact", "Trade Journal", "mpAssetPrompts", "Workspace Settings", "Financial Analyst", "mpClearChat", "Saad Hashmani sparked my interest in markets"]) {
               assert.ok(aiScript.includes(marker), `Published AI workspace is missing ${marker}`);
             }
 
