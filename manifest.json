@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "MarketPilot AI | Market Research",
+  "name": "MarketPilot | Professional Market Terminal",
   "short_name": "MarketPilot",
-  "description": "AI-assisted market research, live public market data, daily analysis and a trading journal.",
+  "description": "Cross-asset market intelligence, macro charts, research tools and a trading journal.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",
