@@ -136,7 +136,7 @@
       const cpiYoY=num(d.cpiYearOverYear?.value),cpiChange=num(d.cpiYearOverYear?.change),ppiPct=percentChange(d.ppi);const yieldVal=num(d.us10y?.value),yieldCh=num(d.us10y?.change),vix=num(d.vix?.value);
       grid.replaceChildren();
       grid.appendChild(card("US 10Y TREASURY YIELD",yieldVal,dateOf(d.us10y),yieldCh===null?null:yieldCh*100,{suffix:"%",changeSuffix:" bps",changeLabel:"change",chart:sparkline(yieldVal,yieldVal!==null&&yieldCh!==null?yieldVal-yieldCh:null,"#26a69a")}));
-      grid.appendChild(card("BROAD US DOLLAR INDEX",dollar,dateOf(d.dollar),dollarPct,{decimals:3,chart:sparkline(dollar,dollarPrev,"#579dff"),extra:'<div class="ms-date">Broad dollar index, not ICE DXY</div>'}));
+      grid.appendChild(card("BROAD US DOLLAR INDEX",dollar,dateOf(d.dollar),dollarPct,{decimals:3,extra:'<div class="ms-date">Broad dollar index, not ICE DXY</div>'}));
       grid.appendChild(card("CPI INFLATION · YEAR OVER YEAR",cpiYoY,dateOf(d.cpiYearOverYear),null,{suffix:"%",chart:sparkline(cpiYoY,cpiYoY!==null&&cpiChange!==null?cpiYoY-cpiChange:null,"#b18cff")}));
       grid.appendChild(card("PPI PRODUCER PRICE INDEX",num(d.ppi?.value),dateOf(d.ppi),ppiPct,{decimals:3,chart:sparkline(num(d.ppi?.value),num(d.ppi?.value)!==null&&num(d.ppi?.change)!==null?num(d.ppi.value)-num(d.ppi.change):null,"#f5a45d")}));
       grid.appendChild(card("VIX · IMPLIED VOLATILITY",vix,dateOf(d.vix),num(d.vix?.change),{changeSuffix:" pts",changeLabel:"change",extra:vix===null?"<div class=\"ms-date\">No current observation supplied</div>":gauge(vix)}));
