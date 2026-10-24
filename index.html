@@ -21,7 +21,7 @@
       --text: #eef4ff;
       --muted: #8ea1ba;
       --accent: #579dff;
-      --blue: #26a69a;
+      --blue: #8c9cff;
       --purple: #b18cff;
       --red: #f23645;
       --yellow: #f0b90b;
@@ -524,7 +524,7 @@
     /* MarketSignal two-view navigation */
     .app-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 14px;padding:5px;border:1px solid var(--border);border-radius:15px;background:rgba(12,23,39,.9);position:sticky;top:8px;z-index:20;backdrop-filter:blur(12px)}
     .app-nav button{border:1px solid transparent;border-radius:10px;padding:12px 10px;background:transparent;color:var(--muted);font:inherit;font-weight:800;cursor:pointer}
-    .app-nav button[aria-selected="true"]{background:var(--accent);color:#071a17}
+    .app-nav button[aria-selected="true"]{background:linear-gradient(135deg,#c8d5ff,#96b5ff);color:#091322}
     .app-view[hidden]{display:none!important}
     .view-heading{margin:0 0 18px}
     .view-heading h2{font-size:22px;margin:0 0 6px}
@@ -538,7 +538,7 @@
 <main class="app">
   <header class="topbar">
     <div class="brand">
-      <div class="logo" aria-hidden="true"><svg viewBox="0 0 40 40" width="32" height="32" fill="none"><path d="M4 28V12l8 8 8-13 8 13 8-8v16" stroke="#579dff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 33h30" stroke="#26a69a" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 40 40" width="32" height="32" fill="none"><path d="M4 28V12l8 8 8-13 8 13 8-8v16" stroke="#579dff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 33h30" stroke="#b18cff" stroke-width="2" stroke-linecap="round"/></svg></div>
       <div>
         <h1>MarketPilot</h1>
         <div class="brand-sub">MARKET INTELLIGENCE <span style="color:var(--accent)">/</span> CROSS-ASSET RESEARCH</div>
@@ -552,8 +552,8 @@
 
 
   <nav class="app-nav" aria-label="Main navigation">
-    <button type="button" id="showDashboard" aria-selected="true">Market Dashboard</button>
-    <button type="button" id="showJournal" aria-selected="false">Trading Journal</button>
+    <button type="button" id="showDashboard" aria-selected="true">Markets</button>
+    <button type="button" id="showCharts" aria-selected="false">Charts</button>
   </nav>
   <section id="dashboardView" class="app-view" aria-label="Market dashboard">
   <section class="hero">
@@ -1085,6 +1085,7 @@
   const journal = document.getElementById("journalView");
   const dashButton = document.getElementById("showDashboard");
   const journalButton = document.getElementById("showJournal");
+  if (!dashboard || !journal || !dashButton || !journalButton) return;
   function showView(name) {
     const isDashboard = name !== "journal";
     dashboard.hidden = !isDashboard;
@@ -1102,9 +1103,9 @@
 })();
 </script>
 
-  <script src="./macro-dashboard.js?v=20261024-cpi-bars-v2" defer></script>
+  <script src="./macro-dashboard.js?v=20261024-cpi-bars-v3" defer></script>
   <script src="./marketpilot-config.js?v=20261024-pro-workspace" defer></script>
-  <script src="./ai-workspace.js?v=20261024-credit-neutral-v3" defer></script>
+  <script src="./ai-workspace.js?v=20261024-financial-assistant-v4" defer></script>
 </body>
   </html>
 
