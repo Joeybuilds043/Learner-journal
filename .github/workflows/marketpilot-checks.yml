@@ -63,7 +63,7 @@ jobs:
           all_js = js + Path('macro-dashboard.js').read_text()
           assert 'MarketPilot AI' in html
           assert 'ai-workspace.js' in html
-          for section in ['Markets', 'Charts', 'Financial Analyst', 'Research Briefing', 'Trade Journal', 'Workspace Settings', 'Macro &amp; Market History', 'News &amp; Market Impact']:
+          for section in ['Markets', 'Charts', 'AI Market Analyst', 'Daily Market Brief', 'Your Journal', 'Profile &amp; Preferences', 'Historical Patterns', 'Macro &amp; Market History', 'News &amp; Market Impact']:
               assert section in js, f'Missing navigation/section: {section}'
           assert 'learner-journal-entries-v1' in html, 'Legacy journal storage key must be preserved in index.html'
           assert 'marketpilot-ai.joeybuilds043.workers.dev' in Path('marketpilot-config.js').read_text(), 'Atlas AI endpoint must be configured in public frontend settings'
@@ -72,9 +72,10 @@ jobs:
           assert '@cf/zai-org/glm-4.7-flash' in worker and 'HISTORICAL SERIES' in worker
           assert 'You are the MarketPilot Market Analyst' in worker, 'Keep the financial analyst system prompt'
           assert 'cpi_yoy' in Path('macro-dashboard.js').read_text(), 'CPI year-over-year history chart must be available'
+          assert 'function loadCpiTrend()' in Path('macro-dashboard.js').read_text() and 'ms-cpi-panel' in Path('macro-dashboard.js').read_text(), 'Dedicated CPI inflation bar chart must be available'
           assert 'msAreaGradient' in Path('macro-dashboard.js').read_text(), 'Historical charts must use enhanced visual treatment'
           assert 'mpClearChat' in js, 'Financial analyst chat must have a clear-chat control'
-          assert 'Saad Hashmani sparked my interest in markets' in js, 'Project inspiration credit must remain visible'
+          assert 'Saad Hashmani’s market-focused content sparked my interest' in js, 'Project inspiration credit must remain visible'
           assert 'citationMap' in worker, 'Live news should preserve source citations'
           loader_start = js.index('async function fetchAssets()')
           loader_end = js.index('function usd(n)', loader_start)
