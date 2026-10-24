@@ -81,7 +81,6 @@
   }
   async function loadHistory(){
     const selected=seriesSelect.value,range=rangeSelect.value;
-    const macroSeries={us10y:"DGS10",dollar:"DTWEXBGS",cpi:"CPIAUCSL",ppi:"PPIACO",vix:"VIXCLS"};
     historyStatus.textContent="Loading "+(selected==="cpi_yoy"?"CPI inflation year over year":selected)+" history…";
     try{
       const series=selected==="cpi_yoy"?"cpi":selected;
