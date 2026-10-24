@@ -84,10 +84,8 @@
     const macroSeries={us10y:"DGS10",dollar:"DTWEXBGS",cpi:"CPIAUCSL",ppi:"PPIACO",vix:"VIXCLS"};
     historyStatus.textContent="Loading "+(selected==="cpi_yoy"?"CPI inflation year over year":selected)+" history…";
     try{
-      const macro=selected==="cpi_yoy"||Object.prototype.hasOwnProperty.call(macroSeries,selected);
-      const series=selected==="cpi_yoy"?"CPIAUCSL":macro?macroSeries[selected]:selected;
-      const endpoint=macro?"https://marketpilot-ai.joeybuilds043.workers.dev/api/macro-history?series="+encodeURIComponent(series)+"&range=5y":"https://marketpilot-ai.joeybuilds043.workers.dev/api/history?symbol="+encodeURIComponent(series)+"&range="+encodeURIComponent(range==="1y"?"1y":"5y");
-      const response=await fetch(endpoint,{cache:"no-store"});const data=await response.json();if(!response.ok)throw new Error(data.detail||data.error||"History endpoint unavailable");
+      const series=selected==="cpi_yoy"?"cpi":selected;
+      const response=await fetch(API_URL+"history?series="+encodeURIComponent(series)+"&range="+encodeURIComponent(selected==="cpi_yoy"?"5y":range),{cache:"no-store"});const data=await response.json();if(!response.ok)throw new Error(data.detail||data.error||"History endpoint unavailable");
       let points=(data.points||data.observations||[]).filter(p=>p&&p.date&&Number.isFinite(Number(p.value)));
       let label=data.name||data.label||series,unit=data.unit||"";
       if(selected==="cpi_yoy"){
