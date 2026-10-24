@@ -8,7 +8,7 @@
   <meta name="description" content="MarketPilot AI — market research, live public market data, daily analysis and a learning workspace.">
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="./marketsignal-mark.svg">
-  <title>MarketPilot AI | Market Research Workspace</title>
+  <title>MarketPilot | Professional Market Terminal</title>
 
   <style>
     :root {
@@ -20,11 +20,11 @@
       --border: #24354a;
       --text: #eef4ff;
       --muted: #8ea1ba;
-      --accent: #9bb5ff;
-      --blue: #78aaff;
-      --purple: #c0a1ff;
-      --red: #ff8795;
-      --yellow: #f1cb7b;
+      --accent: #579dff;
+      --blue: #26a69a;
+      --purple: #b18cff;
+      --red: #f23645;
+      --yellow: #f0b90b;
       --radius: 18px;
     }
 
@@ -352,7 +352,7 @@
       flex: 1;
       border-color: var(--accent);
       background: var(--accent);
-      color: #071a17;
+      color: #08111d;
     }
 
     .btn-subtle { color: #c0cfe2; }
@@ -538,10 +538,10 @@
 <main class="app">
   <header class="topbar">
     <div class="brand">
-      <div class="logo" aria-hidden="true"><svg viewBox="0 0 40 40" width="32" height="32" fill="none"><path d="M4 28V12l8 8 8-13 8 13 8-8v16" stroke="#aebfff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 33h30" stroke="#78aaff" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 40 40" width="32" height="32" fill="none"><path d="M4 28V12l8 8 8-13 8 13 8-8v16" stroke="#579dff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 33h30" stroke="#26a69a" stroke-width="2" stroke-linecap="round"/></svg></div>
       <div>
-        <h1>MarketPilot AI</h1>
-        <div class="brand-sub">AI MARKET RESEARCH <span style="color:var(--accent)">/</span> DAILY INTELLIGENCE</div>
+        <h1>MarketPilot</h1>
+        <div class="brand-sub">MARKET INTELLIGENCE <span style="color:var(--accent)">/</span> CROSS-ASSET RESEARCH</div>
       </div>
     </div>
     <div class="date-box">
@@ -559,7 +559,7 @@
   <section class="hero">
     <div>
       <p class="eyebrow">MARKET INTELLIGENCE / US MACRO</p>
-      <h2>Market intelligence<span style="color:var(--accent)">.</span></h2>
+      <h2>Read the market. Understand the move<span style="color:var(--accent)">.</span></h2>
     </div>
     <div class="mode-pill"><span class="mode-dot"></span> DATA TERMINAL</div>
   </section>
@@ -705,7 +705,7 @@
   </div>
 
   <footer>
-    MarketPilot AI · Market Research Workspace<br>
+    MarketPilot · Professional Market Terminal<br>
     Local browser storage · No account or cloud sync
   </footer>
 </main>
@@ -1069,7 +1069,7 @@
   // Register the existing service worker.
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=20261024-marketpilot").catch(() => {
+      navigator.serviceWorker.register("./sw.js?v=20261024-trading-terminal").catch(() => {
         showStatus("Offline setup failed. Check the service worker file.");
       });
     });
@@ -1102,9 +1102,9 @@
 })();
 </script>
 
-  <script src="./macro-dashboard.js?v=20261024-market-visuals" defer></script>
+  <script src="./macro-dashboard.js?v=20261024-trading-charts" defer></script>
   <script src="./marketpilot-config.js?v=20261024-pro-workspace" defer></script>
-  <script src="./ai-workspace.js?v=20261024-navigation-refresh" defer></script>
+  <script src="./ai-workspace.js?v=20261024-analyst-polish" defer></script>
 </body>
   </html>
 
