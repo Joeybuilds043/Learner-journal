@@ -84,7 +84,7 @@ jobs:
           assert 'function renderAnswer' in js, 'Financial answers should render structured text'
           assert 'if($("mpDrawer"))$("mpDrawer").hidden=true' in js, 'Opening markets before the menu exists must not throw'
           assert 'const macroHistoryTools=document.getElementById("ms-history-tools")' not in js, 'Macro history should stay on the opening dashboard'
-          assert '/api/macro-history' in worker, 'Source-backed macro history endpoint must be available'
+          assert 'API_URL+"history?series="' in Path('macro-dashboard.js').read_text(), 'Macro history charts must use the existing FRED Worker'
           assert 'Clear chat conversation?' not in js and 'Chat cleared. Ask a new market question' not in js, 'Clearing chat should not insert a system message'
           assert 'id="asset"' in html and 'id="mistake"' in html and 'id="betterAction"' in html, 'Journal needs the asset and trade-reflection fields'
           assert 'learner-journal-entries-v1' in html, 'Legacy journal storage key must be preserved in index.html'
