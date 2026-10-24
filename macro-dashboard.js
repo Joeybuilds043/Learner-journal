@@ -73,7 +73,7 @@
     const valid=(points||[]).filter(p=>Number.isFinite(Number(p.value))&&p.date).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
     if(valid.length<2){historyChart.innerHTML='<div class="empty">Not enough dated observations for this range. Choose a longer period; no sample data is shown.</div>';return}
     const values=valid.map(p=>Number(p.value)),min=Math.min(...values),max=Math.max(...values),span=max-min||Math.max(Math.abs(max)*.01,.01);
-    const W=720,H=220,L=56,R=18,T=22,B=35,plotW=W-L-R,plotH=H-T-B;
+    const W=720,H=220,L=56,R=18,T=22,B=35,plotW=W-L-R,plotH=H-T-B,baseY=H-B;
     const pts=values.map((v,i)=>({x:L+i*plotW/(values.length-1),y:T+(max-v)/span*plotH,v,date:valid[i].date}));
     let path="M "+pts[0].x.toFixed(2)+" "+pts[0].y.toFixed(2);
     for(let i=1;i<pts.length;i++){const prev=pts[i-1],cur=pts[i],mx=(prev.x+cur.x)/2;path+=" Q "+prev.x.toFixed(2)+" "+prev.y.toFixed(2)+" "+mx.toFixed(2)+" "+((prev.y+cur.y)/2).toFixed(2);if(i===pts.length-1)path+=" T "+cur.x.toFixed(2)+" "+cur.y.toFixed(2);}
@@ -111,6 +111,7 @@
   const num = v => v!==null && v!=="" && Number.isFinite(Number(v)) ? Number(v) : null;
   const fmt = (v,d=2) => num(v)===null ? "—" : Number(v).toLocaleString("en-US",{minimumFractionDigits:Math.min(2,d),maximumFractionDigits:d,useGrouping:false});
   const dateOf = x => x?.date || x?.latestDate || x?.observationDate || "";
+  let latestCpiYoyValue=null,latestCpiYoyDate="";
   async function loadCpiTrend(){
     const host=section.querySelector("#ms-cpi-bars"),statusEl=section.querySelector("#ms-cpi-status");
     const latestEl=section.querySelector("#ms-cpi-latest"),changeEl=section.querySelector("#ms-cpi-change"),highEl=section.querySelector("#ms-cpi-high"),lowEl=section.querySelector("#ms-cpi-low");
@@ -123,7 +124,7 @@
       const byMonth=new Map(raw.map(p=>[String(p.date).slice(0,7),Number(p.value)]));
       const yoy=raw.map(p=>{const d=new Date(String(p.date)+"T00:00:00Z");d.setUTCMonth(d.getUTCMonth()-12);const prior=byMonth.get(d.toISOString().slice(0,7)),v=Number(p.value);return prior!==undefined&&prior!==0?{date:String(p.date),value:(v/prior-1)*100}:null;}).filter(Boolean);
       if(yoy.length<2)throw new Error("Not enough matching year-ago observations.");
-      const recent=yoy.slice(-12),latest=recent[recent.length-1],previous=recent[recent.length-2],values=recent.map(p=>p.value),min=Math.min(...values),max=Math.max(...values),delta=latest.value-previous.value;
+      const recent=yoy.slice(-12),latest=recent[recent.length-1],previous=recent[recent.length-2],values=recent.map(p=>p.value),min=Math.min(...values),max=Math.max(...values),delta=latest.value-previous.value;latestCpiYoyValue=latest.value;latestCpiYoyDate=latest.date;const mainCpiCard=grid.children[2];if(mainCpiCard){const mainValue=mainCpiCard.querySelector(".ms-value"),mainDate=mainCpiCard.querySelector(".ms-date");if(mainValue)mainValue.textContent=fmt(latest.value,2)+"%";if(mainDate)mainDate.textContent="As of "+latest.date;}if(read.textContent.includes("CPI inflation unavailable"))read.textContent=read.textContent.replace("CPI inflation unavailable","CPI inflation: "+fmt(latest.value,2)+"% year over year");
       latestEl.textContent=fmt(latest.value,2)+"%";changeEl.textContent=(delta>0?"+":"")+fmt(delta,2)+" pp";changeEl.style.color=delta>0?"#eaa3b5":delta<0?"#80d3f0":"#dce7f7";highEl.textContent=fmt(max,2)+"%";lowEl.textContent=fmt(min,2)+"%";
       const W=720,H=190,L=42,R=10,T=15,B=31,plotW=W-L-R,plotH=H-T-B,axisMin=Math.max(0,Math.floor((min-.35)*2)/2),axisMax=Math.ceil((max+.35)*2)/2||1,span=axisMax-axisMin||1;
       const yOf=v=>T+(axisMax-v)/span*plotH,baseY=H-B,slot=plotW/recent.length,bw=Math.min(28,slot*.54);
@@ -163,11 +164,11 @@
     try{
       const response=await fetch(API_URL,{cache:"no-store"}),result=await response.json();if(!response.ok)throw new Error(result.error||"Data request failed");
       const d=result.data||{};const dollar=num(d.dollar?.value),dollarPct=percentChange(d.dollar),dollarPrev=dollar!==null&&num(d.dollar?.change)!==null?dollar-num(d.dollar.change):null;
-      const cpiYoY=num(d.cpiYearOverYear?.value),cpiChange=num(d.cpiYearOverYear?.change),ppiPct=percentChange(d.ppi);const yieldVal=num(d.us10y?.value),yieldCh=num(d.us10y?.change),vix=num(d.vix?.value);
+      const cpiYoY=num(d.cpiYearOverYear?.value)??latestCpiYoyValue,cpiChange=num(d.cpiYearOverYear?.change),ppiPct=percentChange(d.ppi);const yieldVal=num(d.us10y?.value),yieldCh=num(d.us10y?.change),vix=num(d.vix?.value);
       grid.replaceChildren();
       grid.appendChild(card("US 10Y TREASURY YIELD",yieldVal,dateOf(d.us10y),yieldCh===null?null:yieldCh*100,{suffix:"%",changeSuffix:" bps",changeLabel:"change",}));
       grid.appendChild(card("BROAD US DOLLAR INDEX",dollar,dateOf(d.dollar),dollarPct,{decimals:3,extra:'<div class="ms-date">Broad dollar index, not ICE DXY</div>'}));
-      grid.appendChild(card("CPI INFLATION · YEAR OVER YEAR",cpiYoY,dateOf(d.cpiYearOverYear),null,{suffix:"%",}));
+      grid.appendChild(card("CPI INFLATION · YEAR OVER YEAR",cpiYoY,dateOf(d.cpiYearOverYear)||latestCpiYoyDate,null,{suffix:"%",}));
       grid.appendChild(card("PPI PRODUCER PRICE INDEX",num(d.ppi?.value),dateOf(d.ppi),ppiPct,{decimals:3,}));
       grid.appendChild(card("VIX · IMPLIED VOLATILITY",vix,dateOf(d.vix),num(d.vix?.change),{changeSuffix:" pts",changeLabel:"change",extra:vix===null?"<div class=\"ms-date\">No current observation supplied</div>":gauge(vix)}));
       const cpiLine=cpiYoY===null?"CPI inflation unavailable":"CPI inflation: "+fmt(cpiYoY)+"% year over year";const ppiLine=num(d.ppi?.value)===null?"PPI unavailable":"PPI index: "+fmt(d.ppi.value,3);const dollarLine=dollar===null?"Dollar index unavailable":"Broad USD index: "+fmt(dollar,3);
