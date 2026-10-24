@@ -13,7 +13,7 @@
     .ms-label{color:#9badc3;font-size:10px;line-height:1.35;min-height:26px}
     .ms-value{font-size:23px;font-weight:850;letter-spacing:-.8px;margin:5px 0 2px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
     .ms-date{color:#7188a3;font-size:9px;line-height:1.35}
-    .ms-change{font-size:10px;margin-top:5px;font-weight:750}.ms-change.up{color:#ff9d9d}.ms-change.down{color:#75e8be}.ms-change.flat{color:#c2d0e0}
+    .ms-change{font-size:10px;margin-top:5px;font-weight:750}.ms-change.up{color:#ff9d9d}.ms-change.down{color:#8bd1ff}.ms-change.flat{color:#c2d0e0}
     .ms-chart{grid-column:1/-1;width:100%;margin-top:10px;padding-top:9px;border-top:1px solid #24364b}.ms-chart svg{display:block;width:100%;height:58px;overflow:visible}.ms-chart-label{font-size:9px}.ms-card{display:block;padding:14px 16px}.ms-card-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}.ms-card-top .ms-label{min-height:0;flex:1}.ms-card-top .ms-value{font-size:25px;margin:0 0 0 12px;text-align:right;flex-shrink:0}.ms-card .ms-date{margin-top:5px}.ms-card-extra{margin-top:5px}.ms-value{font-size:25px}
     .ms-chart-label{display:flex;justify-content:space-between;color:#7188a3;font-size:9px;margin-top:2px}
     .ms-cpi-panel{margin:12px 0 14px;padding:15px;border:1px solid #394361;border-radius:17px;background:radial-gradient(ellipse at 96% 0%,#282344 0%,transparent 39%),linear-gradient(145deg,#111c2d,#0a1220);box-shadow:0 14px 28px #0002}
@@ -51,7 +51,7 @@
     <div class="ms-grid" id="ms-grid"><div class="ms-card">Loading data…</div></div>
     <div class="ms-read"><div class="ms-read-title">MACRO READ</div><p id="ms-read-text">Loading latest observations.</p></div>
     <section class="ms-cpi-panel" id="ms-cpi-panel" aria-label="US CPI inflation trend"><div class="ms-cpi-head"><div><p class="ms-cpi-kicker">INFLATION TRACKER / FRED CPI</p><h3>US CPI inflation</h3><p>Year-over-year rate · monthly observations</p></div><div class="ms-cpi-current"><strong id="ms-cpi-latest">—</strong><small>latest YoY</small></div></div><div class="ms-cpi-metrics"><div class="ms-cpi-metric"><span>Change vs prior month</span><strong id="ms-cpi-change">—</strong></div><div class="ms-cpi-metric"><span>12-month high</span><strong id="ms-cpi-high">—</strong></div><div class="ms-cpi-metric"><span>12-month low</span><strong id="ms-cpi-low">—</strong></div></div><div class="ms-cpi-chart" id="ms-cpi-bars"><div class="empty">Loading monthly CPI observations…</div></div><p class="ms-cpi-status" id="ms-cpi-status">Loading published CPI data…</p></section>
-    <div class="ms-tools>
+    <div class="ms-tools">
       <h3>Historical macro explorer</h3>
       <div class="ms-controls">
         <div><label for="ms-series">Indicator</label><select id="ms-series"><option value="us10y">US 10Y Yield</option><option value="dollar">Broad Dollar Index</option><option value="cpi_yoy">CPI Inflation (YoY)</option><option value="cpi">CPI Index</option><option value="ppi">PPI Index</option><option value="vix">VIX / Fear Index</option></select></div>
@@ -59,7 +59,7 @@
       </div>
       <div class="ms-chartbox" id="ms-history-chart"><div class="empty">Select an indicator and period to explore published history. No sample data is shown.</div></div>
       <div class="ms-status" id="ms-history-status">Historical data endpoint not confirmed yet.</div>
-      <div class="ms-ai-cta"><div><span class="ms-ai-kicker">NEXT STEP</span><strong>Turn the data into a market view</strong><p>Ask the AI Market Analyst to connect macro trends, price action and risk scenarios.</p></div><button id="ms-open-ai" type="button">Open AI Market Analyst <span aria-hidden="true">↗</span></button></div>
+      <div class="ms-ai-cta"><div><span class="ms-ai-kicker">NEXT STEP</span><strong>Turn the data into a market view</strong><p>Ask the Financial Assistant to connect macro trends, price action and risk scenarios.</p></div><button id="ms-open-ai" type="button">Open Financial Assistant <span aria-hidden="true">↗</span></button></div>
     </div>
     <div class="ms-status" id="ms-status" role="status" aria-live="polite">Connecting…</div>
     <p class="ms-footnote">Data source: FRED. Release data can lag. Broad dollar index is not ICE DXY. VIX is a published volatility index, not a direct measure of all market fear.</p>`;
@@ -83,7 +83,7 @@
     const step=Math.max(1,Math.floor(pts.length/7));
     const dots=pts.filter((p,i)=>i===0||i===pts.length-1||i%step===0).map(p=>'<circle class="ms-data-point" cx="'+p.x.toFixed(2)+'" cy="'+p.y.toFixed(2)+'" r="3" fill="#dce5ff" stroke="#8eaaff" stroke-width="2"><title>'+escapeHtml(p.date)+' · '+fmt(p.v)+(unit==="percent"?"%":"")+'</title></circle>').join("");
     const first=valid[0].date,last=valid[valid.length-1].date;
-    const lineColor=label.toLowerCase().includes("inflation")?"#b18cff":label.toLowerCase().includes("yield")?"#26a69a":"#579dff";
+    const lineColor=label.toLowerCase().includes("inflation")?"#b18cff":label.toLowerCase().includes("yield")?"#8da2ff":"#579dff";
     historyChart.innerHTML='<div class="ms-date">'+escapeHtml(label)+' · '+valid.length+' observations · source: published historical data</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(label)+' historical chart" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="msAreaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+lineColor+'" stop-opacity=".34"/><stop offset="100%" stop-color="'+lineColor+'" stop-opacity=".015"/></linearGradient><linearGradient id="msStrokeGradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="'+lineColor+'"/><stop offset="100%" stop-color="#c5d2ff"/></linearGradient></defs>'+grid+'<path d="'+area+'" fill="url(#msAreaGradient)"/><path d="'+path+'" stroke="url(#msStrokeGradient)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'<text x="'+L+'" y="'+(H-10)+'" fill="#8196b2" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end" fill="#8196b2" font-size="10">'+escapeHtml(last)+'</text></svg><div class="ms-chart-label"><span>Low '+fmt(min)+(unit==="percent"?"%":"")+'</span><span>Latest '+fmt(values[values.length-1])+(unit==="percent"?"%":"")+'</span></div>';
   }
   async function loadHistory(){
