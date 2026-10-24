@@ -15,7 +15,7 @@ export default {
   const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers});
   if(request.method==="OPTIONS")return new Response(null,{status:204,headers});
   const url=new URL(request.url);
-  if(request.method==="GET"&&url.pathname==="/health")return json({ok:true,service:"MarketPilot AI",model,provider:"Cloudflare Workers AI",openAIConfigured:false,freeTierNote:"Cloudflare Workers AI has a daily free allocation; it is not unlimited."});
+  if(request.method==="GET"&&url.pathname==="/health")return json({ok:true,service:"MarketPilot",model:"@cf/zai-org/glm-4.7-flash",provider:"Cloudflare Workers AI",openAIConfigured:false,freeTierNote:"Cloudflare Workers AI has a daily free allocation; it is not unlimited."});
   if(request.method==="GET"&&url.pathname==="/api/macro-history"){
    const allowedSeries={"CPIAUCSL":{name:"US CPI Index",unit:"index points"},"PPIACO":{name:"US PPI Index",unit:"index points"},"DGS10":{name:"US 10-Year Treasury Yield",unit:"percent"},"DTWEXBGS":{name:"Broad US Dollar Index",unit:"index points"},"VIXCLS":{name:"CBOE VIX Volatility Index",unit:"index points"}};
    const series=url.searchParams.get("series")||"CPIAUCSL",meta=allowedSeries[series],range=["1y","5y"].includes(url.searchParams.get("range"))?url.searchParams.get("range"):"5y";
