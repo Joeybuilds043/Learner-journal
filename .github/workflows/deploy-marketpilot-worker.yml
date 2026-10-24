@@ -62,3 +62,13 @@ jobs:
           assert any(term in answer for term in ("cash flow", "settlement", "hypothetical", "example")), data
           print("Cloudflare AI finance education test passed with a direct swaps-vs-forwards answer.")
           PY
+      - name: Verify source-backed macro chart history
+        run: |
+          curl --fail --silent --show-error --max-time 25 "https://marketpilot-ai.joeybuilds043.workers.dev/api/macro-history?series=CPIAUCSL&range=1y" -o macro-history.json
+          python - <<'PY'
+          import json
+          data = json.load(open("macro-history.json"))
+          assert data.get("source", "").startswith("Federal Reserve Bank of St. Louis FRED"), data
+          assert len(data.get("points", [])) >= 6, data
+          print("FRED CPI history endpoint passed.")
+          PY
