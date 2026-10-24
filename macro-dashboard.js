@@ -16,6 +16,12 @@
     .ms-change{font-size:10px;margin-top:5px;font-weight:750}.ms-change.up{color:#ff9d9d}.ms-change.down{color:#75e8be}.ms-change.flat{color:#c2d0e0}
     .ms-chart{grid-column:1/-1;width:100%;margin-top:10px;padding-top:9px;border-top:1px solid #24364b}.ms-chart svg{display:block;width:100%;height:58px;overflow:visible}.ms-chart-label{font-size:9px}.ms-card{display:block;padding:14px 16px}.ms-card-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}.ms-card-top .ms-label{min-height:0;flex:1}.ms-card-top .ms-value{font-size:25px;margin:0 0 0 12px;text-align:right;flex-shrink:0}.ms-card .ms-date{margin-top:5px}.ms-card-extra{margin-top:5px}.ms-value{font-size:25px}
     .ms-chart-label{display:flex;justify-content:space-between;color:#7188a3;font-size:9px;margin-top:2px}
+    .ms-cpi-panel{margin:12px 0 14px;padding:15px;border:1px solid #394361;border-radius:17px;background:radial-gradient(ellipse at 96% 0%,#282344 0%,transparent 39%),linear-gradient(145deg,#111c2d,#0a1220);box-shadow:0 14px 28px #0002}
+    .ms-cpi-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.ms-cpi-kicker{margin:0 0 4px;color:#c3aaff;font-size:9px;font-weight:900;letter-spacing:1.4px}.ms-cpi-head h3{margin:0;font-size:17px;letter-spacing:-.3px}.ms-cpi-head p{margin:4px 0 0;color:#8ea4bd;font-size:10px}
+    .ms-cpi-current{flex-shrink:0;min-width:90px;padding:9px 11px;border:1px solid #65558d;border-radius:12px;background:linear-gradient(145deg,#282642,#161e31);text-align:right}.ms-cpi-current strong{display:block;font-size:23px;letter-spacing:-.7px;color:#e3d7ff;font-variant-numeric:tabular-nums}.ms-cpi-current small{font-size:9px;color:#aa9bcf}
+    .ms-cpi-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.ms-cpi-metric{padding:9px;border:1px solid #29364b;border-radius:10px;background:#0a1320;min-width:0}.ms-cpi-metric span{display:block;color:#8ca1bb;font-size:9px}.ms-cpi-metric strong{display:block;margin-top:4px;color:#e7eef9;font-size:14px;font-variant-numeric:tabular-nums}
+    .ms-cpi-chart{margin-top:10px;padding:7px 8px 2px;border:1px solid #26374d;border-radius:12px;background:linear-gradient(145deg,#0b1422,#0c1420)}.ms-cpi-chart svg{display:block;width:100%;height:185px}.ms-cpi-chart .ms-gridline{stroke:#29374c;stroke-dasharray:3 5}.ms-cpi-status{margin:7px 0 0;color:#7f94ac;font-size:9px;line-height:1.5}
+    @media(max-width:480px){.ms-cpi-panel{padding:12px}.ms-cpi-head h3{font-size:15px}.ms-cpi-current{min-width:78px;padding:8px}.ms-cpi-current strong{font-size:20px}.ms-cpi-metric{padding:8px 6px}.ms-cpi-metric strong{font-size:12px}.ms-cpi-chart svg{height:155px}}
     .ms-read{margin-top:9px;padding:11px;border:1px solid #29465a;border-radius:12px;background:#0e1e2d}
     .ms-read-title{font-size:9px;font-weight:900;letter-spacing:1px;color:#9bb5ff;margin-bottom:5px}
     .ms-read p{margin:0;color:#d3e0ef;font-size:11px;line-height:1.5}
@@ -44,15 +50,16 @@
     <div class="ms-live-head"><div><p class="ms-live-kicker">MARKETPILOT AI / MACRO TERMINAL</p><h2>Market pulse</h2><p class="ms-subtitle">US macro · latest available readings</p></div><button id="ms-refresh" type="button">↻ Refresh</button></div>
     <div class="ms-grid" id="ms-grid"><div class="ms-card">Loading data…</div></div>
     <div class="ms-read"><div class="ms-read-title">MACRO READ</div><p id="ms-read-text">Loading latest observations.</p></div>
-    <div class="ms-tools">
-      <h3>Historical chart</h3>
+    <section class="ms-cpi-panel" id="ms-cpi-panel" aria-label="US CPI inflation trend"><div class="ms-cpi-head"><div><p class="ms-cpi-kicker">INFLATION TRACKER / FRED CPI</p><h3>US CPI inflation</h3><p>Year-over-year rate · monthly observations</p></div><div class="ms-cpi-current"><strong id="ms-cpi-latest">—</strong><small>latest YoY</small></div></div><div class="ms-cpi-metrics"><div class="ms-cpi-metric"><span>Change vs prior month</span><strong id="ms-cpi-change">—</strong></div><div class="ms-cpi-metric"><span>12-month high</span><strong id="ms-cpi-high">—</strong></div><div class="ms-cpi-metric"><span>12-month low</span><strong id="ms-cpi-low">—</strong></div></div><div class="ms-cpi-chart" id="ms-cpi-bars"><div class="empty">Loading monthly CPI observations…</div></div><p class="ms-cpi-status" id="ms-cpi-status">Loading published CPI data…</p></section>
+    <div class="ms-tools>
+      <h3>Historical macro explorer</h3>
       <div class="ms-controls">
         <div><label for="ms-series">Indicator</label><select id="ms-series"><option value="us10y">US 10Y Yield</option><option value="dollar">Broad Dollar Index</option><option value="cpi_yoy">CPI Inflation (YoY)</option><option value="cpi">CPI Index</option><option value="ppi">PPI Index</option><option value="vix">VIX / Fear Index</option></select></div>
         <div><label for="ms-range">Period</label><select id="ms-range"><option value="30d">30 days</option><option value="90d">90 days</option><option value="1y" selected>1 year</option><option value="5y">5 years</option></select></div>
       </div>
-      <div class="ms-chartbox" id="ms-history-chart"><div class="empty">Choose an indicator and period. Historical series will appear when the Worker history endpoint is deployed.</div></div>
+      <div class="ms-chartbox" id="ms-history-chart"><div class="empty">Select an indicator and period to explore published history. No sample data is shown.</div></div>
       <div class="ms-status" id="ms-history-status">Historical data endpoint not confirmed yet.</div>
-      <div class="ms-ai-cta"><div><span class="ms-ai-kicker">NEXT STEP</span><strong>Turn the data into a market view</strong><p>Ask the financial research assistant to connect macro trends, price action and risk scenarios.</p></div><button id="ms-open-ai" type="button">Open Financial Analyst <span aria-hidden="true">↗</span></button></div>
+      <div class="ms-ai-cta"><div><span class="ms-ai-kicker">NEXT STEP</span><strong>Turn the data into a market view</strong><p>Ask the AI Market Analyst to connect macro trends, price action and risk scenarios.</p></div><button id="ms-open-ai" type="button">Open AI Market Analyst <span aria-hidden="true">↗</span></button></div>
     </div>
     <div class="ms-status" id="ms-status" role="status" aria-live="polite">Connecting…</div>
     <p class="ms-footnote">Data source: FRED. Release data can lag. Broad dollar index is not ICE DXY. VIX is a published volatility index, not a direct measure of all market fear.</p>`;
@@ -95,13 +102,37 @@
       const days={"30d":30,"90d":90,"1y":365,"5y":1825}[range]||365;
       if(points.length){const cutoff=new Date(String(points[points.length-1].date)+"T00:00:00Z");cutoff.setUTCDate(cutoff.getUTCDate()-days);points=points.filter(p=>p.date>=cutoff.toISOString().slice(0,10));}
       renderHistory(points,label,unit);historyStatus.textContent="Source: "+(data.source||"published data")+" · "+points.length+" observations · fetched "+new Date(data.fetchedAt||Date.now()).toLocaleString();
-    }catch(e){historyChart.innerHTML='<div class="empty">Historical chart unavailable. No sample data is shown.</div>';historyStatus.textContent="History unavailable: "+e.message}
+    }catch(e){historyChart.innerHTML='<div class="empty">Historical macro explorer unavailable. No sample data is shown.</div>';historyStatus.textContent="History unavailable: "+e.message}
   }
   seriesSelect.addEventListener("change",loadHistory);rangeSelect.addEventListener("change",loadHistory);
   const escapeHtml = value => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll(String.fromCharCode(34),"&quot;").replaceAll(String.fromCharCode(39),"&#39;");
   const num = v => v!==null && v!=="" && Number.isFinite(Number(v)) ? Number(v) : null;
   const fmt = (v,d=2) => num(v)===null ? "—" : Number(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:d,useGrouping:false});
   const dateOf = x => x?.date || x?.latestDate || x?.observationDate || "";
+  async function loadCpiTrend(){
+    const host=section.querySelector("#ms-cpi-bars"),statusEl=section.querySelector("#ms-cpi-status");
+    const latestEl=section.querySelector("#ms-cpi-latest"),changeEl=section.querySelector("#ms-cpi-change"),highEl=section.querySelector("#ms-cpi-high"),lowEl=section.querySelector("#ms-cpi-low");
+    statusEl.textContent="Loading published monthly CPI observations…";
+    try{
+      const response=await fetch(API_URL+"history?series=cpi&range=5y",{cache:"no-store"});
+      const data=await response.json();if(!response.ok)throw new Error(data.detail||data.error||"CPI history endpoint unavailable");
+      const raw=(data.points||data.observations||[]).filter(p=>p&&p.date&&Number.isFinite(Number(p.value))).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+      if(raw.length<14)throw new Error("Not enough dated CPI observations to calculate year-over-year inflation.");
+      const byMonth=new Map(raw.map(p=>[String(p.date).slice(0,7),Number(p.value)]));
+      const yoy=raw.map(p=>{const d=new Date(String(p.date)+"T00:00:00Z");d.setUTCMonth(d.getUTCMonth()-12);const prior=byMonth.get(d.toISOString().slice(0,7)),v=Number(p.value);return prior!==undefined&&prior!==0?{date:String(p.date),value:(v/prior-1)*100}:null;}).filter(Boolean);
+      if(yoy.length<2)throw new Error("Not enough matching year-ago observations.");
+      const recent=yoy.slice(-12),latest=recent[recent.length-1],previous=recent[recent.length-2],values=recent.map(p=>p.value),min=Math.min(...values),max=Math.max(...values),delta=latest.value-previous.value;
+      latestEl.textContent=fmt(latest.value,2)+"%";changeEl.textContent=(delta>0?"+":"")+fmt(delta,2)+" pp";changeEl.style.color=delta>0?"#eaa3b5":delta<0?"#80d3f0":"#dce7f7";highEl.textContent=fmt(max,2)+"%";lowEl.textContent=fmt(min,2)+"%";
+      const W=720,H=190,L=42,R=10,T=15,B=31,plotW=W-L-R,plotH=H-T-B,axisMin=Math.max(0,Math.floor((min-.35)*2)/2),axisMax=Math.ceil((max+.35)*2)/2||1,span=axisMax-axisMin||1;
+      const yOf=v=>T+(axisMax-v)/span*plotH,baseY=H-B,slot=plotW/recent.length,bw=Math.min(28,slot*.54);
+      const ticks=[axisMax,(axisMax+axisMin)/2,axisMin],grid=ticks.map(v=>'<line class="ms-gridline" x1="'+L+'" y1="'+yOf(v).toFixed(1)+'" x2="'+(W-R)+'" y2="'+yOf(v).toFixed(1)+'"/><text x="'+(L-8)+'" y="'+(yOf(v)+3).toFixed(1)+'" text-anchor="end" fill="#8ba0b9" font-size="9">'+fmt(v,1)+'%</text>').join("");
+      const bars=recent.map((p,i)=>{const x=L+i*slot+(slot-bw)/2,y=yOf(p.value),h=Math.max(2,baseY-y),prev=i?recent[i-1].value:p.value,color=p.value>prev+.015?"#d783a7":p.value<prev-.015?"#65c9e7":"#b4a0ff";return '<g><rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="3" fill="'+color+'" opacity=".92"><title>'+escapeHtml(p.date)+' · '+fmt(p.value,2)+'% YoY</title></rect>'+(i%3===0||i===recent.length-1?'<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-9)+'" text-anchor="middle" fill="#8297b0" font-size="9">'+escapeHtml(p.date.slice(0,7))+'</text>':"")+'</g>';}).join("");
+      host.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Monthly US CPI inflation year-over-year column chart" preserveAspectRatio="xMidYMid meet">'+grid+'<line x1="'+L+'" y1="'+baseY+'" x2="'+(W-R)+'" y2="'+baseY+'" stroke="#31445d"/>'+bars+'</svg>';
+      statusEl.textContent="Source: "+(data.source||"FRED")+" · "+recent.length+" recent monthly readings · last observation "+latest.date+" · fetched "+new Date(data.fetchedAt||Date.now()).toLocaleString()+". CPI is released monthly; it is not a live price feed.";
+    }catch(e){
+      latestEl.textContent="—";changeEl.textContent="—";highEl.textContent="—";lowEl.textContent="—";host.innerHTML='<div class="empty">CPI inflation history is unavailable. No illustrative or fabricated data is shown.</div>';statusEl.textContent="CPI history unavailable: "+(e.message||"request failed");
+    }
+  }
   function percentChange(item) {
     const v=num(item?.value), ch=num(item?.change);
     if(v===null || ch===null || v===ch) return null;
@@ -143,5 +174,5 @@
     }catch(e){grid.replaceChildren();["US 10Y TREASURY YIELD","BROAD US DOLLAR INDEX","CPI INFLATION · YEAR OVER YEAR","PPI PRODUCER PRICE INDEX","VIX · IMPLIED VOLATILITY"].forEach(label=>grid.appendChild(card(label,null,"",null)));read.textContent="Macro data could not load. Refresh before drawing a conclusion.";status.textContent="Data unavailable: "+(e.message||"request failed");}
     finally{button.disabled=false;}
   }
-  button.addEventListener("click",()=>{refresh();loadHistory()}); refresh(); loadHistory();
+  button.addEventListener("click",()=>{refresh();loadHistory();loadCpiTrend()}); refresh(); loadHistory(); loadCpiTrend();
 })();
