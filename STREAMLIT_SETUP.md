@@ -12,7 +12,9 @@ CandleDesk is the new Python/Streamlit version of the market dashboard. The exis
 
 ## Deploy on Streamlit Community Cloud
 
-1. Open https://share.streamlit.io/ and sign in with GitHub.
+**Open the pre-filled deployment page:** [Deploy CandleDesk](https://share.streamlit.io/deploy?repository=Joeybuilds043/Learner-journal&branch=main&mainModule=streamlit_app.py)
+
+1. Open the link above (or https://share.streamlit.io/) and sign in with GitHub.
 2. Choose **Create app**.
 3. Repository: `Joeybuilds043/Learner-journal`
 4. Branch: `main`
