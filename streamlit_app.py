@@ -636,7 +636,7 @@ elif page == "Pip AI":
 
     api_ready = bool(get_secret("XAI_API_KEY"))
     if api_ready:
-        st.markdown('<span class="status-pill"><span class="status-dot"></span>Grok connected · free tier may be rate-limited</span>', unsafe_allow_html=True)
+        st.markdown('<span class="status-pill"><span class="status-dot"></span>Grok API connected · usage may be billed</span>', unsafe_allow_html=True)
     else:
         st.info("Dashboard mode is ready. Pip's AI replies activate after XAI_API_KEY is added in Streamlit Cloud → Settings → Secrets. The key will not be stored in source code.")
 
