@@ -1069,7 +1069,7 @@
   // Register the existing service worker.
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=20261024-trading-terminal").catch(() => {
+      navigator.serviceWorker.register("./sw.js?v=20261025-marketpilot-polish").catch(() => {
         showStatus("Offline setup failed. Check the service worker file.");
       });
     });
@@ -1103,9 +1103,9 @@
 })();
 </script>
 
-  <script src="./macro-dashboard.js?v=20261024-cpi-bars-v4" defer></script>
+  <script src="./macro-dashboard.js?v=20261025-advanced-cpi-v5" defer></script>
   <script src="./marketpilot-config.js?v=20261024-pro-workspace" defer></script>
-  <script src="./ai-workspace.js?v=20261024-financial-assistant-v4" defer></script>
+  <script src="./ai-workspace.js?v=20261025-financial-assistant-v5" defer></script>
 </body>
   </html>
 
