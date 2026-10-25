@@ -20,7 +20,8 @@ style.textContent+=".app-nav{display:grid!important;grid-template-columns:minmax
 .mp-search-card{background:linear-gradient(130deg,#192c46,#101829 56%,#29213f)!important;border-color:#667eab!important}
 @media(max-width:500px){.mp-chat-head{align-items:flex-start;flex-wrap:wrap}.mp-chat-head>span{max-width:100%;flex-wrap:wrap;justify-content:flex-end}.mp-avatar svg.sh-illustration{animation:none}}
 `;
-document.head.appendChild(style);
+style.textContent += "\n.app-nav{display:none!important}";
+ document.head.appendChild(style);
 const nav=document.querySelector(".app-nav"), main=document.querySelector("main.app"), market=$("dashboardView"),journal=$("journalView");
 if(!nav||!main||$("aiView"))return;
 const journalStats=main.querySelector(".stats");if(journalStats&&journal){const journalHeading=journal.querySelector(".view-heading");if(journalHeading)journalHeading.insertAdjacentElement("afterend",journalStats);}
