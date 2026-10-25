@@ -166,6 +166,37 @@
     const pct=Math.max(0,Math.min(100,(v/50)*100));
     return `<div class="ms-gauge"><i style="left:calc(${pct}% - 1px)"></i></div><div class="ms-date">${v<15?"Low expected volatility":v<25?"Elevated volatility":"High expected volatility"} · descriptive range, not a trade signal</div>`;
   }
+  async function loadMetricCharts(){
+    const configs=[
+      {series:"us10y",index:0,color:"#65c9e7",label:"US 10Y yield"},
+      {series:"dollar",index:1,color:"#8faaff",label:"Broad USD index"},
+      {series:"cpi",index:2,color:"#c3a3ff",label:"CPI inflation"},
+      {series:"ppi",index:3,color:"#f0b27a",label:"PPI index"},
+      {series:"vix",index:4,color:"#f28da8",label:"VIX volatility"}
+    ];
+    await Promise.all(configs.map(async cfg=>{
+      const cardEl=grid.children[cfg.index];if(!cardEl)return;
+      let host=cardEl.querySelector(".ms-metric-history");
+      if(!host){host=document.createElement("div");host.className="ms-metric-history";cardEl.appendChild(host);}
+      host.innerHTML='<div class="ms-date">Loading published history…</div>';
+      try{
+        const response=await fetch(API_URL+"history?series="+encodeURIComponent(cfg.series)+"&range=1y",{cache:"no-store"});
+        const data=await response.json();if(!response.ok)throw new Error(data.detail||data.error||"History endpoint unavailable");
+        let points=(data.points||data.observations||[]).filter(p=>p&&p.date&&Number.isFinite(Number(p.value))).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+        if(cfg.series==="cpi"){
+          const byMonth=new Map(points.map(p=>[String(p.date).slice(0,7),Number(p.value)]));
+          points=points.map(p=>{const d=new Date(String(p.date)+"T00:00:00Z");d.setUTCMonth(d.getUTCMonth()-12);const prior=byMonth.get(d.toISOString().slice(0,7));return prior!==undefined&&prior!==0?{date:p.date,value:(Number(p.value)/prior-1)*100}:null;}).filter(Boolean);
+        }
+        if(points.length<3)throw new Error("Not enough dated observations");
+        points=points.slice(-24);const vals=points.map(p=>Number(p.value)),min=Math.min(...vals),max=Math.max(...vals),span=max-min||Math.max(Math.abs(max)*.01,.01),W=340,H=76,L=5,R=5,T=8,B=8,pw=W-L-R,ph=H-T-B,base=H-B;
+        const pts=vals.map((v,i)=>({x:L+i*pw/(vals.length-1),y:T+(max-v)/span*ph,v,date:points[i].date}));
+        let path="M "+pts[0].x.toFixed(1)+" "+pts[0].y.toFixed(1);for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],mx=(a.x+b.x)/2;path+=" Q "+a.x.toFixed(1)+" "+a.y.toFixed(1)+" "+mx.toFixed(1)+" "+((a.y+b.y)/2).toFixed(1);if(i===pts.length-1)path+=" T "+b.x.toFixed(1)+" "+b.y.toFixed(1);}
+        const area=path+" L "+pts[pts.length-1].x.toFixed(1)+" "+base+" L "+pts[0].x.toFixed(1)+" "+base+" Z",gid="msMetric"+cfg.index;
+        const bars=pts.map((p,i)=>{const bw=Math.max(2,pw/pts.length*.52),x=p.x-bw/2;return '<rect x="'+x.toFixed(1)+'" y="'+p.y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,base-p.y).toFixed(1)+'" rx="2" fill="'+cfg.color+'" opacity=".24"><title>'+escapeHtml(p.date)+" · "+fmt(p.v,2)+(cfg.series==="us10y"||cfg.series==="cpi"?"%":"")+'</title></rect>';}).join("");
+        host.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+cfg.label+' published history chart"><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+cfg.color+'" stop-opacity=".28"/><stop offset="100%" stop-color="'+cfg.color+'" stop-opacity=".01"/></linearGradient></defs><path d="M5 25H335 M5 50H335" stroke="#26384d" stroke-dasharray="3 5"/>'+bars+'<path d="'+area+'" fill="url(#'+gid+')"/><path d="'+path+'" fill="none" stroke="'+cfg.color+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="'+pts[pts.length-1].x.toFixed(1)+'" cy="'+pts[pts.length-1].y.toFixed(1)+'" r="3.2" fill="'+cfg.color+'"><title>'+escapeHtml(pts[pts.length-1].date)+' · '+fmt(pts[pts.length-1].v,2)+'</title></circle></svg><div class="ms-chart-label"><span>'+escapeHtml(points[0].date.slice(0,7))+'</span><span>Latest '+escapeHtml(points[points.length-1].date.slice(0,7))+'</span></div>';
+      }catch(e){host.innerHTML='<div class="ms-date">History unavailable · '+escapeHtml(e.message||"source error")+'</div>';}
+    }));
+  }
   async function refresh(){
     button.disabled=true;status.textContent="Updating published observations…";
     try{
@@ -182,7 +213,7 @@
       read.textContent=[cpiLine,ppiLine,dollarLine,vix===null?"VIX unavailable":"VIX "+fmt(vix)+": "+(vix<15?"low":vix<25?"elevated":"high")+" expected volatility"].join(" · ")+". Compare release actuals with consensus and price action.";
       status.textContent="Updated "+(result.fetchedAt?new Date(result.fetchedAt).toLocaleString():"now")+" · Observation dates shown on each card.";
     }catch(e){grid.replaceChildren();["US 10Y TREASURY YIELD","BROAD US DOLLAR INDEX","CPI INFLATION · YEAR OVER YEAR","PPI PRODUCER PRICE INDEX","VIX · IMPLIED VOLATILITY"].forEach(label=>grid.appendChild(card(label,null,"",null)));read.textContent="Macro data could not load. Refresh before drawing a conclusion.";status.textContent="Data unavailable: "+(e.message||"request failed");}
-    finally{button.disabled=false;}
+    finally{button.disabled=false;loadMetricCharts();}
   }
   button.addEventListener("click",()=>{refresh();loadHistory();loadCpiTrend()}); refresh(); loadHistory(); loadCpiTrend();
 })();
