@@ -121,18 +121,18 @@ jobs:
             assert.ok(html.includes("<h1>MarketScope</h1>"), "Live page must use the MarketScope brand");
             assert.match(html, /ai-workspace\.js/, "Live page must load the new workspace script");
             assert.match(html, /id="showCharts"/, "Charts route must remain available to the workspace menu");
-            assert.match(html, /macro-dashboard\.js\?v=20261025-marketscope-v7/, "Live page must reference the refreshed macro dashboard");
-            assert.match(html, /ai-workspace\.js\?v=20261025-marketscope-v7/, "Live page must reference the updated assistant bundle");
+            assert.match(html, /macro-dashboard\.js\?v=20261025-marketscope-v8/, "Live page must reference the refreshed macro dashboard");
+            assert.match(html, /ai-workspace\.js\?v=20261025-marketscope-v8/, "Live page must reference the updated assistant bundle");
             assert.ok(script.includes("INFLATION TRACKER / FRED CPI"), "Macro dashboard must include the CPI inflation chart");
             assert.ok(script.includes("Monthly inflation (YoY)") && script.includes("msCpiLine"), "CPI inflation must show an enhanced monthly column and trend chart");
             assert.ok(script.includes("ms-dashboard-open-ai"), "Dashboard must include a direct Financial Assistant shortcut");
-            assert.ok(script.includes("const stressBars") && script.includes("VIX market stress bar chart"), "VIX history must use colour-coded stress bars");
+            assert.ok(script.includes("renderFearGreed") && script.includes("api.alternative.me/fng/") && script.includes("Crypto Fear &amp; Greed Index"), "Sentiment chart must use source-backed colour-coded Fear & Greed bars");
             assert.ok(script.includes("Source rate limit (HTTP 429)"), "Macro dashboard must explain upstream rate limits");
             assert.ok(script.includes('cfg.series==="cpi"?"5y":"1y"'), "CPI chart must load enough history to calculate YoY inflation");
           assert.ok(script.includes("baseY=H-B"), "Historical macro chart must define its bar baseline before rendering");
             assert.ok(script.includes("const bars=pts.map") && script.includes("+grid+bars+"), "Historical macro chart must use columns with the smoothed trend area");
 
-            const aiResponse = await getWithRetry(pageUrl + "ai-workspace.js?v=20261025-marketscope-v7");
+            const aiResponse = await getWithRetry(pageUrl + "ai-workspace.js?v=20261025-marketscope-v8");
             const aiScript = await aiResponse.text();
             for (const marker of ["Financial Assistant", "Daily Market Briefing", "Macro &amp; Market History", "News &amp; Market Impact", "Your Journal", "mpAssetPrompts", "Profile &amp; Preferences", "Historical Relationships", "mpClearChat", "Inspired by Saad Hashmani, whose market content sparked my interest in financial markets", "unavatar.io/instagram/saadahashmani", "ms-dashboard-open-ai", "let chatGeneration=0", "ASK MARKETSCOPE FINANCIAL ASSISTANT", "nav.replaceChildren"]) {
               assert.ok(aiScript.includes(marker), `Published AI workspace is missing ${marker}`);
