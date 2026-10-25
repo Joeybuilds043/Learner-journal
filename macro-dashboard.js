@@ -1,6 +1,26 @@
 (() => {
   "use strict";
   const API_URL = "https://marketsignal-data.joeybuilds043.workers.dev/";
+  const responseCache = new Map();
+  const responsePending = new Map();
+  async function getMacroJson(url) {
+    const cached=responseCache.get(url);
+    if(cached && Date.now()-cached.at<60000) return cached.data;
+    if(responsePending.has(url)) return responsePending.get(url);
+    const pending=(async()=>{
+      const response=await fetch(url,{cache:"no-store"});
+      const data=await response.json().catch(()=>({error:"Invalid data response"}));
+      if(!response.ok){
+        const message=data.detail||data.error||"Data request failed";
+        if(response.status===429 || /too many requests|rate.?limit/i.test(message)) throw new Error("Source rate limit (HTTP 429). Wait 60 seconds before retrying; avoid repeated refreshes.");
+        throw new Error(message);
+      }
+      responseCache.set(url,{at:Date.now(),data});
+      return data;
+    })();
+    responsePending.set(url,pending);
+    try{return await pending;}finally{responsePending.delete(url);}
+  }
   const style = document.createElement("style");
   style.textContent = `
     .ms-live{margin:12px 0 18px;padding:14px;border:1px solid #263a50;border-radius:17px;background:linear-gradient(145deg,#101d2b,#0a1220);color:#edf5ff;box-shadow:0 12px 34px #0002}
@@ -55,7 +75,7 @@
     <div class="ms-tools">
       <h3>Historical macro explorer</h3>
       <div class="ms-controls">
-        <div><label for="ms-series">Indicator</label><select id="ms-series"><option value="us10y">US 10Y Yield</option><option value="dollar">Broad Dollar Index</option><option value="cpi_yoy">CPI Inflation (YoY)</option><option value="cpi">CPI Index</option><option value="ppi">PPI Index</option><option value="vix">VIX / Fear Index</option></select></div>
+        <div><label for="ms-series">Indicator</label><select id="ms-series"><option value="us10y">US 10Y Yield</option><option value="dollar">Broad Dollar Index</option><option value="cpi_yoy">CPI Inflation (YoY)</option><option value="cpi">CPI Index</option><option value="ppi">PPI Index</option><option value="vix">VIX / Market Stress · colour bars</option></select></div>
         <div><label for="ms-range">Period</label><select id="ms-range"><option value="30d">30 days</option><option value="90d">90 days</option><option value="1y" selected>1 year</option><option value="5y">5 years</option></select></div>
       </div>
       <div class="ms-chartbox" id="ms-history-chart"><div class="empty">Select an indicator and period to explore published history. No sample data is shown.</div></div>
@@ -87,6 +107,11 @@
     const lineColor=label.toLowerCase().includes("inflation")?"#b18cff":label.toLowerCase().includes("yield")?"#8da2ff":"#579dff";
     const barWidth=Math.max(1,Math.min(7,plotW/pts.length*.58));
     const bars=pts.map(p=>{const h=Math.max(1,baseY-p.y),y=baseY-h;return '<rect class="ms-bar" x="'+(p.x-barWidth/2).toFixed(2)+'" y="'+y.toFixed(2)+'" width="'+barWidth.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="1.2" fill="'+lineColor+'"><title>'+escapeHtml(p.date)+' · '+fmt(p.v)+(unit==="percent"?"%":"")+'</title></rect>';}).join("");
+    if(label.toLowerCase().includes("vix")){
+      const stressBars=pts.map(p=>{const h=Math.max(2,baseY-p.y),y=baseY-h,color=p.v>=30?"#ff5964":p.v>=20?"#f2c14e":"#46d7a1";return '<rect x="'+(p.x-barWidth/2).toFixed(2)+'" y="'+y.toFixed(2)+'" width="'+barWidth.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="2.5" fill="'+color+'" opacity=".9"><title>'+escapeHtml(p.date)+' · VIX '+fmt(p.v,2)+(p.v>=30?' · High stress':p.v>=20?' · Elevated':' · Lower volatility')+'</title></rect>';}).join("");
+      historyChart.innerHTML='<div class="ms-date">VIX volatility · '+valid.length+' observations · stress bands are descriptive, not a Fear & Greed Index reading</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="VIX market stress bar chart" preserveAspectRatio="xMidYMid meet">'+grid+stressBars+'<text x="'+L+'" y="'+(H-10)+'" fill="#8196b2" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end" fill="#8196b2" font-size="10">'+escapeHtml(last)+'</text></svg><div class="ms-chart-label"><span style="color:#46d7a1">Below 20 · calmer</span><span style="color:#f2c14e">20–29 · elevated</span><span style="color:#ff5964">30+ · high stress</span></div>';
+      return;
+    }
     historyChart.innerHTML='<div class="ms-date">'+escapeHtml(label)+' · '+valid.length+' observations · source: published historical data</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(label)+' historical chart" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="msAreaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+lineColor+'" stop-opacity=".34"/><stop offset="100%" stop-color="'+lineColor+'" stop-opacity=".015"/></linearGradient><linearGradient id="msStrokeGradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="'+lineColor+'"/><stop offset="100%" stop-color="#c5d2ff"/></linearGradient></defs>'+grid+bars+'<path d="'+area+'" fill="url(#msAreaGradient)"/><path d="'+path+'" stroke="url(#msStrokeGradient)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'<text x="'+L+'" y="'+(H-10)+'" fill="#8196b2" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end" fill="#8196b2" font-size="10">'+escapeHtml(last)+'</text></svg><div class="ms-chart-label"><span>Low '+fmt(min)+(unit==="percent"?"%":"")+'</span><span>Latest '+fmt(values[values.length-1])+(unit==="percent"?"%":"")+'</span></div>';
   }
   async function loadHistory(){
@@ -94,7 +119,7 @@
     historyStatus.textContent="Loading "+(selected==="cpi_yoy"?"CPI inflation year over year":selected)+" history…";
     try{
       const series=selected==="cpi_yoy"?"cpi":selected;
-      const response=await fetch(API_URL+"history?series="+encodeURIComponent(series)+"&range="+encodeURIComponent(selected==="cpi_yoy"?"5y":range),{cache:"no-store"});const data=await response.json();if(!response.ok)throw new Error(data.detail||data.error||"History endpoint unavailable");
+      const data=await getMacroJson(API_URL+"history?series="+encodeURIComponent(series)+"&range="+encodeURIComponent(selected==="cpi_yoy"?"5y":range));
       let points=(data.points||data.observations||[]).filter(p=>p&&p.date&&Number.isFinite(Number(p.value)));
       let label=data.name||data.label||series,unit=data.unit||"";
       if(selected==="cpi_yoy"){
@@ -118,8 +143,7 @@
     const latestEl=section.querySelector("#ms-cpi-latest"),changeEl=section.querySelector("#ms-cpi-change"),highEl=section.querySelector("#ms-cpi-high"),lowEl=section.querySelector("#ms-cpi-low");
     statusEl.textContent="Loading published monthly CPI observations…";
     try{
-      const response=await fetch(API_URL+"history?series=cpi&range=5y",{cache:"no-store"});
-      const data=await response.json();if(!response.ok)throw new Error(data.detail||data.error||"CPI history endpoint unavailable");
+      const data=await getMacroJson(API_URL+"history?series=cpi&range=5y");
       const raw=(data.points||data.observations||[]).filter(p=>p&&p.date&&Number.isFinite(Number(p.value))).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
       if(raw.length<14)throw new Error("Not enough dated CPI observations to calculate year-over-year inflation.");
       const byMonth=new Map(raw.map(p=>[String(p.date).slice(0,7),Number(p.value)]));
@@ -140,7 +164,7 @@
       host.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="US CPI inflation: monthly columns and smoothed twelve-month trend" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="msCpiArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b18cff" stop-opacity=".22"/><stop offset="100%" stop-color="#b18cff" stop-opacity=".01"/></linearGradient><linearGradient id="msCpiLine" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#65c9e7"/><stop offset="55%" stop-color="#b18cff"/><stop offset="100%" stop-color="#f0d5ff"/></linearGradient></defs>'+grid+'<line x1="'+L+'" y1="'+baseY+'" x2="'+(W-R)+'" y2="'+baseY+'" stroke="#31445d"/>'+bars+'<path d="'+areaPath+'" fill="url(#msCpiArea)"/><path class="ms-cpi-trend" d="'+trendPath+'" stroke="url(#msCpiLine)" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'<text x="'+(lastPoint.x-5).toFixed(1)+'" y="'+latestTagY.toFixed(1)+'" text-anchor="end" fill="#f0d5ff" font-size="10" font-weight="800">'+fmt(latest.value,2)+'%</text></svg><div class="ms-cpi-legend"><span><i></i> Monthly inflation (YoY)</span><span><i class="line"></i> Trend path</span></div>';
       statusEl.textContent="Source: "+(data.source||"FRED")+" · "+recent.length+" recent monthly readings · last observation "+latest.date+" · fetched "+new Date(data.fetchedAt||Date.now()).toLocaleString()+". CPI is released monthly; it is not a live price feed.";
     }catch(e){
-      latestEl.textContent="—";changeEl.textContent="—";highEl.textContent="—";lowEl.textContent="—";host.innerHTML='<div class="empty">CPI inflation history is unavailable. No illustrative or fabricated data is shown.</div>';statusEl.textContent="CPI history unavailable: "+(e.message||"request failed");
+      latestEl.textContent="—";changeEl.textContent="—";highEl.textContent="—";lowEl.textContent="—";host.innerHTML='<div class="empty">CPI inflation history is unavailable. No illustrative or fabricated data is shown.</div>';statusEl.textContent=/429|rate limit/i.test(e.message||"")?"FRED source rate-limited this request. Wait 60 seconds before retrying.":"CPI history unavailable: "+(e.message||"request failed");
     }
   }
   function percentChange(item) {
@@ -171,8 +195,7 @@
       {series:"us10y",index:0,color:"#65c9e7",label:"US 10Y yield"},
       {series:"dollar",index:1,color:"#8faaff",label:"Broad USD index"},
       {series:"cpi",index:2,color:"#c3a3ff",label:"CPI inflation"},
-      {series:"ppi",index:3,color:"#f0b27a",label:"PPI index"},
-      {series:"vix",index:4,color:"#f28da8",label:"VIX volatility"}
+      {series:"ppi",index:3,color:"#f0b27a",label:"PPI index"}
     ];
     await Promise.all(configs.map(async cfg=>{
       const cardEl=grid.children[cfg.index];if(!cardEl)return;
@@ -180,8 +203,7 @@
       if(!host){host=document.createElement("div");host.className="ms-metric-history";cardEl.appendChild(host);}
       host.innerHTML='<div class="ms-date">Loading published history…</div>';
       try{
-        const response=await fetch(API_URL+"history?series="+encodeURIComponent(cfg.series)+"&range=1y",{cache:"no-store"});
-        const data=await response.json();if(!response.ok)throw new Error(data.detail||data.error||"History endpoint unavailable");
+        const data=await getMacroJson(API_URL+"history?series="+encodeURIComponent(cfg.series)+"&range=1y");
         let points=(data.points||data.observations||[]).filter(p=>p&&p.date&&Number.isFinite(Number(p.value))).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
         if(cfg.series==="cpi"){
           const byMonth=new Map(points.map(p=>[String(p.date).slice(0,7),Number(p.value)]));
@@ -200,7 +222,7 @@
   async function refresh(){
     button.disabled=true;status.textContent="Updating published observations…";
     try{
-      const response=await fetch(API_URL,{cache:"no-store"}),result=await response.json();if(!response.ok)throw new Error(result.error||"Data request failed");
+      const result=await getMacroJson(API_URL);
       const d=result.data||{};const dollar=num(d.dollar?.value),dollarPct=percentChange(d.dollar),dollarPrev=dollar!==null&&num(d.dollar?.change)!==null?dollar-num(d.dollar.change):null;
       const cpiYoY=num(d.cpiYearOverYear?.value)??latestCpiYoyValue,cpiChange=num(d.cpiYearOverYear?.change),ppiPct=percentChange(d.ppi);const yieldVal=num(d.us10y?.value),yieldCh=num(d.us10y?.change),vix=num(d.vix?.value);
       grid.replaceChildren();
@@ -212,7 +234,7 @@
       const cpiLine=cpiYoY===null?"CPI inflation unavailable":"CPI inflation: "+fmt(cpiYoY)+"% year over year";const ppiLine=num(d.ppi?.value)===null?"PPI unavailable":"PPI index: "+fmt(d.ppi.value,3);const dollarLine=dollar===null?"Dollar index unavailable":"Broad USD index: "+fmt(dollar,3);
       read.textContent=[cpiLine,ppiLine,dollarLine,vix===null?"VIX unavailable":"VIX "+fmt(vix)+": "+(vix<15?"low":vix<25?"elevated":"high")+" expected volatility"].join(" · ")+". Compare release actuals with consensus and price action.";
       status.textContent="Updated "+(result.fetchedAt?new Date(result.fetchedAt).toLocaleString():"now")+" · Observation dates shown on each card.";
-    }catch(e){grid.replaceChildren();["US 10Y TREASURY YIELD","BROAD US DOLLAR INDEX","CPI INFLATION · YEAR OVER YEAR","PPI PRODUCER PRICE INDEX","VIX · IMPLIED VOLATILITY"].forEach(label=>grid.appendChild(card(label,null,"",null)));read.textContent="Macro data could not load. Refresh before drawing a conclusion.";status.textContent="Data unavailable: "+(e.message||"request failed");}
+    }catch(e){grid.replaceChildren();["US 10Y TREASURY YIELD","BROAD US DOLLAR INDEX","CPI INFLATION · YEAR OVER YEAR","PPI PRODUCER PRICE INDEX","VIX · IMPLIED VOLATILITY"].forEach(label=>grid.appendChild(card(label,null,"",null)));read.textContent="Macro data could not load. Refresh before drawing a conclusion.";status.textContent=/429|rate limit/i.test(e.message||"")?"FRED/source rate limit. Wait 60 seconds before retrying; repeated refreshes may extend the limit.":"Data unavailable: "+(e.message||"request failed");}
     finally{button.disabled=false;loadMetricCharts();}
   }
   button.addEventListener("click",()=>{refresh();loadHistory();loadCpiTrend()}); refresh(); loadHistory(); loadCpiTrend();
