@@ -1,13 +1,14 @@
 "use strict";
 
-const CACHE_VERSION = "marketscope-v25";
+const CACHE_VERSION = "marketscope-v26";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./marketscope-mark.svg",
-  "./macro-dashboard.js?v=20261025-marketscope-v8",
+  "./macro-dashboard.js?v=20261025-marketscope-v9",
   "./marketpilot-config.js?v=20261024-pro-workspace",
-  "./ai-workspace.js?v=20261025-marketscope-v8",
+  "./ai-workspace.js?v=20261025-marketscope-v9",
+  "./assets/saad-hashmani-avatar.webp",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
@@ -33,7 +34,7 @@ self.addEventListener("activate", (event) => {
       await Promise.all(
         keys
           .filter((key) =>
-            (key.startsWith("market-journal-") || key.startsWith("marketpilot-")) &&
+            (key.startsWith("marketscope-") || key.startsWith("market-journal-") || key.startsWith("marketpilot-")) &&
             key !== CACHE_VERSION
           )
           .map((key) => caches.delete(key))
