@@ -75,7 +75,7 @@
     <div class="ms-tools">
       <h3>Historical macro explorer</h3>
       <div class="ms-controls">
-        <div><label for="ms-series">Indicator</label><select id="ms-series"><option value="us10y">US 10Y Yield</option><option value="dollar">Broad Dollar Index</option><option value="cpi_yoy">CPI Inflation (YoY)</option><option value="cpi">CPI Index</option><option value="ppi">PPI Index</option><option value="vix">VIX / Market Stress · colour bars</option></select></div>
+        <div><label for="ms-series">Indicator</label><select id="ms-series"><option value="us10y">US 10Y Yield</option><option value="dollar">Broad Dollar Index</option><option value="cpi_yoy">CPI Inflation (YoY)</option><option value="cpi">CPI Index</option><option value="ppi">PPI Index</option><option value="fear_greed">Crypto Fear &amp; Greed Index · sentiment bars</option></select></div>
         <div><label for="ms-range">Period</label><select id="ms-range"><option value="30d">30 days</option><option value="90d">90 days</option><option value="1y" selected>1 year</option><option value="5y">5 years</option></select></div>
       </div>
       <div class="ms-chartbox" id="ms-history-chart"><div class="empty">Select an indicator and period to explore published history. No sample data is shown.</div></div>
@@ -114,10 +114,27 @@
     }
     historyChart.innerHTML='<div class="ms-date">'+escapeHtml(label)+' · '+valid.length+' observations · source: published historical data</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(label)+' historical chart" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="msAreaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+lineColor+'" stop-opacity=".34"/><stop offset="100%" stop-color="'+lineColor+'" stop-opacity=".015"/></linearGradient><linearGradient id="msStrokeGradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="'+lineColor+'"/><stop offset="100%" stop-color="#c5d2ff"/></linearGradient></defs>'+grid+bars+'<path d="'+area+'" fill="url(#msAreaGradient)"/><path d="'+path+'" stroke="url(#msStrokeGradient)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'<text x="'+L+'" y="'+(H-10)+'" fill="#8196b2" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end" fill="#8196b2" font-size="10">'+escapeHtml(last)+'</text></svg><div class="ms-chart-label"><span>Low '+fmt(min)+(unit==="percent"?"%":"")+'</span><span>Latest '+fmt(values[values.length-1])+(unit==="percent"?"%":"")+'</span></div>';
   }
+  function renderFearGreed(points){
+    const valid=(points||[]).filter(p=>Number.isFinite(Number(p.value))&&p.date).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    if(valid.length<2){historyChart.innerHTML='<div class="empty">Not enough Fear &amp; Greed observations for this period.</div>';return;}
+    const W=720,H=220,L=52,R=18,T=22,B=35,plotW=W-L-R,plotH=H-T-B,baseY=H-B,slot=plotW/valid.length,bw=Math.max(1,Math.min(8,slot*.72));
+    const y=v=>T+(100-Math.max(0,Math.min(100,Number(v))))/100*plotH;
+    const grid=[100,50,0].map(v=>'<line class="ms-gridline" x1="'+L+'" y1="'+y(v)+'" x2="'+(W-R)+'" y2="'+y(v)+'"/><text x="'+(L-9)+'" y="'+(y(v)+4)+'" text-anchor="end" fill="#91a6c1" font-size="10">'+v+'</text>').join("");
+    const bars=valid.map((p,i)=>{const v=Number(p.value),x=L+i*slot+(slot-bw)/2,top=y(v),color=v<=24?"#ff5964":v<=55?"#f2c14e":"#46d7a1";return '<rect x="'+x.toFixed(2)+'" y="'+top.toFixed(2)+'" width="'+bw.toFixed(2)+'" height="'+Math.max(1,baseY-top).toFixed(2)+'" rx="2" fill="'+color+'" opacity=".92"><title>'+escapeHtml(p.date)+' · '+v+'/100 · '+escapeHtml(p.classification||"Sentiment")+'</title></rect>';}).join("");
+    const first=valid[0].date,last=valid[valid.length-1].date,latest=valid[valid.length-1];
+    historyChart.innerHTML='<div class="ms-date">Crypto Fear &amp; Greed Index · '+valid.length+' daily observations · source: Alternative.me</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Crypto Fear and Greed sentiment bar chart" preserveAspectRatio="xMidYMid meet">'+grid+bars+'<text x="'+L+'" y="'+(H-10)+'" fill="#8196b2" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end" fill="#8196b2" font-size="10">'+escapeHtml(last)+'</text></svg><div class="ms-chart-label"><span style="color:#ff5964">0–24 · Extreme Fear</span><span style="color:#f2c14e">25–55 · Fear / Neutral</span><span style="color:#46d7a1">56–100 · Greed</span></div><div class="ms-chart-label"><span>Latest: '+Number(latest.value)+'/100 · '+escapeHtml(latest.classification||"Sentiment")+'</span><span>Daily sentiment, not a price signal</span></div>';
+  }
   async function loadHistory(){
     const selected=seriesSelect.value,range=rangeSelect.value;
     historyStatus.textContent="Loading "+(selected==="cpi_yoy"?"CPI inflation year over year":selected)+" history…";
     try{
+      if(selected==="fear_greed"){
+        const data=await getMacroJson("https://api.alternative.me/fng/?limit=365&format=json");
+        let points=(data.data||[]).map(p=>({date:new Date(Number(p.timestamp)*1000).toISOString().slice(0,10),value:Number(p.value),classification:p.value_classification})).filter(p=>p.date&&Number.isFinite(p.value)).sort((a,b)=>a.date.localeCompare(b.date));
+        const days={"30d":30,"90d":90,"1y":365,"5y":365}[range]||365;
+        if(points.length){const cutoff=new Date(points[points.length-1].date+"T00:00:00Z");cutoff.setUTCDate(cutoff.getUTCDate()-days);points=points.filter(p=>p.date>=cutoff.toISOString().slice(0,10));}
+        renderFearGreed(points);historyStatus.textContent="Source: Alternative.me Crypto Fear & Greed Index · "+points.length+" daily observations. This sentiment index is crypto-specific, not a general market or VIX measure.";return;
+      }
       const series=selected==="cpi_yoy"?"cpi":selected;
       const data=await getMacroJson(API_URL+"history?series="+encodeURIComponent(series)+"&range="+encodeURIComponent(selected==="cpi_yoy"?"5y":range));
       let points=(data.points||data.observations||[]).filter(p=>p&&p.date&&Number.isFinite(Number(p.value)));
