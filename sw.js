@@ -1,13 +1,13 @@
 "use strict";
 
-const CACHE_VERSION = "marketscope-v24";
+const CACHE_VERSION = "marketscope-v25";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./marketscope-mark.svg",
-  "./macro-dashboard.js?v=20261025-marketscope-v7",
+  "./macro-dashboard.js?v=20261025-marketscope-v8",
   "./marketpilot-config.js?v=20261024-pro-workspace",
-  "./ai-workspace.js?v=20261025-marketscope-v7",
+  "./ai-workspace.js?v=20261025-marketscope-v8",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
