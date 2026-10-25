@@ -118,7 +118,7 @@ jobs:
             assert.ok(!script.includes("marketsignal-data.asadlang05.workers.dev"),
               "Published dashboard must not call the retired Worker");
             assert.match(html, /macro-dashboard\.js/, "Live page must load the macro dashboard script");
-            assert.match(html, /<h1>MarketScope<\\/h1>/, "Live page must use the MarketScope brand");
+            assert.ok(html.includes("<h1>MarketScope</h1>"), "Live page must use the MarketScope brand");
             assert.match(html, /ai-workspace\.js/, "Live page must load the new workspace script");
             assert.match(html, /id="showCharts"/, "Charts route must remain available to the workspace menu");
             assert.match(html, /macro-dashboard\.js\?v=20261025-marketscope-v6/, "Live page must reference the refreshed macro dashboard");
