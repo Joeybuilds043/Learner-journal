@@ -203,7 +203,7 @@
       if(!host){host=document.createElement("div");host.className="ms-metric-history";cardEl.appendChild(host);}
       host.innerHTML='<div class="ms-date">Loading published history…</div>';
       try{
-        const data=await getMacroJson(API_URL+"history?series="+encodeURIComponent(cfg.series)+"&range=1y");
+        const data=await getMacroJson(API_URL+"history?series="+encodeURIComponent(cfg.series)+"&range="+(cfg.series==="cpi"?"5y":"1y"));
         let points=(data.points||data.observations||[]).filter(p=>p&&p.date&&Number.isFinite(Number(p.value))).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
         if(cfg.series==="cpi"){
           const byMonth=new Map(points.map(p=>[String(p.date).slice(0,7),Number(p.value)]));
