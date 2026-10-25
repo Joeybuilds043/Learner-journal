@@ -67,7 +67,7 @@
   section.className = "ms-live";
   section.setAttribute("aria-label","Macro market dashboard");
   section.innerHTML = `
-    <div class="ms-live-head"><div><p class="ms-live-kicker">MARKETPILOT AI / MACRO TERMINAL</p><h2>Market pulse</h2><p class="ms-subtitle">US macro · latest available readings</p></div><button id="ms-refresh" type="button">↻ Refresh</button></div>
+    <div class="ms-live-head"><div><p class="ms-live-kicker">MARKETSCOPE AI / MACRO TERMINAL</p><h2>Market pulse</h2><p class="ms-subtitle">US macro · latest available readings</p></div><button id="ms-refresh" type="button">↻ Refresh</button></div>
     <div class="ms-grid" id="ms-grid"><div class="ms-card">Loading data…</div></div>
     <div class="ms-read"><div class="ms-read-title">MACRO READ</div><p id="ms-read-text">Loading latest observations.</p></div>
     <section class="ms-cpi-panel" id="ms-cpi-panel" aria-label="US CPI inflation trend"><div class="ms-cpi-head"><div><p class="ms-cpi-kicker">INFLATION TRACKER / FRED CPI</p><h3>US CPI inflation</h3><p>Year-over-year rate · monthly observations</p></div><div class="ms-cpi-current"><strong id="ms-cpi-latest">—</strong><small>latest YoY</small></div></div><div class="ms-cpi-metrics"><div class="ms-cpi-metric"><span>Change vs prior month</span><strong id="ms-cpi-change">—</strong></div><div class="ms-cpi-metric"><span>12-month high</span><strong id="ms-cpi-high">—</strong></div><div class="ms-cpi-metric"><span>12-month low</span><strong id="ms-cpi-low">—</strong></div></div><div class="ms-cpi-chart" id="ms-cpi-bars"><div class="empty">Loading monthly CPI observations…</div></div><p class="ms-cpi-status" id="ms-cpi-status">Loading published CPI data…</p></section>
