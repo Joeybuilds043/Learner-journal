@@ -92,35 +92,22 @@
   const seriesSelect=section.querySelector("#ms-series"), rangeSelect=section.querySelector("#ms-range");
   function renderHistory(points,label,unit){
     const valid=(points||[]).filter(p=>Number.isFinite(Number(p.value))&&p.date).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
-    if(valid.length<2){historyChart.innerHTML='<div class="empty">Not enough dated observations for this range. Choose a longer period; no sample data is shown.</div>';return}
+    if(valid.length<2){historyChart.innerHTML='<div class="empty">Not enough dated observations for this range. Choose a longer period; no sample data is shown.</div>';return;}
     const values=valid.map(p=>Number(p.value)),min=Math.min(...values),max=Math.max(...values),span=max-min||Math.max(Math.abs(max)*.01,.01);
     const W=720,H=220,L=56,R=18,T=22,B=35,plotW=W-L-R,plotH=H-T-B,baseY=H-B;
     const pts=values.map((v,i)=>({x:L+i*plotW/(values.length-1),y:T+(max-v)/span*plotH,v,date:valid[i].date}));
     let path="M "+pts[0].x.toFixed(2)+" "+pts[0].y.toFixed(2);
     for(let i=1;i<pts.length;i++){const prev=pts[i-1],cur=pts[i],mx=(prev.x+cur.x)/2;path+=" Q "+prev.x.toFixed(2)+" "+prev.y.toFixed(2)+" "+mx.toFixed(2)+" "+((prev.y+cur.y)/2).toFixed(2);if(i===pts.length-1)path+=" T "+cur.x.toFixed(2)+" "+cur.y.toFixed(2);}
-    const area=path+" L "+pts[pts.length-1].x.toFixed(2)+" "+(H-B)+" L "+L+" "+(H-B)+" Z";
+    const area=path+" L "+pts[pts.length-1].x.toFixed(2)+" "+baseY+" L "+L+" "+baseY+" Z";
     const fmt=v=>Number(v).toLocaleString("en-US",{maximumFractionDigits:3});
-    const yTicks=[max,(max+min)/2,min],grid=yTicks.map((v,i)=>{const y=T+i*plotH/2;return '<line class="ms-gridline" x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'"/><text x="'+(L-9)+'" y="'+(y+4)+'" text-anchor="end" fill="#91a6c1" font-size="10">'+fmt(v)+(unit==="percent"?"%":"")+'</text>'}).join("");
+    const yTicks=[max,(max+min)/2,min],grid=yTicks.map((v,i)=>{const y=T+i*plotH/2;return '<line class="ms-gridline" x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'"/><text x="'+(L-9)+'" y="'+(y+4)+'" text-anchor="end" fill="#91a6c1" font-size="10">'+fmt(v)+(unit==="percent"?"%":"")+'</text>';}).join("");
     const step=Math.max(1,Math.floor(pts.length/7));
     const dots=pts.filter((p,i)=>i===0||i===pts.length-1||i%step===0).map(p=>'<circle class="ms-data-point" cx="'+p.x.toFixed(2)+'" cy="'+p.y.toFixed(2)+'" r="3" fill="#dce5ff" stroke="#8eaaff" stroke-width="2"><title>'+escapeHtml(p.date)+' · '+fmt(p.v)+(unit==="percent"?"%":"")+'</title></circle>').join("");
     const first=valid[0].date,last=valid[valid.length-1].date;
     const lineColor=label.toLowerCase().includes("inflation")?"#b18cff":label.toLowerCase().includes("yield")?"#8da2ff":"#579dff";
     const barWidth=Math.max(1,Math.min(7,plotW/pts.length*.58));
     const bars=pts.map(p=>{const h=Math.max(1,baseY-p.y),y=baseY-h;return '<rect class="ms-bar" x="'+(p.x-barWidth/2).toFixed(2)+'" y="'+y.toFixed(2)+'" width="'+barWidth.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="1.2" fill="'+lineColor+'"><title>'+escapeHtml(p.date)+' · '+fmt(p.v)+(unit==="percent"?"%":"")+'</title></rect>';}).join("");
-    historyChart.innerHTML='<div class="ms-date">VIX volatility · '+valid.length+' observations · stress bands are descriptive, not a Fear & Greed Index reading</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="VIX market stress bar chart" preserveAspectRatio="xMidYMid meet">'+grid+stressBars+'<text x="'+L+'" y="'+(H-10)+'" fill="#8196b2" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end" fill="#8196b2" font-size="10">'+escapeHtml(last)+'</text></svg><div class="ms-chart-label"><span style="color:#46d7a1">Below 20 · calmer</span><span style="color:#f2c14e">20–29 · elevated</span><span style="color:#ff5964">30+ · high stress</span></div>';
-      return;
-    }
     historyChart.innerHTML='<div class="ms-date">'+escapeHtml(label)+' · '+valid.length+' observations · source: published historical data</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(label)+' historical chart" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="msAreaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+lineColor+'" stop-opacity=".34"/><stop offset="100%" stop-color="'+lineColor+'" stop-opacity=".015"/></linearGradient><linearGradient id="msStrokeGradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="'+lineColor+'"/><stop offset="100%" stop-color="#c5d2ff"/></linearGradient></defs>'+grid+bars+'<path d="'+area+'" fill="url(#msAreaGradient)"/><path d="'+path+'" stroke="url(#msStrokeGradient)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'<text x="'+L+'" y="'+(H-10)+'" fill="#8196b2" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end" fill="#8196b2" font-size="10">'+escapeHtml(last)+'</text></svg><div class="ms-chart-label"><span>Low '+fmt(min)+(unit==="percent"?"%":"")+'</span><span>Latest '+fmt(values[values.length-1])+(unit==="percent"?"%":"")+'</span></div>';
-  }
-  function renderFearGreed(points){
-    const valid=(points||[]).filter(p=>Number.isFinite(Number(p.value))&&p.date).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
-    if(valid.length<2){historyChart.innerHTML='<div class="empty">Not enough Fear &amp; Greed observations for this period.</div>';return;}
-    const W=720,H=220,L=52,R=18,T=22,B=35,plotW=W-L-R,plotH=H-T-B,baseY=H-B,slot=plotW/valid.length,bw=Math.max(1,Math.min(8,slot*.72));
-    const y=v=>T+(100-Math.max(0,Math.min(100,Number(v))))/100*plotH;
-    const grid=[100,50,0].map(v=>'<line class="ms-gridline" x1="'+L+'" y1="'+y(v)+'" x2="'+(W-R)+'" y2="'+y(v)+'"/><text x="'+(L-9)+'" y="'+(y(v)+4)+'" text-anchor="end" fill="#91a6c1" font-size="10">'+v+'</text>').join("");
-    const bars=valid.map((p,i)=>{const v=Number(p.value),x=L+i*slot+(slot-bw)/2,top=y(v),color=v<=24?"#ff5964":v<=55?"#f2c14e":"#46d7a1";return '<rect x="'+x.toFixed(2)+'" y="'+top.toFixed(2)+'" width="'+bw.toFixed(2)+'" height="'+Math.max(1,baseY-top).toFixed(2)+'" rx="2" fill="'+color+'" opacity=".92"><title>'+escapeHtml(p.date)+' · '+v+'/100 · '+escapeHtml(p.classification||"Sentiment")+'</title></rect>';}).join("");
-    const first=valid[0].date,last=valid[valid.length-1].date,latest=valid[valid.length-1];
-    historyChart.innerHTML='<div class="ms-date">Crypto Fear &amp; Greed Index · '+valid.length+' daily observations · source: Alternative.me</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Crypto Fear and Greed sentiment bar chart" preserveAspectRatio="xMidYMid meet">'+grid+bars+'<text x="'+L+'" y="'+(H-10)+'" fill="#8196b2" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end" fill="#8196b2" font-size="10">'+escapeHtml(last)+'</text></svg><div class="ms-chart-label"><span style="color:#ff5964">0–24 · Extreme Fear</span><span style="color:#f2c14e">25–55 · Fear / Neutral</span><span style="color:#46d7a1">56–100 · Greed</span></div><div class="ms-chart-label"><span>Latest: '+Number(latest.value)+'/100 · '+escapeHtml(latest.classification||"Sentiment")+'</span><span>Daily sentiment, not a price signal</span></div>';
   }
   async function loadHistory(){
     const selected=seriesSelect.value,range=rangeSelect.value;
