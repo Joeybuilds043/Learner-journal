@@ -4,6 +4,7 @@ const CACHE_VERSION = "marketscope-v23";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./marketscope-mark.svg",
   "./macro-dashboard.js?v=20261025-marketscope-v6",
   "./marketpilot-config.js?v=20261024-pro-workspace",
   "./ai-workspace.js?v=20261025-marketscope-v6",
