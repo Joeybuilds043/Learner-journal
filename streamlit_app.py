@@ -876,7 +876,7 @@ elif page == "Historical Patterns":
     if len(close_series) >= 2:
         # Calculate each instrument on its own trading calendar; never forward-fill
         # weekend or market-holiday prices just to manufacture synchronized returns.
-        return_series = [series.pct_change(fill_method=None).rename(series.name) for series in close_series]
+        return_series = [series.sort_index().pct_change(fill_method=None).rename(series.name) for series in close_series]
         returns = pd.concat(return_series, axis=1).sort_index()
         corr = returns.tail(120).corr(min_periods=30)
         if corr.notna().sum().sum() > 0:
