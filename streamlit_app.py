@@ -11,12 +11,12 @@ import streamlit as st
 import xml.etree.ElementTree as ET
 from urllib.parse import quote
 
-APP_NAME = "CandleDesk"
-ASSISTANT_NAME = "Pip"
+APP_NAME = "MarketPilot AI"
+ASSISTANT_NAME = "Atlas"
 GROK_DEFAULT_MODEL = "grok-4.7"
 
 st.set_page_config(
-    page_title="CandleDesk | Market Intelligence",
+    page_title="MarketPilot AI | Market Intelligence",
     page_icon="assets/candledesk-mark.svg",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -97,6 +97,11 @@ st.markdown(
     div[data-testid="stAlert"] { border-radius: 12px; }
     a { color: #8dbbff !important; text-decoration: none; }
     a:hover { text-decoration: underline; }
+    .inspiration-banner { display:flex; align-items:flex-start; gap:.7rem; margin:.15rem 0 1rem; padding:.75rem .9rem; border:1px solid #2a3d57; border-radius:13px; background:linear-gradient(105deg,#111d2c,#171d32 72%,#211c31); }
+    .inspiration-badge { flex:0 0 30px; width:30px; height:30px; display:grid; place-items:center; border-radius:9px; background:linear-gradient(135deg,#b9d9ff,#c9b7ff); color:#101a2a; font-weight:900; }
+    .inspiration-copy { color:#d5e1f2; font-size:.79rem; line-height:1.5; }
+    .inspiration-copy small { display:block; margin-top:.2rem; color:#8297b3; font-size:.69rem; }
+    .status-dot { background:#68c8f4; }
     .brand-row { display: flex; align-items: center; gap: 11px; margin: .1rem 0 .65rem; }
     .brand-mark { width: 39px; height: 39px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .brand-name { font-size: 1.2rem; line-height:1.05; letter-spacing:-.035em; font-weight:800; color:#f1f6ff; }
@@ -107,7 +112,7 @@ st.markdown(
     .chart-caption { font-size:.75rem; color:#8291a7; margin-bottom:.45rem; }
     .status-pill { display:inline-flex; align-items:center; gap:6px; border:1px solid #253548;
         background:#111a27; color:#b6c9e3; border-radius:100px; padding:5px 10px; font-size:.72rem; }
-    .status-dot { width:7px; height:7px; display:inline-block; border-radius:100%; background:#5dd39e; }
+    .status-dot { width:7px; height:7px; display:inline-block; border-radius:100%; background:#68c8f4; }
     .insight-box { padding: .9rem 1rem; border: 1px solid #24354b; border-radius: 13px; background: linear-gradient(120deg, #101b2a, #101722); }
     .insight-title { color:#eef5ff; font-size:.92rem; font-weight:750; margin-bottom:.25rem; }
     .insight-copy { color:#a9b8cc; font-size:.85rem; line-height:1.55; }
@@ -127,7 +132,7 @@ st.markdown(
 )
 
 SYSTEM_PROMPT = """
-You are Pip, a disciplined cross-asset financial markets analyst and teacher.
+You are Atlas, a disciplined cross-asset financial markets analyst and teacher.
 Write like a real, experienced analyst: clear, compact, natural, and specific.
 Use the data and dated headlines supplied with the user's question. Start with the direct answer.
 Separate (1) verified facts, (2) interpretation, and (3) scenarios or what would invalidate the view.
@@ -171,7 +176,7 @@ def latest_value(df, column="value"):
 @st.cache_data(ttl=1800, show_spinner=False)
 def fred_series(series_id: str) -> pd.DataFrame:
     url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=" + quote(series_id)
-    response = requests.get(url, timeout=15, headers={"User-Agent": "CandleDesk/1.0 market research"})
+    response = requests.get(url, timeout=15, headers={"User-Agent": "MarketPilot AI/1.0 market research"})
     response.raise_for_status()
     raw = pd.read_csv(StringIO(response.text))
     if raw.shape[1] < 2:
@@ -193,7 +198,7 @@ def yahoo_history(symbol: str, range_value: str = "1y", interval: str = "1d") ->
         + quote(symbol, safe="^=.-")
         + f"?period1={period1}&period2={period2}&interval={quote(interval)}"
     )
-    response = requests.get(url, timeout=15, headers={"User-Agent": "Mozilla/5.0 CandleDesk/1.0"})
+    response = requests.get(url, timeout=15, headers={"User-Agent": "Mozilla/5.0 MarketPilot AI/1.0"})
     response.raise_for_status()
     payload = response.json()
     result = (payload.get("chart", {}).get("result") or [None])[0]
@@ -215,7 +220,7 @@ def fetch_news(query: str = "US inflation Federal Reserve Treasury yields dollar
     if len(q) < 3:
         q = "US inflation Federal Reserve Treasury yields dollar stock market"
     url = "https://news.google.com/rss/search?q=" + quote(q[:180]) + "&hl=en-US&gl=US&ceid=US:en"
-    response = requests.get(url, timeout=12, headers={"User-Agent": "Mozilla/5.0 CandleDesk/1.0"})
+    response = requests.get(url, timeout=12, headers={"User-Agent": "Mozilla/5.0 MarketPilot AI/1.0"})
     response.raise_for_status()
     root = ET.fromstring(response.content)
     rows = []
@@ -262,7 +267,7 @@ def load_market_data():
 def metric_card(label, value, delta=None, source_date=None, positive_is_good=True):
     delta_html = ""
     if delta is not None and pd.notna(delta):
-        color = "#57d69b" if (delta >= 0) == positive_is_good else "#ff6477"
+        color = "#68c8f4" if (delta >= 0) == positive_is_good else "#ff6477"
         sign = "+" if delta > 0 else ""
         delta_html = f'<div style="font-size:.76rem;color:{color};margin-top:5px">{sign}{fmt_num(delta)}</div>'
     date_text = source_date.strftime("%d %b %Y") if hasattr(source_date, "strftime") else "Observation unavailable"
@@ -326,7 +331,7 @@ def bar_chart(df, title, subtitle, value_name="VIX"):
         return
     recent = df.tail(60)
     colors = [
-        "#50d39a" if value < 15 else ("#f4bd60" if value < 25 else "#ff6477")
+        "#68c8f4" if value < 15 else ("#f4bd60" if value < 25 else "#ff6477")
         for value in recent["close"].astype(float)
     ]
     fig = go.Figure(go.Bar(
@@ -347,7 +352,7 @@ def candle_chart(df, title, subtitle):
     fig = go.Figure(go.Candlestick(
         x=recent.index,
         open=recent["open"], high=recent["high"], low=recent["low"], close=recent["close"],
-        increasing={"line": {"color": "#50d39a", "width": 1}, "fillcolor": "#50d39a"},
+        increasing={"line": {"color": "#68c8f4", "width": 1}, "fillcolor": "#68c8f4"},
         decreasing={"line": {"color": "#ff6477", "width": 1}, "fillcolor": "#ff6477"},
         whiskerwidth=.4,
         hovertemplate="%{x|%d %b %Y}<br>O %{open:.2f}<br>H %{high:.2f}<br>L %{low:.2f}<br>C %{close:.2f}<extra></extra>",
@@ -452,7 +457,7 @@ def news_query_for_question(question: str) -> str:
 
 # ----- Header and navigation -----
 if st.session_state.pop("jump_to_ai", False):
-    st.session_state["main_nav"] = "Pip AI"
+    st.session_state["main_nav"] = "AI Analyst"
 
 header_left, header_right = st.columns([4, 1.35], vertical_alignment="center")
 with header_left:
@@ -462,45 +467,46 @@ with header_left:
           <div class="brand-mark">
             <svg viewBox="0 0 48 48" width="39" height="39" aria-label="Candlestick market logo">
               <rect x="5" y="8" width="38" height="32" rx="9" fill="#111b28" stroke="#29384b"/>
-              <path d="M14 12V34" stroke="#50d39a" stroke-width="2" stroke-linecap="round"/>
-              <rect x="10" y="18" width="8" height="11" rx="1.5" fill="#50d39a"/>
+              <path d="M14 12V34" stroke="#68c8f4" stroke-width="2" stroke-linecap="round"/>
+              <rect x="10" y="18" width="8" height="11" rx="1.5" fill="#68c8f4"/>
               <path d="M25 8V35" stroke="#ff6477" stroke-width="2" stroke-linecap="round"/>
               <rect x="21" y="13" width="8" height="14" rx="1.5" fill="#ff6477"/>
-              <path d="M36 11V36" stroke="#50d39a" stroke-width="2" stroke-linecap="round"/>
-              <rect x="32" y="23" width="8" height="8" rx="1.5" fill="#50d39a"/>
+              <path d="M36 11V36" stroke="#68c8f4" stroke-width="2" stroke-linecap="round"/>
+              <rect x="32" y="23" width="8" height="8" rx="1.5" fill="#68c8f4"/>
             </svg>
           </div>
           <div>
-            <div class="brand-name">CandleDesk</div>
+            <div class="brand-name">MarketPilot AI</div>
             <div class="brand-sub">Market intelligence, without the noise</div>
           </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
-with header_right:
-    st.markdown('<div style="text-align:right;padding-top:.3rem"><span class="status-pill"><span class="status-dot"></span>Research workspace</span></div>', unsafe_allow_html=True)
+st.markdown(
+    '<section class="inspiration-banner"><span class="inspiration-badge">SH</span><div class="inspiration-copy"><strong>Inspired by Saad Hashmani</strong> — the person who first introduced me to the world of markets. That spark of curiosity became the starting point for MarketPilot AI.<small>Built independently for learning, market research and disciplined analysis.</small></div></section>',
+    unsafe_allow_html=True,
+)
 
-pages = ["Markets", "Research", "Pip AI", "Journal", "Historical Patterns"]
-page = st.radio("Main navigation", pages, horizontal=True, label_visibility="collapsed", key="main_nav")
+pages = ["Markets", "AI Analyst", "Daily Brief", "Your Journal", "Historical Patterns", "Profile"]
+if st.session_state.get("main_nav") not in pages:
+    st.session_state["main_nav"] = "Markets"
+with header_right:
+    with st.popover("⋮ Menu", use_container_width=True):
+        st.radio("Workspace sections", pages, horizontal=False, label_visibility="collapsed", key="main_nav")
+page = st.session_state.get("main_nav", "Markets")
 
 # ----- Data load only on views that need it -----
 data = {}
-if page in ("Markets", "Research", "Pip AI", "Historical Patterns"):
+if page in ("Markets", "Daily Brief", "AI Analyst", "Historical Patterns"):
     with st.spinner("Loading public market and economic observations…"):
         data = load_market_data()
 
 # ----- MARKETS -----
 if page == "Markets":
-    title_col, action_col = st.columns([4, 1.25], vertical_alignment="center")
-    with title_col:
-        st.markdown('<div class="eyebrow">Macro + cross-asset dashboard</div>', unsafe_allow_html=True)
-        st.title("Read the market before the move.")
-        st.markdown('<div class="section-note">Inflation, rates, dollar strength and risk appetite in one view.</div>', unsafe_allow_html=True)
-    with action_col:
-        if st.button("Ask Pip  ↗", type="primary", use_container_width=True):
-            st.session_state["jump_to_ai"] = True
-            st.rerun()
+    st.markdown('<div class="eyebrow">Macro + cross-asset dashboard</div>', unsafe_allow_html=True)
+    st.title("Read the market before the move.")
+    st.markdown('<div class="section-note">Inflation, rates, dollar strength and risk appetite in one view.</div>', unsafe_allow_html=True)
 
     cpi_v, cpi_d, cpi_delta = latest_value(data.get("cpi_yoy"))
     ppi_v, ppi_d, ppi_delta = latest_value(data.get("ppi_yoy"))
@@ -551,7 +557,7 @@ if page == "Markets":
             st.info("PPI observation history unavailable from FRED.")
         else:
             ppi_data = ppi_data.tail(48)
-            bar_colors = ["#50d39a" if x >= 0 else "#ff6477" for x in ppi_data["value"].astype(float)]
+            bar_colors = ["#68c8f4" if x >= 0 else "#ff6477" for x in ppi_data["value"].astype(float)]
             fig = go.Figure(go.Bar(
                 x=ppi_data.index, y=ppi_data["value"], marker_color=bar_colors, marker_line_width=0,
                 hovertemplate="%{x|%b %Y}<br>PPI YoY: %{y:.2f}%<extra></extra>",
@@ -573,15 +579,15 @@ if page == "Markets":
         '<div class="insight-copy">Inflation surprises can shift rate expectations; yields can affect the dollar and equity valuations; VIX reflects expected equity volatility. These are relationships to test against current evidence, not automatic trading rules. CPI/PPI release dates differ from quote timestamps.</div></div>',
         unsafe_allow_html=True,
     )
-    if st.button("Open Pip for a market read  ↗", type="primary"):
+    if st.button("Open Atlas for a market read  ↗", type="primary"):
         st.session_state["jump_to_ai"] = True
         st.rerun()
     st.markdown('<div class="source-line">Sources: FRED economic series; Yahoo Finance chart data. Quotes may be delayed. Values are shown with observation dates where available.</div>', unsafe_allow_html=True)
 
 # ----- RESEARCH -----
-elif page == "Research":
+elif page == "Daily Brief":
     st.markdown('<div class="eyebrow">Headlines and context</div>', unsafe_allow_html=True)
-    st.title("Research brief")
+    st.title("Daily market brief")
     st.markdown('<div class="section-note">Headline discovery first; AI summary only when Grok API is configured.</div>', unsafe_allow_html=True)
 
     query = st.text_input("News topic", value="US inflation Federal Reserve Treasury yields dollar stocks", max_chars=180)
@@ -618,15 +624,15 @@ elif page == "Research":
         st.caption("Generated with " + str(st.session_state.get("last_brief_model", GROK_DEFAULT_MODEL)))
 
 # ----- PIP AI -----
-elif page == "Pip AI":
+elif page == "AI Analyst":
     left, right = st.columns([3, 1], vertical_alignment="center")
     with left:
         st.markdown('<div class="eyebrow">Conversational market research</div>', unsafe_allow_html=True)
-        st.title("Pip")
+        st.title("Atlas")
         st.markdown('<div class="section-note">A practical market analyst. Ask about the why, not only the what.</div>', unsafe_allow_html=True)
     with right:
-        if os.path.exists("assets/pip-avatar.webp"):
-            st.image("assets/pip-avatar.webp", width=74)
+        if os.path.exists("assets/saad-hashmani-avatar.webp"):
+            st.image("assets/saad-hashmani-avatar.webp", width=74)
         if st.button("Clear chat", use_container_width=True):
             st.session_state["pip_messages"] = []
             st.rerun()
@@ -638,7 +644,7 @@ elif page == "Pip AI":
     if api_ready:
         st.markdown('<span class="status-pill"><span class="status-dot"></span>Grok API connected · usage may be billed</span>', unsafe_allow_html=True)
     else:
-        st.info("Dashboard mode is ready. Pip's AI replies activate after XAI_API_KEY is added in Streamlit Cloud → Settings → Secrets. The key will not be stored in source code.")
+        st.info("Dashboard mode is ready. Atlas's AI replies activate after XAI_API_KEY is added in Streamlit Cloud → Settings → Secrets. The key will not be stored in source code.")
 
     with st.container(border=True):
         st.markdown("**Try a question**")
@@ -655,11 +661,11 @@ elif page == "Pip AI":
                     st.rerun()
 
     for item in st.session_state["pip_messages"]:
-        with st.chat_message(item["role"], avatar="assets/pip-avatar.webp" if item["role"] == "assistant" and os.path.exists("assets/pip-avatar.webp") else None):
+        with st.chat_message(item["role"], avatar="assets/saad-hashmani-avatar.webp" if item["role"] == "assistant" and os.path.exists("assets/saad-hashmani-avatar.webp") else None):
             st.markdown(item["content"])
 
     pending = st.session_state.pop("pending_pip_prompt", None)
-    user_prompt = st.chat_input("Ask Pip about markets, macro, risk or a trading concept…")
+    user_prompt = st.chat_input("Ask Atlas about markets, macro, risk or a trading concept…")
     user_prompt = user_prompt or pending
     if user_prompt:
         st.session_state["pip_messages"].append({"role": "user", "content": user_prompt})
@@ -667,11 +673,11 @@ elif page == "Pip AI":
             st.markdown(user_prompt)
 
         if not get_secret("XAI_API_KEY"):
-            answer = "Pip ka dashboard aur charts setup ho raha hai, lekin AI response ke liye Grok API key abhi connect nahin hui. Deployment ke baad Streamlit Cloud ke Settings → Secrets mein XAI_API_KEY add karni hogi. API key ko chat, HTML ya GitHub code mein paste na karein."
+            answer = "Atlas ka dashboard aur charts setup ho raha hai, lekin AI response ke liye Grok API key abhi connect nahin hui. Deployment ke baad Streamlit Cloud ke Settings → Secrets mein XAI_API_KEY add karni hogi. API key ko chat, HTML ya GitHub code mein paste na karein."
             model_used = "not connected"
         else:
             try:
-                with st.spinner("Pip is checking the available data and headlines…"):
+                with st.spinner("Atlas is checking the available data and headlines…"):
                     try:
                         headlines = fetch_news(news_query_for_question(user_prompt))
                     except Exception:
@@ -688,16 +694,16 @@ elif page == "Pip AI":
 
         st.session_state["pip_messages"].append({"role": "assistant", "content": answer})
         st.session_state["pip_model_used"] = model_used
-        with st.chat_message("assistant", avatar="assets/pip-avatar.webp" if os.path.exists("assets/pip-avatar.webp") else None):
+        with st.chat_message("assistant", avatar="assets/saad-hashmani-avatar.webp" if os.path.exists("assets/saad-hashmani-avatar.webp") else None):
             st.markdown(answer)
         st.rerun()
 
     if st.session_state.get("pip_model_used"):
         st.caption("Model: " + str(st.session_state["pip_model_used"]) + " · A model label does not guarantee response accuracy.")
-    st.markdown('<div class="source-line">Pip uses available public market observations and headline links. If a provider is unavailable, it should say so rather than fabricate a price or headline.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="source-line">Atlas uses available public market observations and headline links. If a provider is unavailable, it should say so rather than fabricate a price or headline.</div>', unsafe_allow_html=True)
 
 # ----- JOURNAL -----
-elif page == "Journal":
+elif page == "Your Journal":
     st.markdown('<div class="eyebrow">Private learning log</div>', unsafe_allow_html=True)
     st.title("Trading journal")
     st.markdown('<div class="section-note">Record your thesis, then compare it with what the market actually did.</div>', unsafe_allow_html=True)
@@ -788,7 +794,7 @@ elif page == "Historical Patterns":
                 zmin=-1, zmax=1, zmid=0,
                 colorscale=[
                     [0.0, "#ff6477"], [0.25, "#6b3747"], [0.5, "#162131"],
-                    [0.75, "#245b58"], [1.0, "#50d39a"],
+                    [0.75, "#364d76"], [1.0, "#68c8f4"],
                 ],
                 colorbar={"title": "Corr.", "tickformat": ".1f"},
                 hovertemplate="%{y} vs %{x}<br>Correlation: %{z:.2f}<extra></extra>",
@@ -810,7 +816,21 @@ elif page == "Historical Patterns":
         unsafe_allow_html=True,
     )
 
+elif page == "Profile":
+    st.markdown('<div class="eyebrow">Workspace preferences</div>', unsafe_allow_html=True)
+    st.title("Profile & preferences")
+    st.markdown('<div class="section-note">These settings are stored only for the current Streamlit session in this prototype.</div>', unsafe_allow_html=True)
+    display_name = st.text_input("Display name", value=st.session_state.get("profile_display_name", ""), max_chars=60)
+    focus = st.multiselect("Markets you follow", ["US equities", "Treasury yields", "US dollar", "Inflation", "Gold", "Forex", "Crypto", "Volatility"], default=st.session_state.get("profile_focus", ["Inflation", "Treasury yields", "US dollar"]))
+    if st.button("Save preferences", type="primary"):
+        st.session_state["profile_display_name"] = display_name.strip()
+        st.session_state["profile_focus"] = focus
+        st.success("Preferences saved for this session.")
+    st.markdown("**Data & privacy**")
+    st.write("The Grok API key belongs in Streamlit Cloud App settings → Secrets as XAI_API_KEY. It must never be pasted into this page, a chat, or a public source file.")
+    st.write("Market observations come from public FRED and Yahoo Finance endpoints. They may be delayed or unavailable. Your legacy GitHub Pages journal remains separate and is not altered by this app.")
+
 st.markdown(
-    '<div class="footer-note">CandleDesk is an educational research workspace, not an execution platform or financial adviser. Public feeds may be delayed, incomplete or unavailable. Never treat an AI response or a chart pattern as a guaranteed trading signal.</div>',
+    '<div class="footer-note">MarketPilot AI is an educational research workspace, not an execution platform or financial adviser. Public feeds may be delayed, incomplete or unavailable. Never treat an AI response or a chart pattern as a guaranteed trading signal.</div>',
     unsafe_allow_html=True,
 )
