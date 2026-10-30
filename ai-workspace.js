@@ -1,10 +1,10 @@
 (() => {
 "use strict";
 const MARKET_API="https://marketsignal-data.joeybuilds043.workers.dev/";
-const API_BASE=String(window.MARKETPULSE_API_BASE||"https://marketpilot-ai.joeybuilds043.workers.dev").replace(/\/+$/,"");
-const AI_API_BASE=String(window.MARKETPULSE_AI_API_BASE||"").replace(/\/+$/,"");
+const API_BASE=String(window.MARKETPILOT_API_BASE||"https://marketpilot-ai.joeybuilds043.workers.dev").replace(/\/+$/,"");
+const AI_API_BASE=String(window.MARKETPILOT_AI_API_BASE||"").replace(/\/+$/,"");
 const ANALYST_API_BASE=AI_API_BASE||API_BASE;
-const DAILY_AI_LIMIT=Math.max(1,Math.min(30,Number(window.MARKETPULSE_AI_DAILY_LIMIT)||15));
+const DAILY_AI_LIMIT=Math.max(1,Math.min(30,Number(window.MARKETPILOT_AI_DAILY_LIMIT)||15));
 const AI_USAGE_KEY="marketpilot-ai-usage-v1";
 let sessionAiCount=0;
 function consumeAiRequest(){const today=new Date().toISOString().slice(0,10);let usage={};try{usage=JSON.parse(localStorage.getItem(AI_USAGE_KEY)||"{}")||{};}catch(_){usage={};}const count=usage.day===today?Number(usage.count)||0:0;if(count>=DAILY_AI_LIMIT)throw new Error("Daily AI request limit reached ("+DAILY_AI_LIMIT+"). The app counter resets at 00:00 UTC; provider quotas may use a different schedule.");try{localStorage.setItem(AI_USAGE_KEY,JSON.stringify({day:today,count:count+1}));}catch(_){sessionAiCount++;if(sessionAiCount>DAILY_AI_LIMIT)throw new Error("Daily AI request limit reached for this browser session.");}}
