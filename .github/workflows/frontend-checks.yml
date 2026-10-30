@@ -50,14 +50,14 @@ jobs:
             new vm.Script(scripts[i][1], { filename: "index-inline-" + (i + 1) + ".js" });
           }
           const checks = {
-            "MarketPilot AI brand": html.includes("<h1>MarketPilot AI</h1>"),
+            "MarketPulse AI brand": html.includes("<h1>MarketPulse AI</h1>"),
             "Legacy journal storage key": html.includes('const KEY = "learner-journal-entries-v1";'),
             "Frontend config variable": ai.includes("window.MARKETPILOT_API_BASE") && !ai.includes("MARKETSCOPE_API_BASE"),
             "Separate optional AI URL": config.includes("MARKETPILOT_AI_API_BASE"),
             "Local daily request cap": ai.includes("marketpilot-ai-usage-v1"),
             "Conversation follow-up context": ai.includes("buildConversationQuestion(q)"),
-            "Three-dot-only navigation": ai.includes(".app-nav{display:none!important}"),
-            "PWA name": manifest.short_name === "MarketPilot"
+            "Hamburger navigation": ai.includes("M4 6.5H20M4 12H20M4 17.5H20"),
+            "PWA name": manifest.short_name === "MarketPulse"
           };
           const failed = Object.entries(checks).filter(([, ok]) => !ok);
           for (const [name, ok] of Object.entries(checks)) {
