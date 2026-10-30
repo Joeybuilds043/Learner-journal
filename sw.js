@@ -1,14 +1,14 @@
 "use strict";
 
-const CACHE_VERSION = "marketpilot-v27";
+const CACHE_VERSION = "marketpulse-v28";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./marketscope-mark.svg",
-  "./macro-dashboard.js?v=20261031-marketpilot-v10",
-  "./marketpilot-config.js?v=20261031-provider-routing-v1",
-  "./ai-workspace.js?v=20261031-marketpilot-v10",
-  "./assets/saad-hashmani-avatar.webp",
+  "./macro-dashboard.js?v=20261031-marketpulse-v10",
+  "./marketpulse-config.js?v=20261031-provider-routing-v1",
+  "./ai-workspace.js?v=20261031-marketpulse-v10",
+  "./assets/candledesk-mark.svg",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
@@ -34,7 +34,7 @@ self.addEventListener("activate", (event) => {
       await Promise.all(
         keys
           .filter((key) =>
-            (key.startsWith("marketscope-") || key.startsWith("market-journal-") || key.startsWith("marketpilot-")) &&
+            (key.startsWith("marketscope-") || key.startsWith("market-journal-") || key.startsWith("marketpulse-")) &&
             key !== CACHE_VERSION
           )
           .map((key) => caches.delete(key))
@@ -59,7 +59,7 @@ self.addEventListener("fetch", (event) => {
 
   // Always try the network for the live macro dashboard first. Older installed
   // copies must not keep using a stale API URL just because a cached script exists.
-  if (url.pathname.endsWith("/macro-dashboard.js") || url.pathname.endsWith("/ai-workspace.js") || url.pathname.endsWith("/marketpilot-config.js")) {
+  if (url.pathname.endsWith("/macro-dashboard.js") || url.pathname.endsWith("/ai-workspace.js") || url.pathname.endsWith("/marketpulse-config.js")) {
     event.respondWith(
       (async () => {
         try {
