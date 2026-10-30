@@ -1,24 +1,28 @@
-# MarketPilot AI backend
+# MarketPilot AI — Gemini API service
 
-Python 3.12 + FastAPI + CrewAI. The service retrieves current public Binance spot ticker data and the existing MarketSignal FRED Worker data on the server, then runs a two-agent CrewAI workflow (market analyst and risk reviewer) using the Gemini API.
+This optional FastAPI service handles AI analysis for the existing GitHub Pages app. The existing Cloudflare Worker remains responsible for market quotes, historical prices and news. The frontend routes only /api/analyze and /api/daily-brief here after this service has been deployed and verified.
 
-## Deploy on Render
+## Deploy with Render
 
-The repository root includes `render.yaml` as a deployment blueprint. In Render, create a new Blueprint and select this GitHub repository. Review the `marketpilot-ai-api` service, set `GEMINI_API_KEY` as a secret environment variable, and deploy. The free web-service plan can sleep when idle and may have cold-start delays; it is not an always-on unlimited compute tier. After deployment, copy the public service URL into `marketpilot-config.js` as `window.MARKETPILOT_API_BASE`, then commit that public URL configuration (never the API key).
+The repository-root render.yaml is the Blueprint. In Render, create a Blueprint from this GitHub repository and add GEMINI_API_KEY as a secret. The service runs from backend/ and exposes /health.
 
-## Run locally
+Default provider: Google Gemini, model gemini-3.8-flash. Create the key in Google AI Studio. Never put it in GitHub, browser JavaScript, marketpilot-config.js or chat.
 
-1. Create a virtual environment and install `requirements.txt`.
-2. Set `GEMINI_API_KEY` in your shell environment (never commit it).
-3. Run `uvicorn main:app --reload --port 7860` from this directory.
-4. Test `GET /health`, `POST /api/analyze` with `{"question":"Summarize BTC and ETH and explain the main uncertainties."}`, and `POST /api/daily-brief` with `{}`.
+After deployment, copy the public service URL into window.MARKETPILOT_AI_API_BASE in marketpilot-config.js. It is blank by default, so the existing Cloudflare Worker remains active until you deliberately connect and test the new service.
 
-Set `PAGES_ORIGIN` to the exact GitHub Pages origin when deploying. The frontend can be configured with `window.MARKETPILOT_API_BASE` pointing to the public service URL. Do not expose `GEMINI_API_KEY` in frontend JavaScript.
+## Provider selection
 
-## Free-tier reality
+- Default free-tier candidate: AI_PROVIDER=gemini, GEMINI_MODEL=gemini-3.8-flash, GEMINI_API_KEY.
+- Optional xAI API: AI_PROVIDER=xai, GROK_MODEL and XAI_API_KEY. xAI API billing is separate from a consumer Grok subscription. It is never selected automatically.
 
-The Gemini API free tier has model-specific RPM/TPM/RPD quotas, not unlimited requests. Binance public market-data endpoints do not require a key but are rate-limited and can be unavailable in some regions. This service limits requests per IP as a basic guardrail; that in-memory limit is not sufficient for a public production service. Add persistent gateway rate limiting before inviting public traffic.
+The backend makes one model call per answer and caps output at 1,200 tokens. It accepts market context and recent conversation context from the frontend. It does not use the old two-agent CrewAI workflow, which made two model calls for one answer.
 
-## Data quality
+## Limits and privacy
 
-This version uses Binance spot tickers for BTC, ETH, SOL, BNB and XRP, plus the existing FRED Worker. It does not include a news feed, stock-market feed, official economic calendar or broker execution. The AI must not invent those facts. The SQL schema is a proposed data model; account authentication and durable report storage are not active yet.
+Default backend limits are 4 requests/minute and 15 requests per IP per UTC day. The browser also applies a soft 15-request daily cap. These counters are in memory and reset if the service restarts; they are guardrails for low-volume personal use, not production-grade anti-abuse protection. Provider quotas are independent and may reset on a different schedule.
+
+Google's Gemini API free tier is quota-limited and Google states that free-tier content may be used to improve its products. Do not send confidential journal notes, passwords, account information or other sensitive information through a free-tier API key. Review the current Google AI Studio pricing, rate limits and terms.
+
+## Data boundaries
+
+The frontend supplies current assets, macro readings, cross-asset groups and optional historical context. This service does not provide broker execution or a verified economic calendar. It must not invent missing data, headlines or prices.

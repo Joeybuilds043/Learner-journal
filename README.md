@@ -1,59 +1,70 @@
 # MarketPilot AI
 
-**A dark, chart-first workspace for macro research and cross-asset market context.**
+**A dark, chart-first workspace for macro research, cross-asset markets and disciplined journaling.**
 
-MarketPilot AI brings US inflation, producer prices, Treasury yields, dollar strength, volatility and major asset prices into one dashboard. Its research assistant is named **Atlas** and uses the xAI Grok API when the server-side key is configured.
+MarketPilot AI brings US inflation, Treasury yields, dollar strength, volatility and major asset prices into one research terminal. Its assistant, **Atlas**, explains market context and competing scenarios rather than presenting unsupported trading signals.
 
-## Current public app
+## Live app and services
 
-The existing GitHub Pages version remains available while the Streamlit build is validated:
-
-- **Live legacy app:** https://joeybuilds043.github.io/Learner-journal/
+- **GitHub Pages app:** https://joeybuilds043.github.io/Learner-journal/
 - **Repository:** https://github.com/Joeybuilds043/Learner-journal
-- **Macro data service:** https://marketsignal-data.joeybuilds043.workers.dev/
-- **Existing AI service:** https://marketpilot-ai.joeybuilds043.workers.dev/
+- **Market data Worker:** https://marketsignal-data.joeybuilds043.workers.dev/
+- **Existing AI/data Worker:** https://marketpilot-ai.joeybuilds043.workers.dev/
 
-The Streamlit build lives in `streamlit_app.py`. It is a separate deployment; a Streamlit URL is not active until the deployment is created in Streamlit Community Cloud. Do not delete the existing Pages app or its browser storage while testing the new version.
+The existing Pages app remains the production frontend. The Streamlit UI is a separate research prototype; it is not automatically synchronized with Pages. The optional FastAPI AI service is in \`backend/\`. It is designed to use Gemini by default and can be deployed separately.
 
-## Features
+## Application sections
 
-- **Markets dashboard:** CPI year-over-year monthly bars with a 3-month average and 2% reference, PPI inflation bars, 10-year Treasury yield, DXY candlesticks, VIX bars, S&P 500, gold and Bitcoin.
-- **Atlas AI Analyst:** finance-focused explanations that separate observations, interpretation and scenarios; includes available dated market context and retrieved headlines.
-- **Daily Brief:** headline discovery with an optional Grok-generated summary.
-- **Historical Patterns:** correlations between available daily asset returns. Correlation is not causation.
-- **Your Journal:** thesis, market outcome and lesson fields, CSV export, and individual entry deletion.
-- **Profile:** session-only display preferences.
-- **Saad Hashmani inspiration credit:** a short acknowledgement of the person who first introduced the project author to markets.
+- **Markets:** CPI year-over-year monthly bars and 3-month average, PPI, US 10-year yield, broad dollar index, VIX and cross-asset prices.
+- **AI Analyst:** source-aware answers that separate observations, interpretation, scenarios and invalidation conditions.
+- **Daily Brief:** on-demand research from the available data and headline context.
+- **News & Market Impact:** source-led news discovery; a headline is not proof of causation.
+- **Historical Relationships:** cross-asset comparisons with missing trading sessions handled explicitly.
+- **Your Journal:** the original browser-local journal with entry search, export/import and deletion.
+- **Profile:** browser-local workspace preferences. This is not account authentication.
 
-## Deploy the Streamlit UI
+Navigation in the Pages app is through the three-dot menu. The older Markets/Charts row has been removed from the visible interface. The app name is standardized as **MarketPilot AI**; the repository path and live URL are unchanged.
 
-1. Open the [Streamlit Community Cloud deployment page](https://share.streamlit.io/deploy?repository=Joeybuilds043/Learner-journal&branch=main&mainModule=streamlit_app.py).
-2. Sign in with GitHub and select repository `Joeybuilds043/Learner-journal`, branch `main`.
-3. Set the main file path to `streamlit_app.py` and deploy.
-4. After deployment succeeds, open the app's Settings → Secrets and configure the Grok API key as shown below.
+## AI configuration
 
-Local dependencies are in `requirements.txt`; detailed instructions are in [STREAMLIT_SETUP.md](STREAMLIT_SETUP.md).
+### Default model candidate: Gemini 3.8 Flash
 
-## Configure Grok
+The optional FastAPI service defaults to Google Gemini with \`GEMINI_MODEL=gemini-3.8-flash\`. Create a key in Google AI Studio and configure it only as a server-side secret.
 
-Add the key in Streamlit Community Cloud → App settings → Secrets. Do not commit it to GitHub, put it in frontend JavaScript, or paste it into a chat.
+Official documentation:
+- [Gemini models](https://ai.google.dev/gemini-api/docs/models)
+- [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing)
+- [Gemini API rate limits](https://ai.google.dev/gemini-api/docs/rate-limits)
 
-```toml
-XAI_API_KEY = "your-xai-api-key"
-GROK_MODEL = "grok-4.7"
-```
+The free tier is model-, project- and account-quota-limited. Gemini request-per-day quotas reset at midnight Pacific Time; request-per-minute and token-per-minute limits are separate. Google's Gemini API free-tier content may be used to improve Google products. Do not send confidential journal entries, passwords, account identifiers or sensitive personal information through a free-tier API key.
 
-The app calls the official xAI Responses API server-side. Grok API billing is separate from a consumer Grok subscription and may require credits; it is not unlimited or guaranteed free. Check the [xAI Console](https://console.x.ai/) for billing and usage.
+### Deploy the optional FastAPI service
 
-## Data sources and limitations
+1. Open Render and create a Blueprint from this repository using the root \`render.yaml\`.
+2. Add \`GEMINI_API_KEY\` as a Render secret. Do not commit it to GitHub.
+3. Wait until the service's \`/health\` endpoint reports healthy.
+4. Add the deployed public service URL to \`window.MARKETPILOT_AI_API_BASE\` in \`marketpilot-config.js\`.
+5. Keep \`window.MARKETPILOT_API_BASE\` pointing to the existing Cloudflare Worker. Market quotes, history and news continue to use that Worker.
 
-- **FRED public CSV:** CPI index, PPI index and DGS10 Treasury yield. CPI/PPI year-over-year rates are calculated from monthly observations; releases are not real-time.
-- **Yahoo Finance chart endpoint:** DXY, VIX, S&P 500, gold futures and BTC/USD. Quotes can be delayed, incomplete or unavailable.
-- **Google News RSS:** headline discovery. Coverage is incomplete; headlines alone do not prove market causality.
-- **xAI Grok API:** optional server-side assistant and brief generation, only when `XAI_API_KEY` is configured and account usage is available.
+\`MARKETPILOT_AI_API_BASE\` is blank by default. This is intentional: the current Worker remains the AI endpoint until the separate Gemini service has actually been deployed and tested. No deployed Worker code is changed by this repository update.
 
-No synthetic market prices are intentionally generated when a provider fails. Check observation dates and sources before relying on a chart.
+The Gemini backend makes one model call per answer, caps output at 1,200 tokens, and applies a basic backend limit of 4 requests per minute and 15 requests per IP per UTC day. The browser has a separate soft cap of 15 AI calls per UTC day. These limits reduce accidental usage; the in-memory backend counters reset if the service restarts and are not production-grade abuse protection. Render's free service may sleep while idle.
 
-## Journal and privacy
+### Optional xAI provider
 
-The original Pages app uses browser-local storage key `learner-journal-entries-v1`. This project does not clear or overwrite that storage. The Streamlit prototype's own journal and profile preferences are session-only and are not a permanent database; export its journal as CSV if you use it. The two versions do not automatically sync entries.
+The FastAPI service can use xAI only when \`AI_PROVIDER=xai\`, \`XAI_API_KEY\` and \`GROK_MODEL\` are explicitly configured. xAI API billing is separate from a consumer Grok subscription. The system does not silently switch to a paid provider.
+
+## Data and analytical limitations
+
+- **FRED via the Market data Worker:** CPI, PPI, US 10-year Treasury yield and broad dollar observations. Economic data is released periodically, not tick-by-tick.
+- **Yahoo Finance through the existing AI/data Worker:** cross-asset chart data may be delayed, incomplete or unavailable.
+- **Public crypto market endpoints:** availability and geographic access can vary.
+- **News RSS/search:** coverage is incomplete; verify original publishers before drawing conclusions.
+
+The application should label stale or unavailable data rather than invent prices or events. Correlation is not causation, and historical relationships can change across market regimes.
+
+## Journal preservation and privacy
+
+The original Pages journal storage key remains exactly \`learner-journal-entries-v1\`. The update does not clear, rename, migrate or overwrite this browser storage. Export a JSON backup before changing devices or browsers.
+
+The Pages journal is browser-local and is not synchronized across devices. The Streamlit prototype's journal and profile are session-only. A durable cross-device account requires separately configured authentication and database services; login is not claimed to be active.

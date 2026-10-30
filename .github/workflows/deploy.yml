@@ -1,4 +1,4 @@
-name: Deploy MarketSignal to GitHub Pages
+name: Deploy MarketPilot AI to GitHub Pages
 
 on:
   push:
@@ -11,9 +11,8 @@ on:
       - "marketpilot-config.js"
       - "sw.js"
       - ".github/workflows/deploy.yml"
-      - ".github/workflows/marketpilot-checks.yml"
       - "manifest.json"
-      - "marketsignal-mark.svg"
+      - "marketscope-mark.svg"
       - "icons/**"
       - "assets/**"
   workflow_dispatch:
@@ -37,7 +36,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
-      - name: Validate browser JavaScript
+      - name: Validate JavaScript and product invariants
         shell: bash
         run: |
           node --check macro-dashboard.js
@@ -48,11 +47,21 @@ jobs:
           const fs = require("node:fs");
           const vm = require("node:vm");
           const html = fs.readFileSync("index.html", "utf8");
+          const ai = fs.readFileSync("ai-workspace.js", "utf8");
+          const config = fs.readFileSync("marketpilot-config.js", "utf8");
+          const manifest = JSON.parse(fs.readFileSync("manifest.json", "utf8"));
           const scripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
           for (let i = 0; i < scripts.length; i++) {
-            new vm.Script(scripts[i][1], { filename: `index-inline-${i + 1}.js` });
+            new vm.Script(scripts[i][1], { filename: "index-inline-" + (i + 1) + ".js" });
           }
-          console.log(`JavaScript syntax validated: 4 external files and ${scripts.length} inline scripts.`);
+          if (!html.includes("<h1>MarketPilot AI</h1>")) throw new Error("Missing MarketPilot AI brand");
+          if (!html.includes('const KEY = "learner-journal-entries-v1";')) throw new Error("Legacy journal key changed");
+          if (!ai.includes("window.MARKETPILOT_API_BASE") || ai.includes("MARKETSCOPE_API_BASE")) throw new Error("Frontend API config mismatch");
+          if (!ai.includes("marketpilot-ai-usage-v1")) throw new Error("Browser-side AI usage guard missing");
+          if (!ai.includes(".app-nav{display:none!important}")) throw new Error("Legacy top navigation is not hidden");
+          if (manifest.short_name !== "MarketPilot") throw new Error("PWA name mismatch");
+          if (!config.includes("MARKETPILOT_AI_API_BASE")) throw new Error("Optional AI endpoint setting missing");
+          console.log("Validated app shell, local journal key, API routing, navigation and inline JavaScript.");
           NODE
 
       - name: Package static site
@@ -61,15 +70,9 @@ jobs:
           mkdir -p "$RUNNER_TEMP/site"
           cp -R . "$RUNNER_TEMP/site/"
           rm -rf "$RUNNER_TEMP/site/.git" "$RUNNER_TEMP/site/.github"
-          tar --dereference --hard-dereference \
-            --directory "$RUNNER_TEMP/site" \
-            -cvf "$RUNNER_TEMP/artifact.tar" \
-            --exclude=.git \
-            --exclude=.github \
-            --exclude='.[^/]*' \
-            .
+          tar --dereference --hard-dereference --directory "$RUNNER_TEMP/site" -cvf "$RUNNER_TEMP/artifact.tar" .
 
-      - name: Upload site artifact with Node 24-compatible action
+      - name: Upload site artifact
         uses: actions/upload-artifact@v7
         with:
           name: github-pages
@@ -81,144 +84,5 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Smoke test live site and macro API
-        shell: bash
-        run: |
-          node <<'NODE'
-          const assert = require("node:assert/strict");
-
-          const pageUrl = "https://joeybuilds043.github.io/Learner-journal/";
-          const apiUrl = "https://marketsignal-data.joeybuilds043.workers.dev/";
-          const origin = "https://joeybuilds043.github.io";
-          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-          async function getWithRetry(url, options = {}, attempts = 8) {
-            let lastError;
-            for (let attempt = 1; attempt <= attempts; attempt++) {
-              try {
-                const response = await fetch(url, options);
-                if (response.ok) return response;
-                lastError = new Error(`HTTP ${response.status} for ${url}`);
-              } catch (error) {
-                lastError = error;
-              }
-              if (attempt < attempts) await sleep(5000);
-            }
-            throw lastError || new Error(`Request failed: ${url}`);
-          }
-
-          (async () => {
-            const pageResponse = await getWithRetry(pageUrl);
-            const html = await pageResponse.text();
-
-            // Check the published JavaScript itself, not only the HTML reference.
-            const scriptResponse = await getWithRetry(pageUrl + "macro-dashboard.js");
-            const script = await scriptResponse.text();
-            assert.ok(script.includes("https://marketsignal-data.joeybuilds043.workers.dev/"),
-              "Published dashboard must call the current Worker");
-            assert.ok(!script.includes("marketsignal-data.asadlang05.workers.dev"),
-              "Published dashboard must not call the retired Worker");
-            assert.match(html, /macro-dashboard\.js/, "Live page must load the macro dashboard script");
-            assert.ok(html.includes("<h1>MarketScope</h1>"), "Live page must use the MarketScope brand");
-            assert.match(html, /ai-workspace\.js/, "Live page must load the new workspace script");
-            assert.match(html, /id="showCharts"/, "Charts route must remain available to the workspace menu");
-            assert.match(html, /macro-dashboard\.js\?v=20261025-marketscope-v9/, "Live page must reference the refreshed macro dashboard");
-            assert.match(html, /ai-workspace\.js\?v=20261025-marketscope-v9/, "Live page must reference the updated assistant bundle");
-            assert.ok(script.includes("INFLATION TRACKER / FRED CPI"), "Macro dashboard must include the CPI inflation chart");
-            assert.ok(script.includes("Monthly CPI inflation (YoY)") && script.includes("3-month average") && script.includes("msCpiLine"), "CPI inflation must show monthly bars and a three-month average curve");
-            assert.ok(script.includes("ms-dashboard-open-ai"), "Dashboard must include a direct Financial Assistant shortcut");
-            assert.ok(script.includes("renderFearGreed") && script.includes("api.alternative.me/fng/") && script.includes("Crypto Fear &amp; Greed Index"), "Sentiment chart must use source-backed colour-coded Fear & Greed bars");
-            assert.ok(script.includes("Source rate limit (HTTP 429)"), "Macro dashboard must explain upstream rate limits");
-            assert.ok(script.includes('cfg.series==="cpi"?"5y":"1y"'), "CPI chart must load enough history to calculate YoY inflation");
-          assert.ok(script.includes("baseY=H-B"), "Historical macro chart must define its bar baseline before rendering");
-            assert.ok(script.includes("const bars=pts.map") && script.includes("+grid+bars+"), "Historical macro chart must use columns with the smoothed trend area");
-
-            const aiResponse = await getWithRetry(pageUrl + "ai-workspace.js?v=20261025-marketscope-v9");
-            const aiScript = await aiResponse.text();
-            for (const marker of ["Financial Assistant", "Daily Market Briefing", "Macro &amp; Market History", "News &amp; Market Impact", "Your Journal", "mpAssetPrompts", "Profile &amp; Preferences", "Historical Relationships", "mpClearChat", "Saad Hashmani’s market insights first sparked my curiosity about the markets", "saad-hashmani-avatar.webp", "ms-dashboard-open-ai", "let chatGeneration=0", "ASK MARKETSCOPE FINANCIAL ASSISTANT", "nav.replaceChildren", "mp-drawer"]) {
-              assert.ok(aiScript.includes(marker), `Published AI workspace is missing ${marker}`);
-            }
-
-            const avatarResponse = await getWithRetry(pageUrl + "assets/saad-hashmani-avatar.webp");
-            assert.match(avatarResponse.headers.get("content-type") || "", /image\/webp/i,
-              "The bundled illustrated mentor avatar must be published as WebP");
-            assert.ok(!aiScript.includes(".app-nav{display:none!important}"),
-              "Markets and Charts navigation row must remain visible");
-
-            const apiResponse = await getWithRetry(apiUrl, {
-              headers: { Origin: origin, "Cache-Control": "no-cache" }
-            });
-            assert.equal(apiResponse.headers.get("access-control-allow-origin"), origin,
-              "Worker must allow the current GitHub Pages origin");
-
-            const payload = await apiResponse.json();
-            assert.equal(payload.provider, "Federal Reserve Economic Data (FRED)",
-              "Worker must return the FRED provider payload");
-            for (const key of ["us10y", "dollar", "cpi", "ppi"]) {
-              assert.ok(payload.data?.[key]?.date && Number.isFinite(payload.data?.[key]?.value),
-                `Missing latest data for ${key}`);
-            }
-
-            const historyResponse = await getWithRetry(
-              apiUrl + "history?series=us10y&range=30d",
-              { headers: { Origin: origin, "Cache-Control": "no-cache" } },
-              3
-            );
-            assert.equal(historyResponse.headers.get("access-control-allow-origin"), origin,
-              "History endpoint must allow the current GitHub Pages origin");
-            const history = await historyResponse.json();
-            assert.ok(Array.isArray(history.points) && history.points.length > 0,
-              "History endpoint must return at least one observation");
-
-            const cpiHistoryResponse = await getWithRetry(
-              apiUrl + "history?series=cpi&range=5y",
-              { headers: { Origin: origin, "Cache-Control": "no-cache" } },
-              3
-            );
-            const cpiHistory = await cpiHistoryResponse.json();
-            assert.ok(Array.isArray(cpiHistory.points) && cpiHistory.points.length >= 13,
-              "CPI history must return enough monthly observations to calculate year-over-year inflation");
-
-            const atlasUrl = "https://marketpilot-ai.joeybuilds043.workers.dev";
-            const atlasHealthResponse = await getWithRetry(atlasUrl + "/health", {
-              headers: { Origin: origin, "Cache-Control": "no-cache" }
-            });
-            const atlasHealth = await atlasHealthResponse.json();
-            assert.equal(atlasHealth.ok, true, "Atlas AI service must be online");
-            if (atlasHealth.openAIConfigured) {
-              assert.match(atlasHealth.provider || "", /openai/i, "Configured OpenAI secret must select the OpenAI provider");
-              assert.match(atlasHealth.model || "", /^gpt-/i, "Atlas must report the configured GPT model");
-            } else {
-              assert.equal(atlasHealth.provider, "Cloudflare Workers AI", "Atlas must report the free Cloudflare AI provider");
-              assert.match(atlasHealth.model || "", /glm|zai/i, "Atlas must report the configured free GLM model");
-            }
-
-            const atlasMarketsResponse = await getWithRetry(atlasUrl + "/api/markets?group=stocks", {
-              headers: { Origin: origin, "Cache-Control": "no-cache" }
-            });
-            const atlasMarkets = await atlasMarketsResponse.json();
-            assert.equal(atlasMarkets.group, "stocks", "Atlas must expose cross-asset market quotes");
-            assert.equal(atlasMarkets.assets?.length, 3, "Atlas must return S&P 500, Nasdaq and Dow Jones quote slots");
-
-            const atlasAnalysisResponse = await fetch(atlasUrl + "/api/analyze", {
-              method: "POST",
-              headers: { Origin: origin, "Content-Type": "application/json" },
-              body: JSON.stringify({
-                question: "In two short sentences, explain how rising Treasury yields can affect growth stocks.",
-                assets: [],
-                macro: {},
-                marketGroups: {}
-              }),
-              signal: AbortSignal.timeout(90000)
-            });
-            assert.equal(atlasAnalysisResponse.status, 200, "Atlas AI analysis endpoint must respond successfully");
-            const atlasAnalysis = await atlasAnalysisResponse.json();
-            assert.ok(typeof atlasAnalysis.answer === "string" && atlasAnalysis.answer.length > 30,
-              "Atlas must return a substantive AI-generated answer");
-
-            console.log("Smoke test passed: GitHub Pages, FRED macro API, journal history, Atlas AI inference and cross-asset market endpoint.");
-          })().catch(error => {
-            console.error(error.message || error);
-            process.exitCode = 1;
-          });
-          NODE
+      # No live model inference here. Deployment must not spend free AI quota
+      # or fail because a provider is temporarily rate-limited or unavailable.

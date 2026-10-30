@@ -14,6 +14,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 APP_NAME = "MarketPilot AI"
 ASSISTANT_NAME = "Atlas"
+GEMINI_DEFAULT_MODEL = "gemini-3.8-flash"
 GROK_DEFAULT_MODEL = "grok-4.7"
 
 st.set_page_config(
@@ -156,6 +157,43 @@ def get_secret(name: str) -> str:
         pass
     return os.getenv(name, "").strip()
 
+
+def ai_provider() -> str:
+    provider = (get_secret("AI_PROVIDER") or "gemini").strip().lower()
+    if provider not in {"gemini", "xai"}:
+        raise RuntimeError("AI_PROVIDER must be either 'gemini' or 'xai'.")
+    return provider
+
+
+def ai_model() -> str:
+    if ai_provider() == "gemini":
+        return get_secret("GEMINI_MODEL") or GEMINI_DEFAULT_MODEL
+    return get_secret("GROK_MODEL") or GROK_DEFAULT_MODEL
+
+
+def ai_api_key(provider: str | None = None) -> str:
+    selected = provider or ai_provider()
+    return get_secret("GEMINI_API_KEY") if selected == "gemini" else get_secret("XAI_API_KEY")
+
+
+def consume_session_ai_request() -> None:
+    today = datetime.now(timezone.utc).date().isoformat()
+    try:
+        limit = max(1, min(30, int(get_secret("MAX_AI_REQUESTS_PER_DAY") or "15")))
+    except ValueError:
+        limit = 15
+    usage = st.session_state.get("atlas_ai_usage", {})
+    if usage.get("day") != today:
+        usage = {"day": today, "count": 0}
+    if int(usage.get("count", 0)) >= limit:
+        raise RuntimeError(
+            f"App daily AI limit reached ({limit} requests per session). "
+            "The app counter resets at 00:00 UTC; provider quotas may use a different schedule."
+        )
+    usage["count"] = int(usage.get("count", 0)) + 1
+    st.session_state["atlas_ai_usage"] = usage
+
+
 def fmt_num(value, digits=2, suffix=""):
     try:
         if value is None or pd.isna(value):
@@ -263,8 +301,8 @@ def load_market_data():
             except Exception:
                 columns = ["value"] if kind == "fred" else ["open", "high", "low", "close", "volume"]
                 data[key] = pd.DataFrame(columns=columns)
-    data["cpi_yoy"] = data["cpi"][["value"]].pct_change(12).mul(100).dropna() if not data["cpi"].empty else pd.DataFrame(columns=["value"])
-    data["ppi_yoy"] = data["ppi"][["value"]].pct_change(12).mul(100).dropna() if not data["ppi"].empty else pd.DataFrame(columns=["value"])
+    data["cpi_yoy"] = data["cpi"][["value"]].pct_change(12, fill_method=None).mul(100).dropna() if not data["cpi"].empty else pd.DataFrame(columns=["value"])
+    data["ppi_yoy"] = data["ppi"][["value"]].pct_change(12, fill_method=None).mul(100).dropna() if not data["ppi"].empty else pd.DataFrame(columns=["value"])
     return data
 
 def metric_card(label, value, delta=None, source_date=None, positive_is_good=True):
@@ -415,38 +453,42 @@ def current_context(data, news=None):
         "data_note": "Economic series are releases with their own observation dates. Exchange quotes can be delayed and are not guaranteed real-time."
     }
 
-def grok_answer(prompt: str) -> tuple[str, str]:
-    """Call xAI's Responses API without exposing the API key to the browser or logs."""
-    api_key = get_secret("XAI_API_KEY")
+def ai_answer(prompt: str) -> tuple[str, str]:
+    """Call the selected server-side AI provider with one bounded request."""
+    provider = ai_provider()
+    api_key = ai_api_key(provider)
     if not api_key:
-        raise RuntimeError("Grok API key is not connected. Add XAI_API_KEY in Streamlit Settings → Secrets.")
+        key_name = "GEMINI_API_KEY" if provider == "gemini" else "XAI_API_KEY"
+        raise RuntimeError(f"{key_name} is not connected. Add it in Streamlit Settings → Secrets.")
 
-    model = get_secret("GROK_MODEL") or GROK_DEFAULT_MODEL
-    url = "https://api.x.ai/v1/responses"
-    payload = {
-        "model": model,
-        "input": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
-        ],
-        "reasoning": {"effort": "medium"},
-        "max_output_tokens": 1700,
-        "temperature": 0.7,
-        "top_p": 0.95,
-        "store": False,
-    }
+    consume_session_ai_request()
+    model = ai_model()
+    if provider == "gemini":
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{quote(model, safe='')}:generateContent"
+        payload = {
+            "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT}]},
+            "contents": [{"role": "user", "parts": [{"text": prompt[:12000]}]}],
+            "generationConfig": {"temperature": 0.25, "maxOutputTokens": 1200},
+        }
+        headers = {"x-goog-api-key": api_key, "Content-Type": "application/json"}
+    else:
+        url = "https://api.x.ai/v1/responses"
+        payload = {
+            "model": model,
+            "input": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": prompt[:12000]},
+            ],
+            "max_output_tokens": 1200,
+            "temperature": 0.25,
+            "store": False,
+        }
+        headers = {"Authorization": "Bearer " + api_key, "Content-Type": "application/json"}
+
     try:
-        response = requests.post(
-            url,
-            headers={
-                "Authorization": "Bearer " + api_key,
-                "Content-Type": "application/json",
-            },
-            json=payload,
-            timeout=120,
-        )
+        response = requests.post(url, headers=headers, json=payload, timeout=60)
     except requests.RequestException as exc:
-        raise RuntimeError("Grok API network request failed. Please retry in a moment.") from exc
+        raise RuntimeError(f"{provider.upper()} API network request failed. Please retry shortly.") from exc
 
     try:
         result = response.json()
@@ -457,17 +499,31 @@ def grok_answer(prompt: str) -> tuple[str, str]:
         detail = result.get("error", {})
         if isinstance(detail, dict):
             detail = detail.get("message") or detail.get("code") or "request rejected"
-        raise RuntimeError(f"Grok API HTTP {response.status_code}: {str(detail)[:220]}")
+        if response.status_code == 429:
+            raise RuntimeError(
+                "The provider's free-tier quota or rate limit has been reached. "
+                "Wait for its own reset window; it may differ from the app's UTC counter."
+            )
+        raise RuntimeError(f"{provider.upper()} API HTTP {response.status_code}: {str(detail)[:220]}")
 
-    parts = []
-    for item in result.get("output", []) or []:
-        for part in item.get("content", []) or []:
-            if part.get("type") == "output_text" and part.get("text"):
-                parts.append(part["text"])
-    answer = "\n".join(parts).strip()
+    if provider == "gemini":
+        candidates = result.get("candidates", []) or []
+        parts = candidates[0].get("content", {}).get("parts", []) if candidates else []
+        answer = "\n".join(part.get("text", "") for part in parts if part.get("text")).strip()
+        used_model = result.get("modelVersion") or model
+    else:
+        parts = []
+        for item in result.get("output", []) or []:
+            for part in item.get("content", []) or []:
+                if part.get("type") == "output_text" and part.get("text"):
+                    parts.append(part["text"])
+        answer = "\n".join(parts).strip()
+        used_model = result.get("model") or model
+
     if not answer:
-        raise RuntimeError("Grok API returned no readable text.")
-    return answer, str(result.get("model") or model)
+        raise RuntimeError(f"{provider.upper()} API returned no readable text.")
+    return answer, str(used_model)
+
 
 def build_prompt(question: str, data: dict, news: list, history: list) -> str:
     context = current_context(data, news)
@@ -621,7 +677,7 @@ if page == "Markets":
 elif page == "Daily Brief":
     st.markdown('<div class="eyebrow">Headlines and context</div>', unsafe_allow_html=True)
     st.title("Daily market brief")
-    st.markdown('<div class="section-note">Headline discovery first; AI summary only when Grok API is configured.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-note">Headline discovery first; AI summary uses the selected server-side model when configured.</div>', unsafe_allow_html=True)
 
     query = st.text_input("News topic", value="US inflation Federal Reserve Treasury yields dollar stocks", max_chars=180)
     try:
@@ -644,7 +700,7 @@ elif page == "Daily Brief":
                         "Create a concise market brief from the supplied observations and current headlines. Organize it into: key developments, macro transmission, affected assets, bull case, bear case, and what to watch. Cite headline links. Label any interpretation as interpretation.",
                         data, news_items, [],
                     )
-                    answer, model = grok_answer(prompt)
+                    answer, model = ai_answer(prompt)
                     st.session_state["last_brief"] = answer
                     st.session_state["last_brief_model"] = model
                 except Exception as exc:
@@ -654,7 +710,7 @@ elif page == "Daily Brief":
     if st.session_state.get("last_brief"):
         st.markdown("### Market brief")
         st.markdown(st.session_state["last_brief"])
-        st.caption("Generated with " + str(st.session_state.get("last_brief_model", GROK_DEFAULT_MODEL)))
+        st.caption("Generated with " + str(st.session_state.get("last_brief_model", ai_model())))
 
 # ----- PIP AI -----
 elif page == "AI Analyst":
@@ -673,11 +729,11 @@ elif page == "AI Analyst":
     if "pip_messages" not in st.session_state:
         st.session_state["pip_messages"] = []
 
-    api_ready = bool(get_secret("XAI_API_KEY"))
+    api_ready = bool(ai_api_key(ai_provider()))
     if api_ready:
-        st.markdown('<span class="status-pill"><span class="status-dot"></span>Grok API connected · usage may be billed</span>', unsafe_allow_html=True)
+        st.markdown('<span class="status-pill"><span class="status-dot"></span>AI API connected · selected provider and model are shown below</span>', unsafe_allow_html=True)
     else:
-        st.info("Dashboard mode is ready. Atlas's AI replies activate after XAI_API_KEY is added in Streamlit Cloud → Settings → Secrets. The key will not be stored in source code.")
+        st.info("Dashboard mode is ready. Add GEMINI_API_KEY to Streamlit Cloud → Settings → Secrets for the default Gemini provider. The key stays server-side.")
 
     with st.container(border=True):
         st.markdown("**Try a question**")
@@ -705,8 +761,9 @@ elif page == "AI Analyst":
         with st.chat_message("user"):
             st.markdown(user_prompt)
 
-        if not get_secret("XAI_API_KEY"):
-            answer = "Atlas ka dashboard aur charts setup ho raha hai, lekin AI response ke liye Grok API key abhi connect nahin hui. Deployment ke baad Streamlit Cloud ke Settings → Secrets mein XAI_API_KEY add karni hogi. API key ko chat, HTML ya GitHub code mein paste na karein."
+        if not ai_api_key(ai_provider()):
+            required_key = "GEMINI_API_KEY" if ai_provider() == "gemini" else "XAI_API_KEY"
+            answer = f"Atlas ka dashboard aur charts ready hain, lekin AI response ke liye {required_key} abhi connect nahin hui. Streamlit Cloud ke Settings → Secrets mein server-side key add karein. API key ko chat, HTML ya GitHub code mein paste na karein."
             model_used = "not connected"
         else:
             try:
@@ -716,14 +773,14 @@ elif page == "AI Analyst":
                     except Exception:
                         headlines = []
                     prompt = build_prompt(user_prompt, data, headlines, st.session_state["pip_messages"][:-1])
-                    answer, model_used = grok_answer(prompt)
+                    answer, model_used = ai_answer(prompt)
             except Exception as exc:
                 answer = (
                     "AI request complete nahin ho saki. Agar 429 aaye to free-tier request limit khatam ho sakti hai; "
                     "503 temporary service load ho sakta hai. API key ko code mein na daalein.\n\n"
                     "Technical detail: " + str(exc)[:260]
                 )
-                model_used = "Grok unavailable"
+                model_used = ai_provider().upper() + " unavailable"
 
         st.session_state["pip_messages"].append({"role": "assistant", "content": answer})
         st.session_state["pip_model_used"] = model_used
@@ -732,7 +789,7 @@ elif page == "AI Analyst":
         st.rerun()
 
     if st.session_state.get("pip_model_used"):
-        st.caption("Model: " + str(st.session_state["pip_model_used"]) + " · A model label does not guarantee response accuracy.")
+        st.caption("Model: " + str(st.session_state["pip_model_used"]) + " · AI calls are limited to 15 per session per UTC day by default; provider quotas are separate.")
     st.markdown('<div class="source-line">Atlas uses available public market observations and headline links. If a provider is unavailable, it should say so rather than fabricate a price or headline.</div>', unsafe_allow_html=True)
 
 # ----- JOURNAL -----
@@ -774,7 +831,7 @@ elif page == "Your Journal":
         st.download_button(
             "Export journal as CSV",
             df_entries.to_csv(index=False).encode("utf-8"),
-            file_name="candledesk-journal.csv",
+            file_name="marketpilot-journal.csv",
             mime="text/csv",
             use_container_width=True,
         )
@@ -817,8 +874,10 @@ elif page == "Historical Patterns":
             s = df["close"].rename(label)
             close_series.append(s)
     if len(close_series) >= 2:
-        prices = pd.concat(close_series, axis=1).sort_index()
-        returns = prices.pct_change().dropna(how="all")
+        # Calculate each instrument on its own trading calendar; never forward-fill
+        # weekend or market-holiday prices just to manufacture synchronized returns.
+        return_series = [series.sort_index().pct_change(fill_method=None).rename(series.name) for series in close_series]
+        returns = pd.concat(return_series, axis=1).sort_index()
         corr = returns.tail(120).corr(min_periods=30)
         if corr.notna().sum().sum() > 0:
             fig = go.Figure(go.Heatmap(
@@ -838,7 +897,7 @@ elif page == "Historical Patterns":
                 font={"family": "Inter, system-ui", "color": "#afbed1", "size": 12},
             )
             st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-            st.caption("Pearson correlation of daily percentage returns, latest 120 calendar-day observations where available. Pairwise observations are limited by each provider's history.")
+            st.caption("Pearson correlation of each instrument's own daily percentage returns across up to 120 recent dates. Pairwise complete observations are used; missing sessions are never forward-filled. Correlation is not causation.")
         else:
             st.info("Enough overlapping history has not arrived from the data providers.")
     else:
@@ -860,7 +919,8 @@ elif page == "Profile":
         st.session_state["profile_focus"] = focus
         st.success("Preferences saved for this session.")
     st.markdown("**Data & privacy**")
-    st.write("The Grok API key belongs in Streamlit Cloud App settings → Secrets as XAI_API_KEY. It must never be pasted into this page, a chat, or a public source file.")
+    st.write("The selected AI API key belongs in Streamlit Cloud App settings → Secrets (GEMINI_API_KEY by default; XAI_API_KEY only when AI_PROVIDER=xai). Never paste keys into this page, a chat, or a public source file.")
+    st.warning("Gemini API free-tier content may be used by Google to improve its products. Do not send confidential journal notes, passwords, account details or sensitive personal information through a free-tier key.")
     st.write("Market observations come from public FRED and Yahoo Finance endpoints. They may be delayed or unavailable. Your legacy GitHub Pages journal remains separate and is not altered by this app.")
 
 st.markdown(

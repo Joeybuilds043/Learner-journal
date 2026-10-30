@@ -1,46 +1,60 @@
-# MarketPilot AI — Streamlit setup
+# MarketPilot AI — Streamlit research prototype
 
-The Streamlit UI is a separate build of MarketPilot AI. It uses Plotly for richer financial charts and calls Grok server-side when the xAI API key is configured. The existing GitHub Pages app remains available and its browser-local journal is not changed.
+The Streamlit UI is a separate research prototype. The existing GitHub Pages app remains the primary public frontend; its browser-local journal is not changed by this prototype.
 
 ## Deploy
 
-**Open the pre-filled deployment page:** https://share.streamlit.io/deploy?repository=Joeybuilds043/Learner-journal&branch=main&mainModule=streamlit_app.py
+Open the pre-filled deployment page:
+
+https://share.streamlit.io/deploy?repository=Joeybuilds043/Learner-journal&branch=main&mainModule=streamlit_app.py
 
 1. Sign in to Streamlit Community Cloud with GitHub.
-2. Select repository `Joeybuilds043/Learner-journal`.
-3. Select branch `main`.
-4. Set main file path to `streamlit_app.py`.
-5. Deploy. Wait for the app health/build status to report success before using it.
+2. Select repository \`Joeybuilds043/Learner-journal\`, branch \`main\`.
+3. Set main file path to \`streamlit_app.py\`.
+4. Deploy. Streamlit assigns the public URL after deployment.
 
-The public Streamlit URL is assigned by Streamlit after deployment. It cannot be confirmed from this repository alone.
+## Configure the AI provider
 
-## Configure Grok (xAI API)
+The default provider is Gemini:
 
-After deployment, open the app's **Settings → Secrets** and add:
+\`\`\`toml
+AI_PROVIDER = "gemini"
+GEMINI_API_KEY = "your-gemini-api-key"
+GEMINI_MODEL = "gemini-3.8-flash"
+MAX_AI_REQUESTS_PER_DAY = "15"
+\`\`\`
 
-```toml
+The key belongs only in Streamlit Cloud → App settings → Secrets. Never commit it, put it in browser JavaScript or paste it into chat.
+
+The app caps its own AI use at 15 requests per Streamlit session per UTC day by default. This is separate from Google's model-specific request/token quotas. Gemini request-per-day quotas reset at midnight Pacific Time; request-per-minute and token-per-minute limits are separate.
+
+**Privacy notice:** Google's Gemini API free-tier content may be used to improve Google products. Do not submit confidential journal notes, passwords, account identifiers or sensitive personal information through a free-tier key. Review the current [Gemini pricing](https://ai.google.dev/gemini-api/docs/pricing) and [rate limits](https://ai.google.dev/gemini-api/docs/rate-limits).
+
+### Optional xAI provider
+
+Grok can be selected explicitly, but its API is billed separately from a consumer Grok subscription:
+
+\`\`\`toml
+AI_PROVIDER = "xai"
 XAI_API_KEY = "your-xai-api-key"
 GROK_MODEL = "grok-4.7"
-```
+\`\`\`
 
-Create and manage the key in https://console.x.ai/. Never add the key to source code, browser JavaScript, GitHub commits, screenshots, or chat messages. The app uses the official server-side xAI Responses API and requests `store = false`.
+The app does not automatically fall back to a paid provider.
 
-Grok API access is billed separately from the consumer Grok subscription and may require credits. It is not assumed to be free or unlimited. Confirm current rates and usage in the xAI Console.
+## Research features
 
-## What's included
+- Dark, ice-blue Markets dashboard with CPI, PPI, 10Y yield, dollar, VIX, equities, gold and crypto.
+- Atlas AI Analyst and Daily Brief.
+- Historical Patterns, Your Journal and Profile.
+- Three-dot vertical workspace navigation.
+- Recent conversation context for the latest eight messages in the active session.
 
-- Dark, ice-blue market dashboard with CPI YoY bars, a 3-month trend curve and 2% reference.
-- PPI inflation, US 10-year yield, DXY candlesticks, VIX bars, S&P 500, gold and BTC charts.
-- **Atlas**, a financial research assistant using available observations and dated headlines.
-- Daily Brief, Historical Patterns, Your Journal, CSV export, and Profile preferences.
-- Saad Hashmani inspiration credit.
+## Data and storage
 
-## Data and storage notes
-
-- CPI and PPI year-over-year values are calculated from monthly FRED index observations.
-- US 10-year yield comes from FRED's DGS10 series.
-- DXY, VIX, S&P 500, gold and BTC use Yahoo Finance's chart endpoint; values may be delayed.
-- News discovery uses a public Google News RSS feed and may be incomplete.
-- Historical correlations are based on available daily returns; they are not causal or predictive claims.
-- Streamlit journal entries and profile preferences are currently session-only. Export CSV for a local backup.
-- The old GitHub Pages app and `learner-journal-entries-v1` browser storage are not deleted or cleared by this Streamlit build.
+- CPI/PPI year-over-year calculations do not forward-fill missing observations.
+- Historical returns are calculated on each instrument's own observed trading dates; non-overlapping dates are not filled with synthetic prices.
+- FRED and Yahoo Finance observations may be delayed or unavailable.
+- Google News RSS provides headline discovery, not complete article text.
+- Streamlit journal entries and profile preferences are session-only. Export the journal as CSV if you use it.
+- The original Pages journal key \`learner-journal-entries-v1\` is untouched and does not sync to Streamlit.

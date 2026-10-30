@@ -1,14 +1,14 @@
 <!doctype html>
-<!-- MarketScope UI refresh: macro charts, CPI inflation and compact navigation -->
+<!-- MarketPilot AI UI refresh: macro charts, CPI inflation and compact navigation -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080d18">
-  <meta name="description" content="MarketScope is a professional macro and cross-asset research terminal with inflation charts, market analysis and a trading journal.">
+  <meta name="description" content="MarketPilot AI is a professional macro and cross-asset research terminal with inflation charts, market analysis and a trading journal.">
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="./marketscope-mark.svg">
-  <title>MarketScope | Macro & Cross-Asset Terminal</title>
+  <title>MarketPilot AI | Macro & Cross-Asset Terminal</title>
 
   <style>
     :root {
@@ -540,7 +540,7 @@
     <div class="brand">
       <div class="logo" aria-hidden="true"><svg viewBox="0 0 40 40" width="32" height="32" fill="none"><path d="M6 31V9M6 31H35" stroke="#7f91b7" stroke-width="1.5" stroke-linecap="round"/><path d="M10 25L16 19L21 22L29 10L34 14" stroke="#75cfff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="29" cy="10" r="3" fill="#c4a5ff"/><path d="M10 34H34" stroke="#c4a5ff" stroke-width="1.7" stroke-linecap="round"/></svg></div>
       <div>
-        <h1>MarketScope</h1>
+        <h1>MarketPilot AI</h1>
         <div class="brand-sub">MARKET INTELLIGENCE <span style="color:var(--accent)">/</span> CROSS-ASSET RESEARCH</div>
       </div>
     </div>
@@ -701,11 +701,11 @@
 
   </section>
   <div class="disclaimer">
-    <strong>Data transparency:</strong> Macro indicators are fetched from the MarketScope data Worker using published FRED observations. Data may be delayed and is not tick-by-tick market pricing or financial advice.
+    <strong>Data transparency:</strong> Macro indicators are fetched from the MarketPilot AI data Worker using published FRED observations. Data may be delayed and is not tick-by-tick market pricing or financial advice.
   </div>
 
   <footer>
-    MarketScope · Professional Market Terminal<br>
+    MarketPilot AI · Professional Market Terminal<br>
     Local browser storage · No account or cloud sync
   </footer>
 </main>
@@ -958,7 +958,7 @@
 
   $("exportBtn").addEventListener("click", () => {
     const backup = {
-      app: "MarketScope AI",
+      app: "MarketPilot AI",
       version: 1,
       exportedAt: new Date().toISOString(),
       entries
@@ -1063,7 +1063,7 @@
   });
 
   window.addEventListener("appinstalled", () => {
-    showStatus("MarketScope AI installed.");
+    showStatus("MarketPilot AI installed.");
   });
 
   // Register the existing service worker.
@@ -1103,9 +1103,9 @@
 })();
 </script>
 
-  <script src="./macro-dashboard.js?v=20261025-marketscope-v9" defer></script>
-  <script src="./marketpilot-config.js?v=20261024-pro-workspace" defer></script>
-  <script src="./ai-workspace.js?v=20261025-marketscope-v9" defer></script>
+  <script src="./macro-dashboard.js?v=20261031-marketpilot-v10" defer></script>
+  <script src="./marketpilot-config.js?v=20261031-provider-routing-v1" defer></script>
+  <script src="./ai-workspace.js?v=20261031-marketpilot-v10" defer></script>
 </body>
   </html>
 
