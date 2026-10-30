@@ -1,48 +1,46 @@
-# CandleDesk — Streamlit rebuild
+# MarketPilot AI — Streamlit setup
 
-CandleDesk is the new Python/Streamlit version of the market dashboard. The existing GitHub Pages app remains untouched while this version is prepared and deployed.
+The Streamlit UI is a separate build of MarketPilot AI. It uses Plotly for richer financial charts and calls Grok server-side when the xAI API key is configured. The existing GitHub Pages app remains available and its browser-local journal is not changed.
 
-## Included
+## Deploy
 
-- TradingView-inspired dark interface with straightforward horizontal navigation.
-- Separate macro/market charts: CPI YoY, PPI YoY, US 10-year Treasury yield, DXY candlesticks, VIX fear-index bars, S&P 500, gold and Bitcoin.
-- Public observations from FRED and Yahoo Finance; Google News RSS headlines for research.
-- Pip, a conversational financial research assistant powered by Grok (xAI API) once its server-side key is configured.
-- Clear-chat control, session-based journal, CSV export, and historical correlation heatmap.
+**Open the pre-filled deployment page:** https://share.streamlit.io/deploy?repository=Joeybuilds043/Learner-journal&branch=main&mainModule=streamlit_app.py
 
-## Deploy on Streamlit Community Cloud
+1. Sign in to Streamlit Community Cloud with GitHub.
+2. Select repository `Joeybuilds043/Learner-journal`.
+3. Select branch `main`.
+4. Set main file path to `streamlit_app.py`.
+5. Deploy. Wait for the app health/build status to report success before using it.
 
-**Open the pre-filled deployment page:** [Deploy CandleDesk](https://share.streamlit.io/deploy?repository=Joeybuilds043/Learner-journal&branch=main&mainModule=streamlit_app.py)
+The public Streamlit URL is assigned by Streamlit after deployment. It cannot be confirmed from this repository alone.
 
-1. Open the link above (or https://share.streamlit.io/) and sign in with GitHub.
-2. Choose **Create app**.
-3. Repository: `Joeybuilds043/Learner-journal`
-4. Branch: `main`
-5. Main file path: `streamlit_app.py`
-6. Deploy the app. The first build can take several minutes.
+## Configure Grok (xAI API)
 
-The new app will receive a Streamlit URL such as `https://<chosen-name>.streamlit.app`. The exact URL is assigned by Streamlit during deployment; it is not available until that step succeeds.
-
-## Connect Grok (xAI API)
-
-After the Streamlit app is deployed, open the app's **Settings → Secrets** and add:
+After deployment, open the app's **Settings → Secrets** and add:
 
 ```toml
 XAI_API_KEY = "your-xai-api-key"
-# Optional: defaults to grok-4.7
 GROK_MODEL = "grok-4.7"
 ```
 
-Create the API key in the [xAI Console](https://console.x.ai/). Do not put the key in source files, public GitHub, screenshots, or chat messages. The app sends requests server-side to the official xAI Responses API and sets `store = false` for API responses.
+Create and manage the key in https://console.x.ai/. Never add the key to source code, browser JavaScript, GitHub commits, screenshots, or chat messages. The app uses the official server-side xAI Responses API and requests `store = false`.
 
-**Billing note:** Grok API access is separate from the consumer Grok chat subscription and may require billing/credits. It is not assumed to be free or unlimited. Check current API pricing and limits in the xAI Console before using it heavily.
+Grok API access is billed separately from the consumer Grok subscription and may require credits. It is not assumed to be free or unlimited. Confirm current rates and usage in the xAI Console.
 
-## Data notes
+## What's included
 
-- CPI and PPI are calculated year-over-year from monthly FRED index observations; release dates can lag the current day.
+- Dark, ice-blue market dashboard with CPI YoY bars, a 3-month trend curve and 2% reference.
+- PPI inflation, US 10-year yield, DXY candlesticks, VIX bars, S&P 500, gold and BTC charts.
+- **Atlas**, a financial research assistant using available observations and dated headlines.
+- Daily Brief, Historical Patterns, Your Journal, CSV export, and Profile preferences.
+- Saad Hashmani inspiration credit.
+
+## Data and storage notes
+
+- CPI and PPI year-over-year values are calculated from monthly FRED index observations.
 - US 10-year yield comes from FRED's DGS10 series.
-- DXY, VIX, S&P 500, gold and BTC use Yahoo Finance's chart endpoint and can be delayed or unavailable.
-- News discovery uses a public RSS feed and may be incomplete. It is not a paid, guaranteed real-time terminal.
-- Historical correlation is computed from available daily returns and is not a causal or predictive claim.
-- The journal is session-only in this prototype. Export CSV to keep your entries; permanent private storage requires a database.
-- The old Pages app and its existing browser-local journal storage have not been deleted or cleared.
+- DXY, VIX, S&P 500, gold and BTC use Yahoo Finance's chart endpoint; values may be delayed.
+- News discovery uses a public Google News RSS feed and may be incomplete.
+- Historical correlations are based on available daily returns; they are not causal or predictive claims.
+- Streamlit journal entries and profile preferences are currently session-only. Export CSV for a local backup.
+- The old GitHub Pages app and `learner-journal-entries-v1` browser storage are not deleted or cleared by this Streamlit build.
