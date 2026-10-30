@@ -13,6 +13,8 @@ on:
     paths:
       - "streamlit_app.py"
       - "requirements.txt"
+      - "README.md"
+      - "STREAMLIT_SETUP.md"
       - ".github/workflows/streamlit-checks.yml"
 
 permissions:
@@ -58,4 +60,4 @@ jobs:
       - name: Install application dependencies
         run: python -m pip install -r requirements.txt
       - name: Check imports
-        run: python -c "import pandas, plotly, requests, streamlit; print('CandleDesk imports OK')"
+        run: python -c "import pandas, plotly, requests, streamlit; print('MarketPilot AI imports OK')"
