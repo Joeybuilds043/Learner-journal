@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: marketpilot-gemini-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: AI_PROVIDER
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-3.8-flash
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PAGES_ORIGIN
+        value: https://joeybuilds043.github.io
+      - key: MAX_REQUESTS_PER_MINUTE
+        value: "4"
+      - key: MAX_REQUESTS_PER_DAY
+        value: "15"
