@@ -1,14 +1,14 @@
 <!doctype html>
-<!-- MarketPilot AI UI refresh: macro charts, CPI inflation and compact navigation -->
+<!-- MarketPulse AI UI refresh: macro charts, CPI inflation and compact navigation -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080d18">
-  <meta name="description" content="MarketPilot AI is a professional macro and cross-asset research terminal with inflation charts, market analysis and a trading journal.">
+  <meta name="description" content="MarketPulse AI is a compact trading analysis terminal with macro indicators, cross-asset market research and a trading journal.">
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="./marketscope-mark.svg">
-  <title>MarketPilot AI | Macro & Cross-Asset Terminal</title>
+  <title>MarketPulse AI | Trading Analysis Terminal</title>
 
   <style>
     :root {
@@ -540,7 +540,7 @@
     <div class="brand">
       <div class="logo" aria-hidden="true"><svg viewBox="0 0 40 40" width="32" height="32" fill="none"><path d="M6 31V9M6 31H35" stroke="#7f91b7" stroke-width="1.5" stroke-linecap="round"/><path d="M10 25L16 19L21 22L29 10L34 14" stroke="#75cfff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="29" cy="10" r="3" fill="#c4a5ff"/><path d="M10 34H34" stroke="#c4a5ff" stroke-width="1.7" stroke-linecap="round"/></svg></div>
       <div>
-        <h1>MarketPilot AI</h1>
+        <h1>MarketPulse AI</h1>
         <div class="brand-sub">MARKET INTELLIGENCE <span style="color:var(--accent)">/</span> CROSS-ASSET RESEARCH</div>
       </div>
     </div>
@@ -584,7 +584,7 @@
 
   </section>
   <section id="journalView" class="app-view" aria-label="Trading journal" hidden>
-    <div class="view-heading"><h2>Trading Journal</h2><p>Record your market expectations, actual moves and lessons. Your saved entries remain on this device.</p></div>
+    <div class="view-heading"><h2>My Journal</h2><p>Record your market expectations, actual moves and lessons. Your saved entries remain on this device.</p></div>
   <div class="section-title">
     <h2>Build today's review</h2>
     <span class="section-kicker">01 / Context · 02 / Reflection</span>
@@ -701,11 +701,11 @@
 
   </section>
   <div class="disclaimer">
-    <strong>Data transparency:</strong> Macro indicators are fetched from the MarketPilot AI data Worker using published FRED observations. Data may be delayed and is not tick-by-tick market pricing or financial advice.
+    <strong>Data transparency:</strong> Macro indicators are fetched from the macro data Worker using published FRED observations. Data may be delayed and is not tick-by-tick market pricing or financial advice.
   </div>
 
   <footer>
-    MarketPilot AI · Professional Market Terminal<br>
+    MarketPulse AI · Professional Market Terminal<br>
     Local browser storage · No account or cloud sync
   </footer>
 </main>
@@ -958,7 +958,7 @@
 
   $("exportBtn").addEventListener("click", () => {
     const backup = {
-      app: "MarketPilot AI",
+      app: "MarketPulse AI",
       version: 1,
       exportedAt: new Date().toISOString(),
       entries
@@ -1063,7 +1063,7 @@
   });
 
   window.addEventListener("appinstalled", () => {
-    showStatus("MarketPilot AI installed.");
+    showStatus("MarketPulse AI installed.");
   });
 
   // Register the existing service worker.
@@ -1103,9 +1103,9 @@
 })();
 </script>
 
-  <script src="./macro-dashboard.js?v=20261031-marketpilot-v10" defer></script>
-  <script src="./marketpilot-config.js?v=20261031-provider-routing-v1" defer></script>
-  <script src="./ai-workspace.js?v=20261031-marketpilot-v10" defer></script>
+  <script src="./macro-dashboard.js?v=20261031-marketpulse-v11" defer></script>
+  <script src="./marketpilot-config.js?v=20261031-marketpulse-branding-v2" defer></script>
+  <script src="./ai-workspace.js?v=20261031-marketpulse-v11" defer></script>
 </body>
   </html>
 

@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "MarketPilot AI | Macro & Cross-Asset Terminal",
-  "short_name": "MarketPilot",
-  "description": "Macro and cross-asset research, inflation charts, market analysis and a trading journal.",
+  "name": "MarketPulse AI | Trading Analysis Terminal",
+  "short_name": "MarketPulse",
+  "description": "A compact trading analysis terminal with macro research, market charts and a trading journal.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",
