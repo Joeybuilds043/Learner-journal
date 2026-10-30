@@ -74,7 +74,7 @@
     <div class="ms-tools">
       <h3>Historical macro explorer</h3>
       <div class="ms-controls">
-        <div><label for="ms-series">Indicator</label><select id="ms-series"><option value="us10y">US 10Y Yield</option><option value="dollar">Broad Dollar Index</option><option value="cpi_yoy">CPI Inflation (YoY)</option><option value="cpi">CPI Index</option><option value="ppi">PPI Index</option><option value="fear_greed">Crypto Fear &amp; Greed Index · sentiment bars</option></select></div>
+        <div><label for="ms-series">Indicator</label><select id="ms-series"><option value="us10y">US 10Y Yield</option><option value="dollar">Broad Dollar Index</option><option value="cpi">CPI Index</option><option value="ppi">PPI Index</option><option value="fear_greed">Crypto Fear &amp; Greed Index · sentiment bars</option></select></div>
         <div><label for="ms-range">Period</label><select id="ms-range"><option value="30d">30 days</option><option value="90d">90 days</option><option value="1y" selected>1 year</option><option value="5y">5 years</option></select></div>
       </div>
       <div class="ms-chartbox" id="ms-history-chart"><div class="empty">Select an indicator and period to explore published history. No sample data is shown.</div></div>
@@ -151,7 +151,7 @@
       const byMonth=new Map(raw.map(p=>[String(p.date).slice(0,7),Number(p.value)]));
       const yoy=raw.map(p=>{const d=new Date(String(p.date)+"T00:00:00Z");d.setUTCMonth(d.getUTCMonth()-12);const prior=byMonth.get(d.toISOString().slice(0,7)),v=Number(p.value);return prior!==undefined&&prior!==0?{date:String(p.date),value:(v/prior-1)*100}:null;}).filter(Boolean);
       if(yoy.length<2)throw new Error("Not enough matching year-ago observations.");
-      const recent=yoy.slice(-12),latest=recent[recent.length-1],previous=recent[recent.length-2],values=recent.map(p=>p.value),min=Math.min(...values),max=Math.max(...values),delta=latest.value-previous.value;latestCpiYoyValue=latest.value;latestCpiYoyDate=latest.date;const mainCpiCard=grid.children[2];if(mainCpiCard){const mainValue=mainCpiCard.querySelector(".ms-value"),mainDate=mainCpiCard.querySelector(".ms-date");if(mainValue)mainValue.textContent=fmt(latest.value,2)+"%";if(mainDate)mainDate.textContent="As of "+latest.date;}if(read.textContent.includes("CPI inflation unavailable"))read.textContent=read.textContent.replace("CPI inflation unavailable","CPI inflation: "+fmt(latest.value,2)+"% year over year");
+      const recent=yoy.slice(-12),latest=recent[recent.length-1],previous=recent[recent.length-2],values=recent.map(p=>p.value),min=Math.min(...values),max=Math.max(...values),delta=latest.value-previous.value;latestCpiYoyValue=latest.value;latestCpiYoyDate=latest.date;if(read.textContent.includes("CPI inflation unavailable"))read.textContent=read.textContent.replace("CPI inflation unavailable","CPI inflation: "+fmt(latest.value,2)+"% year over year");
       latestEl.textContent=fmt(latest.value,2)+"%";changeEl.textContent=(delta>0?"+":"")+fmt(delta,2)+" pp";changeEl.style.color=delta>0?"#eaa3b5":delta<0?"#80d3f0":"#dce7f7";highEl.textContent=fmt(max,2)+"%";lowEl.textContent=fmt(min,2)+"%";
       const W=720,H=210,L=44,R=17,T=17,B=34,plotW=W-L-R,plotH=H-T-B,axisMin=0,axisMax=Math.max(4,Math.ceil((max+.35)*2)/2),span=axisMax-axisMin||1;
       const yOf=v=>T+(axisMax-v)/span*plotH,baseY=H-B,slot=plotW/recent.length,bw=Math.min(26,slot*.52);
@@ -231,14 +231,13 @@
       grid.replaceChildren();
       grid.appendChild(card("US 10Y TREASURY YIELD",yieldVal,dateOf(d.us10y),yieldCh===null?null:yieldCh*100,{suffix:"%",changeSuffix:" bps",changeLabel:"change",}));
       grid.appendChild(card("BROAD US DOLLAR INDEX",dollar,dateOf(d.dollar),dollarPct,{decimals:3,extra:'<div class="ms-date">Broad dollar index, not ICE DXY</div>'}));
-      grid.appendChild(card("CPI INFLATION · YEAR OVER YEAR",cpiYoY,dateOf(d.cpiYearOverYear)||latestCpiYoyDate,null,{suffix:"%",}));
       grid.appendChild(card("PPI PRODUCER PRICE INDEX",num(d.ppi?.value),dateOf(d.ppi),ppiPct,{decimals:3,}));
       grid.appendChild(card("VIX · IMPLIED VOLATILITY",vix,dateOf(d.vix),num(d.vix?.change),{changeSuffix:" pts",changeLabel:"change",extra:vix===null?"<div class=\"ms-date\">No current observation supplied</div>":gauge(vix)}));
       const cpiLine=cpiYoY===null?"CPI inflation unavailable":"CPI inflation: "+fmt(cpiYoY)+"% year over year";const ppiLine=num(d.ppi?.value)===null?"PPI unavailable":"PPI index: "+fmt(d.ppi.value,3);const dollarLine=dollar===null?"Dollar index unavailable":"Broad USD index: "+fmt(dollar,3);
       read.textContent=[cpiLine,ppiLine,dollarLine,vix===null?"VIX unavailable":"VIX "+fmt(vix)+": "+(vix<15?"low":vix<25?"elevated":"high")+" expected volatility"].join(" · ")+". Compare release actuals with consensus and price action.";
       status.textContent="Updated "+(result.fetchedAt?new Date(result.fetchedAt).toLocaleString():"now")+" · Observation dates shown on each card.";
       dataLoaded=true;
-    }catch(e){grid.replaceChildren();["US 10Y TREASURY YIELD","BROAD US DOLLAR INDEX","CPI INFLATION · YEAR OVER YEAR","PPI PRODUCER PRICE INDEX","VIX · IMPLIED VOLATILITY"].forEach(label=>grid.appendChild(card(label,null,"",null)));read.textContent="Macro data could not load. Refresh before drawing a conclusion.";status.textContent=/429|rate limit/i.test(e.message||"")?"FRED/source rate limit. Wait 60 seconds before retrying; repeated refreshes may extend the limit.":"Data unavailable: "+(e.message||"request failed");}
+    }catch(e){grid.replaceChildren();["US 10Y TREASURY YIELD","BROAD US DOLLAR INDEX","PPI PRODUCER PRICE INDEX","VIX · IMPLIED VOLATILITY"].forEach(label=>grid.appendChild(card(label,null,"",null)));read.textContent="Macro data could not load. Refresh before drawing a conclusion.";status.textContent=/429|rate limit/i.test(e.message||"")?"FRED/source rate limit. Wait 60 seconds before retrying; repeated refreshes may extend the limit.":"Data unavailable: "+(e.message||"request failed");}
     finally{button.disabled=false;if(dataLoaded)loadMetricCharts();}
   }
   button.addEventListener("click",()=>{refresh();loadHistory();loadCpiTrend()}); refresh(); loadHistory(); loadCpiTrend();

@@ -63,7 +63,7 @@ function extractText(input,depth=0){
   const text=input.replace(/\\r/g,"").trim();
   if(!text)return "";
   if((text.startsWith("{")&&text.endsWith("}"))||(text.startsWith("[")&&text.endsWith("]"))){
-   try{const parsed=JSON.parse(text);const nested=extractText(parsed,depth+1);if(nested)return nested;}catch(_){}
+   try{const parsed=JSON.parse(text);const nested=extractText(parsed,depth+1);if(nested)return nested;if(parsed&&typeof parsed==="object"&&("choices" in parsed||"candidates" in parsed||"reasoning" in parsed||"reasoning_content" in parsed))return "";}catch(_){}
   }
   return text;
  }
