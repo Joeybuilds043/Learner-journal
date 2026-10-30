@@ -8,7 +8,7 @@
     if(cached && Date.now()-cached.at<60000) return cached.data;
     if(responsePending.has(url)) return responsePending.get(url);
     const pending=(async()=>{
-      const response=await fetch(url,{cache:"no-store"});
+      const response=await fetch(url,{cache:"no-store",signal:AbortSignal.timeout(20000)});
       const data=await response.json().catch(()=>({error:"Invalid data response"}));
       if(!response.ok){
         const message=data.detail||data.error||"Data request failed";
