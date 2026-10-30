@@ -10,6 +10,7 @@ import requests
 import streamlit as st
 import xml.etree.ElementTree as ET
 from urllib.parse import quote
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 APP_NAME = "MarketPilot AI"
 ASSISTANT_NAME = "Atlas"
@@ -236,18 +237,11 @@ def fetch_news(query: str = "US inflation Federal Reserve Treasury yields dollar
 
 def load_market_data():
     data = {}
-    series_map = {
-        "cpi": ("CPIAUCSL", "CPI index"),
-        "ppi": ("PPIACO", "PPI index"),
-        "yield": ("DGS10", "US 10-Year Treasury yield"),
+    fred_map = {
+        "cpi": "CPIAUCSL",
+        "ppi": "PPIACO",
+        "yield": "DGS10",
     }
-    for key, (series_id, _) in series_map.items():
-        try:
-            df = fred_series(series_id)
-            data[key] = df if not df.empty else pd.DataFrame(columns=["value"])
-        except Exception:
-            data[key] = pd.DataFrame(columns=["value"])
-
     symbol_map = {
         "dxy": "DX-Y.NYB",
         "vix": "^VIX",
@@ -255,11 +249,20 @@ def load_market_data():
         "gold": "GC=F",
         "bitcoin": "BTC-USD",
     }
-    for key, symbol in symbol_map.items():
-        try:
-            data[key] = yahoo_history(symbol, "1y", "1d")
-        except Exception:
-            data[key] = pd.DataFrame(columns=["open", "high", "low", "close", "volume"])
+    jobs = {}
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        for key, series_id in fred_map.items():
+            jobs[pool.submit(fred_series, series_id)] = (key, "fred")
+        for key, symbol in symbol_map.items():
+            jobs[pool.submit(yahoo_history, symbol, "1y", "1d")] = (key, "yahoo")
+        for future in as_completed(jobs):
+            key, kind = jobs[future]
+            try:
+                frame = future.result()
+                data[key] = frame if frame is not None and not frame.empty else pd.DataFrame(columns=["value"])
+            except Exception:
+                columns = ["value"] if kind == "fred" else ["open", "high", "low", "close", "volume"]
+                data[key] = pd.DataFrame(columns=columns)
     data["cpi_yoy"] = data["cpi"][["value"]].pct_change(12).mul(100).dropna() if not data["cpi"].empty else pd.DataFrame(columns=["value"])
     data["ppi_yoy"] = data["ppi"][["value"]].pct_change(12).mul(100).dropna() if not data["ppi"].empty else pd.DataFrame(columns=["value"])
     return data
@@ -323,6 +326,36 @@ def line_area_chart(df, title, color, suffix="", reference=None):
         fig.add_hline(y=reference, line_dash="dot", line_color="#71839c", annotation_text=f"Reference {reference:g}{suffix}")
     fig.update_yaxes(tickformat=".1f")
     show_fig(fig, 286)
+
+def inflation_chart(df, title):
+    chart_base(title, "Monthly CPI inflation · bars show each published YoY reading · purple curve is the 3-month average")
+    if df is None or df.empty:
+        st.info("CPI inflation history is unavailable from FRED. No illustrative data is shown.")
+        return
+    recent = df.tail(60).copy()
+    recent["average_3m"] = recent["value"].rolling(3, min_periods=2).mean()
+    values = recent["value"].astype(float).tolist()
+    bar_colors = []
+    for idx, value in enumerate(values):
+        prior = values[idx - 1] if idx else value
+        bar_colors.append("#ff8197" if value > prior + 0.015 else ("#68c8f4" if value < prior - 0.015 else "#9e9fca"))
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=recent.index, y=recent["value"], name="CPI YoY",
+        marker_color=bar_colors, marker_line_width=0, opacity=0.86,
+        hovertemplate="%{x|%b %Y}<br>CPI inflation: %{y:.2f}%<extra></extra>",
+    ))
+    fig.add_trace(go.Scatter(
+        x=recent.index, y=recent["average_3m"], name="3-month average",
+        mode="lines+markers",
+        line={"color": "#c4a5ff", "width": 3, "shape": "spline"},
+        marker={"size": 4, "color": "#e0d2ff"},
+        hovertemplate="%{x|%b %Y}<br>3-month average: %{y:.2f}%<extra></extra>",
+    ))
+    fig.add_hline(y=2.0, line_dash="dot", line_color="#71839c", annotation_text="Fed 2% reference")
+    fig.update_yaxes(tickformat=".1f", ticksuffix="%", rangemode="tozero")
+    fig.update_layout(legend={"orientation": "h", "y": 1.12, "x": 0})
+    show_fig(fig, 310)
 
 def bar_chart(df, title, subtitle, value_name="VIX"):
     chart_base(title, subtitle)
@@ -535,7 +568,7 @@ if page == "Markets":
         cpi_data = data.get("cpi_yoy")
         if cpi_data is not None and not cpi_data.empty:
             cpi_data = cpi_data.tail(120)
-        line_area_chart(cpi_data, "US CPI · year-over-year", "rgb(94,155,255)", "%", reference=2.0)
+        inflation_chart(cpi_data, "US CPI · year-over-year")
     with first_right:
         bar_chart(data.get("vix"), "VIX · fear & volatility", "Daily bars · under 15 calm, 15–25 watch, above 25 elevated", "VIX")
 
