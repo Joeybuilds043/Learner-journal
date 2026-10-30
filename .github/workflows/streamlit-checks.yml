@@ -25,31 +25,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
       - name: Check Python syntax
         run: python -m py_compile streamlit_app.py
-      - name: Check app routes, charts and Grok configuration
+      - name: Check model, calculations and navigation
         run: |
           python - <<'PY'
           from pathlib import Path
           source = Path("streamlit_app.py").read_text(encoding="utf-8")
           checks = {
-              "Grok Responses API": "https://api.x.ai/v1/responses" in source,
-              "server-side XAI_API_KEY": 'get_secret("XAI_API_KEY")' in source,
-              "Grok 4.7 default": 'GROK_DEFAULT_MODEL = "grok-4.7"' in source,
-              "CPI bars and 3-month average": "def inflation_chart(" in source and 'rolling(3, min_periods=2).mean()' in source,
-              "three-dot navigation": 'st.popover("⋮ Menu"' in source,
-              "no horizontal navigation row": 'st.radio("Main navigation", pages, horizontal=True' not in source,
-              "Saad Hashmani credit": "Inspired by Saad Hashmani" in source,
-              "Atlas analyst route": 'elif page == "AI Analyst":' in source,
-              "Daily Brief loads data": 'page in ("Markets", "Daily Brief", "AI Analyst", "Historical Patterns")' in source,
-              "Profile route": 'elif page == "Profile":' in source,
-              "legacy journal storage untouched": "learner-journal-entries-v1" not in source,
+              "Gemini 3.8 Flash default": 'GEMINI_DEFAULT_MODEL = "gemini-3.8-flash"' in source,
+              "Gemini server-side API key": 'get_secret("GEMINI_API_KEY")' in source,
+              "Provider can be explicitly selected": 'get_secret("AI_PROVIDER") or "gemini"' in source,
+              "Gemini generateContent endpoint": "generateContent" in source,
+              "Output token cap": '"maxOutputTokens": 1200' in source,
+              "Daily app request cap": "consume_session_ai_request()" in source,
+              "CPI no missing-value forward fill": 'pct_change(12, fill_method=None)' in source,
+              "PPI no missing-value forward fill": 'pct_change(12, fill_method=None)' in source,
+              "Historical return gaps not forward-filled": 'pct_change(fill_method=None)' in source,
+              "Three-dot navigation": 'st.popover("⋮ Menu"' in source,
+              "Legacy Pages journal key untouched": "learner-journal-entries-v1" not in source,
           }
           failed = [name for name, ok in checks.items() if not ok]
           for name, ok in checks.items():
@@ -57,7 +57,7 @@ jobs:
           if failed:
               raise SystemExit("Failed checks: " + ", ".join(failed))
           PY
-      - name: Install application dependencies
+      - name: Install dependencies
         run: python -m pip install -r requirements.txt
       - name: Check imports
-        run: python -c "import pandas, plotly, requests, streamlit; print('MarketPilot AI imports OK')"
+        run: python -c "import pandas, plotly, requests, streamlit; print('MarketPilot Streamlit imports OK')"
