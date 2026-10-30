@@ -26,7 +26,7 @@ MAX_AI_REQUESTS_PER_DAY = "15"
 
 The key belongs only in Streamlit Cloud → App settings → Secrets. Never commit it, put it in browser JavaScript or paste it into chat.
 
-The app caps its own AI use at 15 requests per Streamlit session per UTC day by default. This is separate from Google's model-specific request/token quotas. Provider reset windows are not guaranteed to align with the app's UTC counter.
+The app caps its own AI use at 15 requests per Streamlit session per UTC day by default. This is separate from Google's model-specific request/token quotas. Gemini request-per-day quotas reset at midnight Pacific Time; request-per-minute and token-per-minute limits are separate.
 
 **Privacy notice:** Google's Gemini API free-tier content may be used to improve Google products. Do not submit confidential journal notes, passwords, account identifiers or sensitive personal information through a free-tier key. Review the current [Gemini pricing](https://ai.google.dev/gemini-api/docs/pricing) and [rate limits](https://ai.google.dev/gemini-api/docs/rate-limits).
 

@@ -36,7 +36,7 @@ Official documentation:
 - [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing)
 - [Gemini API rate limits](https://ai.google.dev/gemini-api/docs/rate-limits)
 
-The free tier is model-, project- and account-quota-limited. It does not promise a universal 12- or 24-hour reset time. Google's Gemini API free-tier content may be used to improve Google products. Do not send confidential journal entries, passwords, account identifiers or sensitive personal information through a free-tier API key.
+The free tier is model-, project- and account-quota-limited. Gemini request-per-day quotas reset at midnight Pacific Time; request-per-minute and token-per-minute limits are separate. Google's Gemini API free-tier content may be used to improve Google products. Do not send confidential journal entries, passwords, account identifiers or sensitive personal information through a free-tier API key.
 
 ### Deploy the optional FastAPI service
 
