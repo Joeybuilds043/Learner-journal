@@ -1,13 +1,13 @@
 "use strict";
 
-const CACHE_VERSION = "marketscope-v26";
+const CACHE_VERSION = "marketpilot-v27";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./marketscope-mark.svg",
-  "./macro-dashboard.js?v=20261025-marketscope-v9",
-  "./marketpilot-config.js?v=20261024-pro-workspace",
-  "./ai-workspace.js?v=20261025-marketscope-v9",
+  "./macro-dashboard.js?v=20261031-marketpilot-v10",
+  "./marketpilot-config.js?v=20261031-provider-routing-v1",
+  "./ai-workspace.js?v=20261031-marketpilot-v10",
   "./assets/saad-hashmani-avatar.webp",
   "./manifest.json",
   "./icons/icon-192.png",
