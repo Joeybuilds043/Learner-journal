@@ -1,51 +1,59 @@
-# CandleDesk
+# MarketPilot AI
 
-**Market intelligence, without the noise.**
+**A dark, chart-first workspace for macro research and cross-asset market context.**
 
-CandleDesk is a dark, chart-first market research workspace built with Python and Streamlit. It brings inflation, Treasury yields, dollar strength, volatility, and cross-asset context into one interface, with a plain-English research assistant named **Pip**.
+MarketPilot AI brings US inflation, producer prices, Treasury yields, dollar strength, volatility and major asset prices into one dashboard. Its research assistant is named **Atlas** and uses the xAI Grok API when the server-side key is configured.
 
-> CandleDesk is for education and market research, not for executing trades or providing personalized financial advice.
+## Current public app
 
-## What's in the app
+The existing GitHub Pages version remains available while the Streamlit build is validated:
 
-- **Market dashboard:** separate charts for US CPI year-over-year, US PPI year-over-year, the 10-year Treasury yield, DXY candlesticks, VIX volatility bars, S&P 500, gold, and Bitcoin.
-- **Research brief:** public news headlines with source links, plus an optional AI-generated summary.
-- **Pip:** a conversational market analyst designed to distinguish observations, interpretation, and scenarios.
-- **Trading journal:** thesis, market outcome, and lesson fields with CSV export. The current prototype keeps entries in the active session, so export your file before leaving.
-- **Historical patterns:** a heatmap of daily-return correlations for available market series. Correlation does not imply causation.
+- **Live legacy app:** https://joeybuilds043.github.io/Learner-journal/
+- **Repository:** https://github.com/Joeybuilds043/Learner-journal
+- **Macro data service:** https://marketsignal-data.joeybuilds043.workers.dev/
+- **Existing AI service:** https://marketpilot-ai.joeybuilds043.workers.dev/
 
-## Run on Streamlit Community Cloud
+The Streamlit build lives in `streamlit_app.py`. It is a separate deployment; a Streamlit URL is not active until the deployment is created in Streamlit Community Cloud. Do not delete the existing Pages app or its browser storage while testing the new version.
 
-1. Sign in at [Streamlit Community Cloud](https://share.streamlit.io/) using GitHub.
-2. Create an app from this repository: `Joeybuilds043/Learner-journal`.
-3. Select branch `main`.
-4. Set the main file path to `streamlit_app.py`.
-5. Deploy. Streamlit assigns the final public URL after deployment.
+## Features
 
-Local requirements are in [requirements.txt](requirements.txt). Full instructions are in [STREAMLIT_SETUP.md](STREAMLIT_SETUP.md).
+- **Markets dashboard:** CPI year-over-year monthly bars with a 3-month average and 2% reference, PPI inflation bars, 10-year Treasury yield, DXY candlesticks, VIX bars, S&P 500, gold and Bitcoin.
+- **Atlas AI Analyst:** finance-focused explanations that separate observations, interpretation and scenarios; includes available dated market context and retrieved headlines.
+- **Daily Brief:** headline discovery with an optional Grok-generated summary.
+- **Historical Patterns:** correlations between available daily asset returns. Correlation is not causation.
+- **Your Journal:** thesis, market outcome and lesson fields, CSV export, and individual entry deletion.
+- **Profile:** session-only display preferences.
+- **Saad Hashmani inspiration credit:** a short acknowledgement of the person who first introduced the project author to markets.
 
-## Enable Pip with Gemini
+## Deploy the Streamlit UI
 
-The dashboard and charts are designed to work without an AI API key. To enable AI responses, create a Gemini API key through [Google AI Studio](https://aistudio.google.com/) and add it in Streamlit Community Cloud under **App settings → Secrets**:
+1. Open the [Streamlit Community Cloud deployment page](https://share.streamlit.io/deploy?repository=Joeybuilds043/Learner-journal&branch=main&mainModule=streamlit_app.py).
+2. Sign in with GitHub and select repository `Joeybuilds043/Learner-journal`, branch `main`.
+3. Set the main file path to `streamlit_app.py` and deploy.
+4. After deployment succeeds, open the app's Settings → Secrets and configure the Grok API key as shown below.
+
+Local dependencies are in `requirements.txt`; detailed instructions are in [STREAMLIT_SETUP.md](STREAMLIT_SETUP.md).
+
+## Configure Grok
+
+Add the key in Streamlit Community Cloud → App settings → Secrets. Do not commit it to GitHub, put it in frontend JavaScript, or paste it into a chat.
 
 ```toml
-GEMINI_API_KEY = "your-key-here"
-# Optional; the default is gemini-3.8-flash
-GEMINI_MODEL = "gemini-3.8-flash"
+XAI_API_KEY = "your-xai-api-key"
+GROK_MODEL = "grok-4.7"
 ```
 
-Never commit an actual API key to GitHub or paste it into the chat. Gemini free usage has rate limits and can be temporarily unavailable. Pip will report when the API cannot respond rather than fabricate a market answer.
+The app calls the official xAI Responses API server-side. Grok API billing is separate from a consumer Grok subscription and may require credits; it is not unlimited or guaranteed free. Check the [xAI Console](https://console.x.ai/) for billing and usage.
 
 ## Data sources and limitations
 
-- **FRED:** CPI index, PPI index, and DGS10 Treasury yield. CPI/PPI year-over-year values are calculated from monthly index data; release observations can lag the current day.
-- **Yahoo Finance chart endpoint:** DXY, VIX, S&P 500, gold futures, and BTC/USD. These quotes may be delayed or unavailable.
-- **Google News RSS:** headline discovery. Coverage can be incomplete; a headline alone does not prove a causal market impact.
-- **Gemini API:** available only when the server-side secret is configured and quota is available.
+- **FRED public CSV:** CPI index, PPI index and DGS10 Treasury yield. CPI/PPI year-over-year rates are calculated from monthly observations; releases are not real-time.
+- **Yahoo Finance chart endpoint:** DXY, VIX, S&P 500, gold futures and BTC/USD. Quotes can be delayed, incomplete or unavailable.
+- **Google News RSS:** headline discovery. Coverage is incomplete; headlines alone do not prove market causality.
+- **xAI Grok API:** optional server-side assistant and brief generation, only when `XAI_API_KEY` is configured and account usage is available.
 
-No synthetic prices are used when a data provider fails. Check observation timestamps and sources before relying on a chart.
+No synthetic market prices are intentionally generated when a provider fails. Check observation dates and sources before relying on a chart.
 
-## Privacy and legacy app
+## Journal and privacy
 
-The earlier GitHub Pages app remains at https://joeybuilds043.github.io/Learner-journal/ while the Streamlit version is deployed separately. This new app does not clear the previous app's browser storage. The Streamlit journal is session-only for now and is not a substitute for a private, persistent database.
-
+The original Pages app uses browser-local storage key `learner-journal-entries-v1`. This project does not clear or overwrite that storage. The Streamlit prototype's own journal and profile preferences are session-only and are not a permanent database; export its journal as CSV if you use it. The two versions do not automatically sync entries.
