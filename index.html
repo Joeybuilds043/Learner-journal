@@ -1069,7 +1069,7 @@
   // Register the existing service worker.
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=20261025-marketpilot-polish").catch(() => {
+      navigator.serviceWorker.register("./sw.js?v=20261031-marketpulse-v29").catch(() => {
         showStatus("Offline setup failed. Check the service worker file.");
       });
     });
