@@ -391,7 +391,7 @@ async function compareHistory(){const status=$("mpHistoryStatus"),button=$("mpLo
 $("mpLoadHistory").addEventListener("click",compareHistory);
 $("mpAnalyzeHistory").addEventListener("click",async()=>{
  const b=$("mpAnalyzeHistory"),host=$("mpHistoryAnalysis"),selectedRange=$("mpHistoryRange").value;
- if(!historyA||!historyB||historyRange!==selectedRange){
+ if(!historyA||!historyB||historyRange!==selectedRange||historyA.symbol!==$("mpHistoryA").value||historyB.symbol!==$("mpHistoryB").value){
   host.textContent="Load both markets again for the selected time period before asking for an analysis.";
   return;
  }
