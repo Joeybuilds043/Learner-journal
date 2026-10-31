@@ -57,7 +57,10 @@ jobs:
             "Local daily request cap": ai.includes("marketpilot-ai-usage-v1"),
             "Conversation follow-up context": ai.includes("buildConversationQuestion(q)"),
             "Hamburger navigation": ai.includes("M4 6.5H20M4 12H20M4 17.5H20"),
-            "PWA name": manifest.short_name === "MarketPulse"
+            "PWA name": manifest.short_name === "MarketPulse",
+            "Structured daily desk brief": ai.includes("function renderDailyBrief(report)") && ai.includes("report.brief"),
+            "Fresh cross-asset snapshots": ai.includes("getAllCrossAssetData(true)") && ai.includes("lastAssets=await fetchAssets()"),
+            "Compact charts": ai.includes(".ms-chartbox svg{height:168px!important}") && ai.includes(".ms-cpi-chart svg{height:150px!important}") && ai.includes(".mp-history-chart svg{height:138px!important}")
           };
           const failed = Object.entries(checks).filter(([, ok]) => !ok);
           for (const [name, ok] of Object.entries(checks)) {
