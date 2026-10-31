@@ -64,6 +64,7 @@ jobs:
             "AI page is not duplicated on dashboard": ai.includes('$("aiView").hidden=name!=="ai"') && !ai.includes('$("aiView").hidden=!(name==="ai"||name==="markets")'),
             "Homepage AI analyst launch card": ai.includes("mpHomeAgent") && ai.includes("Illustrated senior investor analyst mascot") && ai.includes('setView("ai");$("mpQuestion").focus()'),
             "AI answer Markdown rendering": ai.includes("function appendInline(target,text)") && ai.includes('source.split("\\n")') && ai.includes('line.match(/^(#{1,6})\\s+(.+)$/)') && ai.includes('line.match(/^[-*+•]\\s+(.+)$/)'),
+            "Inline Markdown list normalization": ai.includes("Inline Markdown normalization") && ai.includes("source.replace(/([.:;])\\s+([*+•-])\\s+/g"),
             "Ask AI Analyst labelling": ai.includes("<h2>Ask AI Analyst</h2>") && ai.includes("ASK AI ANALYST") && ai.includes(">Ask AI ↗</button>")
           };
           const failed = Object.entries(checks).filter(([, ok]) => !ok);
