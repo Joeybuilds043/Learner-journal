@@ -65,7 +65,13 @@ jobs:
             "Homepage AI analyst launch card": ai.includes("mpHomeAgent") && ai.includes("Illustrated senior investor analyst mascot") && ai.includes('setView("ai");$("mpQuestion").focus()'),
             "AI answer Markdown rendering": ai.includes("function appendInline(target,text)") && ai.includes('source.split("\\n")') && ai.includes('line.match(/^(#{1,6})\\s+(.+)$/)') && ai.includes('line.match(/^[-*+•]\\s+(.+)$/)'),
             "Inline Markdown list normalization": ai.includes("Inline Markdown normalization") && ai.includes("source.replace(/([.:;])\\s+([*+•-])\\s+/g"),
-            "Ask AI Analyst labelling": ai.includes("<h2>Ask AI Analyst</h2>") && ai.includes("ASK AI ANALYST") && ai.includes(">Ask AI ↗</button>")
+            "Ask AI Analyst labelling": ai.includes("<h2>Ask AI Analyst</h2>") && ai.includes("ASK AI ANALYST") && ai.includes(">Ask AI ↗</button>"),
+            "Welcome banner removed": !ai.includes('id="mpWelcome"') && !ai.includes("Welcome to Your Personal Trading Analysis App."),
+            "Saad Hashmani credit line": html.includes("Inspired by Saad Hashmani’s market insights and disciplined analytical approach."),
+            "Historical 1–5 year choices": ["1y","2y","3y","4y","5y"].every(range => ai.includes('value="'+range+'"')),
+            "Historical analysis uses shared Markdown renderer": ai.includes('renderAnswer(host,result.answer||"No analysis returned.")') && ai.includes('id="mpHistoryAnalysis" class="mp-answer-block'),
+            "Historical statistics passed to analyst": ai.includes("statistics:historyComparisonStats") && ai.includes("pairedMonthlyObservations:paired.length"),
+            "Historical AI analysis matches selected markets and period": ai.includes('historyRange!==selectedRange') && ai.includes('historyA.symbol!==$("mpHistoryA").value') && ai.includes('historyB.symbol!==$("mpHistoryB").value'),
           };
           const failed = Object.entries(checks).filter(([, ok]) => !ok);
           for (const [name, ok] of Object.entries(checks)) {
