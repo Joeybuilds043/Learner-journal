@@ -36,6 +36,28 @@ jobs:
           node --check ai-workspace.js
           node --check marketpilot-config.js
           node --check sw.js
+      - name: Smoke-test live macro data endpoints
+        env:
+          MARKET_DATA_URL: https://marketsignal-data.joeybuilds043.workers.dev
+        run: |
+          node <<'NODE'
+          const base = process.env.MARKET_DATA_URL;
+          async function get(path) {
+            const response = await fetch(base + path, { signal: AbortSignal.timeout(30000), cache: "no-store" });
+            const body = await response.json();
+            if (!response.ok) throw new Error(path + " returned HTTP " + response.status + ": " + (body.detail || body.error || "request failed"));
+            return body;
+          }
+          (async () => {
+            const snapshot = await get("/");
+            if (!snapshot.data || !snapshot.provider) throw new Error("Macro snapshot response is missing its data contract.");
+            const history = await get("/history?series=us10y&range=1y");
+            if (!Array.isArray(history.points) || history.points.length < 2) throw new Error("US10Y history did not return enough dated observations.");
+            console.log("PASS - macro snapshot endpoint");
+            console.log("PASS - US10Y historical series (" + history.points.length + " observations)");
+            console.log("Macro snapshot mode: " + (snapshot.partial ? "partial, with source warnings" : "all requested series available"));
+          })().catch(error => { console.error(error); process.exitCode = 1; });
+          NODE
       - name: Validate app invariants and inline scripts
         run: |
           node <<'NODE'
@@ -77,6 +99,8 @@ jobs:
             "Market charts load even if the summary snapshot fails": macro.includes("finally{button.disabled=false;loadMetricCharts();}") && macro.includes("async function loadMetricCharts()"),
             "Finance-watchlist mini charts": macro.includes("ms-metric-history-head") && macro.includes("ms-metric-trend") && macro.includes("msMetricArea"),
             "Market chart aspect ratios preserved": ai.includes(".ms-chartbox svg{height:auto!important;aspect-ratio:720 / 210") && ai.includes(".ms-cpi-chart svg{height:auto!important;aspect-ratio:720 / 210"),
+            "Partial macro readings remain visible": macro.includes("error:d.us10y?.error") && macro.includes("successful series remain visible."),
+            "Market chart errors do not suppress independent history": macro.includes("finally{button.disabled=false;loadMetricCharts();}") && macro.includes("Latest history refresh unavailable; showing last successful chart."),
             "PWA caches the current dashboard scripts": html.includes("macro-dashboard.js?v=20261031-marketpulse-v12") && sw.includes("macro-dashboard.js?v=20261031-marketpulse-v12") && html.includes("marketpilot-config.js?v=20261031-marketpulse-branding-v2") && sw.includes("marketpilot-config.js?v=20261031-marketpulse-branding-v2"),
           };
           const failed = Object.entries(checks).filter(([, ok]) => !ok);
