@@ -61,6 +61,9 @@ jobs:
           if (!ai.includes(".app-nav{display:none!important}") || !ai.includes("M4 6.5H20M4 12H20M4 17.5H20")) throw new Error("Hamburger navigation invariant failed");
           if (manifest.short_name !== "MarketPulse") throw new Error("PWA name mismatch");
           if (!config.includes("MARKETPILOT_AI_API_BASE")) throw new Error("Optional AI endpoint setting missing");
+          if (!ai.includes("function renderDailyBrief(report)") || !ai.includes("report.brief")) throw new Error("Structured analyst brief renderer missing");
+          if (!ai.includes("getAllCrossAssetData(true)") || !ai.includes("lastAssets=await fetchAssets()")) throw new Error("Daily brief must refresh market snapshots");
+          if (!ai.includes(".ms-chartbox svg{height:168px!important}") || !ai.includes(".ms-cpi-chart svg{height:150px!important}") || !ai.includes(".mp-history-chart svg{height:138px!important}")) throw new Error("Compact chart sizing missing");
           console.log("Validated app shell, local journal key, API routing, navigation and inline JavaScript.");
           NODE
 
