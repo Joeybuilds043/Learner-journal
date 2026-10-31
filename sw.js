@@ -1,12 +1,12 @@
 "use strict";
 
-const CACHE_VERSION = "marketpulse-v32";
+const CACHE_VERSION = "marketpulse-v33";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./marketscope-mark.svg",
-  "./macro-dashboard.js?v=20261031-marketpulse-v10",
-  "./marketpilot-config.js?v=20261031-provider-routing-v1",
+  "./macro-dashboard.js?v=20261031-marketpulse-v12",
+  "./marketpilot-config.js?v=20261031-marketpulse-branding-v2",
   "./ai-workspace.js?v=20261031-history-clean-v14",
   "./assets/candledesk-mark.svg",
   "./manifest.json",
