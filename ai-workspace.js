@@ -61,6 +61,155 @@ style.textContent += `
 @media(max-width:679px){.ms-grid{grid-template-columns:1fr!important}.mp-brief-signal-grid,.mp-brief-scenario-grid{grid-template-columns:1fr}}
 @media(max-width:420px){.mp-brief-report-head,.mp-brief-summary,.mp-brief-block,.mp-brief-events{padding:10px}.mp-brief-headline{font-size:15px}}
 `;
+
+style.textContent += `
+/* Terminal UI polish: compact hierarchy, legible output and restrained market colors */
+.mp-mentor{
+  position:relative;overflow:hidden;isolation:isolate;
+  border:1px solid #425c7e!important;
+  background:radial-gradient(ellipse at 0 0,#2b52764a,transparent 55%),linear-gradient(125deg,#142b43 0%,#111b2d 58%,#211d38 100%)!important;
+  box-shadow:inset 0 1px 0 #ffffff10,0 12px 28px #0004!important
+}
+.mp-mentor:after{content:"";position:absolute;z-index:-1;inset:auto -8% -90% 35%;height:140%;background:radial-gradient(ellipse,#79bfff12,transparent 67%);pointer-events:none}
+.mp-avatar{border-color:#6884ac!important;background:linear-gradient(145deg,#213b59,#111b2d)!important}
+.mp-mentor h3{font-size:14px!important;letter-spacing:-.2px;color:#f3f7ff}
+.mp-mentor p{font-size:10px!important;color:#adbed4!important}
+.mp-chat{border-color:#3c5270!important;background:#0b1421!important;box-shadow:0 14px 32px #0005}
+.mp-chat-head{
+  min-height:58px;padding:11px 14px!important;
+  background:linear-gradient(105deg,#172c44,#1b2038 72%,#242039)!important;
+  border-bottom:1px solid #3b506e!important
+}
+.mp-chat-brand{display:flex;align-items:center;gap:10px;min-width:0}
+.mp-chat-brand>div{display:grid;gap:2px}
+.mp-chat-brand strong{font-size:11px;letter-spacing:.2px;color:#eaf2ff}
+.mp-chat-brand small{font-size:9px;color:#91a8c6;letter-spacing:.25px}
+.mp-live-indicator{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#62c9ed;box-shadow:0 0 0 4px #62c9ed1c,0 0 12px #62c9ed65}
+.mp-chat-controls{min-width:0}
+.mp-messages{
+  display:flex;flex-direction:column;gap:12px;
+  padding:15px!important;min-height:110px!important;max-height:440px!important;
+  background:radial-gradient(ellipse at 8% 0%,#25496a30,transparent 54%),linear-gradient(180deg,#0a1422,#0b1523)!important
+}
+.mp-message{max-width:88%;padding:11px 13px!important;font-size:12px!important;line-height:1.68!important}
+.mp-message.assistant{
+  align-self:stretch;max-width:100%;padding:15px 17px!important;
+  border:1px solid #38516f!important;border-left:3px solid #7cc9f2!important;
+  border-radius:12px 15px 15px 12px!important;
+  background:radial-gradient(ellipse at 0 0,#2b52752a,transparent 62%),linear-gradient(135deg,#14263b 0%,#111d30 58%,#191d34 100%)!important;
+  color:#e7effb!important;box-shadow:0 8px 24px #0003,inset 0 1px 0 #ffffff08!important
+}
+.mp-message.assistant>small{
+  margin-bottom:9px!important;padding-bottom:7px;border-bottom:1px solid #405570;
+  color:#9ec7eb!important;font-size:9px!important;letter-spacing:1.05px!important
+}
+.mp-message.user{
+  max-width:82%;border:1px solid #516991!important;border-right:3px solid #a99af4!important;
+  border-radius:14px 12px 12px 14px!important;
+  background:linear-gradient(130deg,#273f5e,#292641)!important;color:#f2f5ff!important
+}
+.mp-answer-block{font-size:12px;line-height:1.78;color:#dce7f6}
+.mp-answer-block h3{
+  margin:15px 0 7px!important;padding:7px 10px;border-left:2px solid #9cafff;
+  border-radius:0 8px 8px 0;background:linear-gradient(90deg,#829eff18,transparent 85%);
+  color:#dce7ff!important;font-size:12px!important;font-weight:850;letter-spacing:.15px
+}
+.mp-answer-block h3:first-child{margin-top:0!important}
+.mp-answer-block p{margin:7px 0 11px!important;color:#d2deee!important;font-size:12px!important;line-height:1.78!important}
+.mp-answer-block strong{color:#f4f7ff;font-weight:850}
+.mp-answer-block ul,.mp-answer-block ol{margin:7px 0 12px!important;padding-left:21px!important;color:#c6d5e8}
+.mp-answer-block li{padding-left:3px;margin:5px 0!important}
+.mp-answer-block li::marker{color:#8ecdf1}
+.mp-answer-block code{padding:2px 5px;border-radius:5px;background:#080f1b;color:#c9d6ff}
+.mp-brief{
+  padding:9px;border:1px solid #405879;border-radius:17px;
+  background:radial-gradient(ellipse at 8% 0%,#294b6c2b,transparent 48%),linear-gradient(155deg,#101e30,#0b1421 72%,#17172d);
+  box-shadow:0 14px 30px #0003
+}
+.mp-brief-report{gap:11px!important}
+.mp-brief-report-head{
+  position:relative;overflow:hidden;padding:16px 17px!important;
+  border-color:#536d96!important;border-left:3px solid #8abfff!important;
+  background:radial-gradient(ellipse at 92% 0%,#7868b52b,transparent 45%),linear-gradient(120deg,#1b3450,#121e31 65%,#211f3b)!important;
+  box-shadow:inset 0 1px 0 #ffffff0c,0 8px 22px #0003
+}
+.mp-brief-report-meta{color:#9dcaf0!important;letter-spacing:1.3px!important}
+.mp-brief-headline{max-width:900px;font-size:19px!important;line-height:1.38!important;letter-spacing:-.35px;font-weight:850}
+.mp-brief-chips{margin-top:10px}
+.mp-brief-chip{border-color:#58749a!important;background:linear-gradient(120deg,#243d5b,#292644)!important;color:#e3edff!important}
+.mp-brief-chip.muted{border-color:#3b4d65!important;background:#131f30!important;color:#b7c7dc!important}
+.mp-brief-summary{
+  padding:15px 17px!important;border-color:#3c5d7d!important;border-left:3px solid #6ec8e9!important;
+  background:linear-gradient(120deg,#142c43,#101e30 68%,#171d34)!important
+}
+.mp-brief-kicker{color:#82cce9!important}
+.mp-brief-summary p,.mp-brief-block>p,.mp-brief-scenario>p,.mp-brief-events p{
+  color:#d4e1f1!important;font-size:12px!important;line-height:1.75!important
+}
+.mp-brief-block{
+  padding:14px 15px!important;border-color:#304760!important;
+  background:linear-gradient(145deg,#13243a,#0e1929 76%,#17192d)!important;
+  box-shadow:inset 0 1px 0 #ffffff06
+}
+.mp-brief-block h4,.mp-brief-scenario h4,.mp-brief-events h4{
+  color:#e7f0ff!important;font-size:11px!important;letter-spacing:.55px
+}
+.mp-brief-signal{
+  border-color:#344b68!important;background:linear-gradient(145deg,#13243a,#0b1523)!important;
+  padding:11px!important
+}
+.mp-brief-signal strong{color:#e5f0ff!important;font-size:11px!important}
+.mp-brief-observation{color:#9ed5f3!important;font-size:12px!important}
+.mp-brief-signal p{font-size:11px!important;line-height:1.65!important;color:#bdcde0!important}
+.mp-brief-signal small{font-size:9px!important;color:#829bb8!important}
+.mp-brief-scenario{
+  padding:13px!important;border-color:#3b506d!important;
+  background:linear-gradient(145deg,#14243a,#101a29)!important
+}
+.mp-brief-scenario.bull{border-top:2px solid #72c4eb!important}
+.mp-brief-scenario.bear{border-top:2px solid #d58aa7!important;background:linear-gradient(145deg,#2b1f35,#171a2b)!important}
+.mp-brief-list{font-size:11px!important;line-height:1.7!important;color:#cad8e9!important}
+.mp-brief-invalidation{border-top-color:#3a4b62!important;color:#d5dfed!important}
+.mp-brief-events{border-color:#43536b!important;background:linear-gradient(145deg,#171f2e,#121a28)!important}
+.mp-search-card{
+  border:1px solid #526b91!important;
+  background:radial-gradient(ellipse at 95% 0%,#7059a523,transparent 48%),linear-gradient(125deg,#192f49,#101a2c 65%,#201d37)!important;
+  box-shadow:0 9px 24px #0003!important
+}
+.mp-search-row .mp-input:focus{border-color:#8fc9f3;box-shadow:0 0 0 3px #75bdf326}
+.mp-search-row .mp-button.primary{
+  border:1px solid #9fc9ef!important;background:linear-gradient(125deg,#c8dcff,#9fc4f0)!important;
+  color:#0b1a2a!important;box-shadow:0 5px 14px #82b7ef24;transition:transform .16s,filter .16s
+}
+.mp-search-row .mp-button.primary:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.mp-prompt{border-color:#405777!important;background:linear-gradient(120deg,#172940,#1b1c32)!important;color:#d5e4f7!important}
+.mp-prompt:hover{border-color:#829fc7!important;background:#1d3450!important}
+.mp-button{transition:transform .16s,border-color .16s,filter .16s}
+.mp-button:hover{border-color:#7e9cc7;filter:brightness(1.08);transform:translateY(-1px)}
+.mp-button:focus-visible,.mp-input:focus-visible,.mp-select:focus-visible,.mp-prompt:focus-visible{outline:2px solid #8fc9f3;outline-offset:2px}
+.mp-assets,.mp-cross-assets{gap:8px}
+.mp-asset,.mp-cross-card{border-color:#304763!important;background:linear-gradient(125deg,#13243a,#0d1726 65%,#17182d)!important}
+.mp-asset-price,.mp-cross-right{font-variant-numeric:tabular-nums}
+.mp-up{color:#72c7ec!important}
+.mp-down{color:#e994a8!important}
+@media(max-width:650px){
+  .mp-mentor{grid-template-columns:56px minmax(0,1fr)!important;padding:9px!important}
+  .mp-avatar,.mp-avatar svg{width:54px!important;height:54px!important}
+  .mp-mentor h3{font-size:12px!important}
+  .mp-messages{padding:10px!important;max-height:340px!important}
+  .mp-message.assistant{padding:12px!important}
+  .mp-brief{padding:7px!important}
+  .mp-brief-report-head,.mp-brief-summary,.mp-brief-block,.mp-brief-events{padding:12px!important}
+  .mp-brief-headline{font-size:16px!important}
+  .mp-brief-signal-grid,.mp-brief-scenario-grid{grid-template-columns:1fr!important}
+  .mp-chat-head{padding:10px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .mp-button,.mp-prompt,.mp-search-row .mp-button.primary{transition:none!important}
+  .mp-avatar .sh-illustration{animation:none!important}
+}
+
+`;
 document.head.appendChild(style);
 const nav=document.querySelector(".app-nav"), main=document.querySelector("main.app"), market=$("dashboardView"),journal=$("journalView");
 if(!nav||!main||$("aiView"))return;
@@ -75,7 +224,7 @@ const chartsButton=$("showCharts")||document.createElement("button");chartsButto
 
 const avatar='<svg class="sh-illustration" viewBox="0 0 100 100" role="img" aria-label="Market chart icon"><defs><linearGradient id="mpAvatarGlow" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#83d8ff"/><stop offset="1" stop-color="#b69aff"/></linearGradient></defs><rect x="7" y="7" width="86" height="86" rx="20" fill="#101d31"/><path d="M22 72V28M22 72H80" stroke="#607795" stroke-width="2" stroke-linecap="round"/><path d="M28 62L42 49L53 56L72 31L80 37" fill="none" stroke="url(#mpAvatarGlow)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="72" cy="31" r="5" fill="#d9c2ff"/><path d="M29 78H79" stroke="#b69aff" stroke-width="2" stroke-linecap="round"/></svg>';
 const views=document.createElement("div");
-views.innerHTML='<section id="aiView" class="mp-view" hidden><div class="mp-page"><div class="mp-head"><div><h2>AI Assistant</h2><p>Ask research questions grounded in live public market data and the latest available macro readings.</p></div><span class="mp-chip">RESEARCH MODE</span></div><div class="mp-mentor"><div class="mp-avatar">'+avatar+'</div><div><h3>MarketPulse AI Financial Assistant</h3><p>Clear market context, cross-asset links and risk scenarios, grounded in available data.</p></div></div><form class="mp-chat-form mp-search-card" id="mpChatForm"><label class="mp-search-label" for="mpQuestion">ASK MARKETPULSE AI FINANCIAL ASSISTANT <span>· CROSS-ASSET RESEARCH</span></label><div class="mp-search-row"><span class="mp-search-icon" aria-hidden="true">⌕</span><input class="mp-input" id="mpQuestion" maxlength="1200" placeholder="Ask about the S&P 500, EUR/USD, gold, BTC…" required><button class="mp-button primary" id="mpSend" type="submit">Analyze ↗</button></div><p class="mp-search-hint">Try: “What could move gold this week?” or “Compare Nasdaq and Treasury yields.”</p></form><div class="mp-chat"><div class="mp-chat-head"><strong>MarketPulse AI Financial Assistant</strong><span style="display:flex;align-items:center;gap:8px"><span id="mpChatState">Connecting AI…</span><button type="button" class="mp-clear-chat" id="mpClearChat">Clear chat</button></span></div><div class="mp-messages" id="mpMessages" aria-live="polite"><div class="mp-message"><small>MARKETPULSE AI ANALYST · RESEARCH</small>Ask a question or select a market below. I will separate available data from analysis and uncertainty.</div></div></div><div class="mp-title">Explore markets</div><div class="mp-market-tabs" id="mpMarketTabs"><button type="button" class="mp-market-tab active" data-group="crypto">Crypto</button><button type="button" class="mp-market-tab" data-group="stocks">US indices</button><button type="button" class="mp-market-tab" data-group="forex">Forex</button><button type="button" class="mp-market-tab" data-group="commodities">Commodities</button></div><div id="mpCrossAssetPanel" class="mp-cross-assets"><p class="mp-status">Loading market quotes…</p></div><div class="mp-prompts" id="mpPrompts" hidden><button class="mp-prompt" data-q="Give me a BTC and ETH market snapshot with latest prices and 24-hour changes.">BTC / ETH snapshot</button><button class="mp-prompt" data-q="Explain how US Treasury yields and the broad US dollar can affect Bitcoin and equities. Separate facts from interpretation.">Macro → risk assets</button><button class="mp-prompt" data-q="Compare BTC, ETH, SOL, BNB and XRP by latest 24-hour change and quote volume. Include source and timestamp.">Most traded crypto</button><button class="mp-prompt" data-q="Build a bull case, bear case and invalidation checklist for the asset I name. Avoid guaranteed targets.">Bull / bear scenarios</button><button class="mp-prompt" data-q="Teach me a repeatable market analysis framework using price, volume, volatility and macro context.">Teach me analysis</button></div><div id="mpAssetPrompts"></div><p class="mp-status" id="mpChatStatus">Connecting to MarketPilot AI service…</p><div class="mp-note">Research and education only—not personalized financial advice, trade execution or a guarantee of returns. API providers impose limits.</div></div></section><section id="researchView" class="mp-view" hidden><div class="mp-page"><div class="mp-head"><div><h2>Daily Market Briefing</h2><p>Review active assets, macro conditions and competing market scenarios in one daily workspace.</p></div><span class="mp-chip">DAILY WORKSPACE</span></div><div class="mp-grid"><article class="mp-card"><div class="mp-label">Research date</div><div class="mp-value" id="mpDate">—</div><div class="mp-muted">Market timestamps can differ from your local date.</div></article><article class="mp-card"><div class="mp-label">Coverage</div><div class="mp-value">Cross-asset</div><div class="mp-muted">Crypto, US indices, major FX pairs and key commodities.</div></article></div><div class="mp-row"><button class="mp-button primary" id="mpGenerate">Generate daily brief</button><button class="mp-button" id="mpRefresh">Refresh market data</button></div><p class="mp-status" id="mpResearchStatus">Loading market data…</p><div class="mp-title">Live crypto snapshot</div><div class="mp-assets" id="mpAssets"></div><div class="mp-title">US indices · Forex · Commodities</div><div id="mpResearchCrossAsset" class="mp-cross-assets"><p class="mp-status">Loading cross-asset quotes…</p></div><div class="mp-title">Research report</div><div class="mp-brief" id="mpBrief"><section><h3>01 / Market regime</h3><p>Generate a brief to review trend, volatility and macro context from available observations.</p></section><section><h3>02 / Bull case vs bear case</h3><p>Separate evidence, assumptions and invalidation conditions.</p></section><section><h3>03 / Watchlist & events</h3><p>Verify market timestamps and upcoming economic releases from authoritative sources.</p></section></div><div class="mp-note">Briefs are on-demand in this first phase. Scheduled reports and cloud history need deployed services and database configuration.</div></div></section><section id="profileView" class="mp-view" hidden><div class="mp-page mp-profile"><div class="mp-head"><div><h2>Profile & Workspace</h2><p>Set analyst preferences for this device.</p></div><span class="mp-chip">WORKSPACE</span></div><div class="mp-card"><div class="mp-label">Current workspace</div><div class="mp-value" id="mpProfileTitle">Local workspace</div><label for="mpName">Display name</label><input class="mp-input" id="mpName" maxlength="60" placeholder="Your analyst name"><label for="mpLevel">Experience level</label><select class="mp-select" id="mpLevel"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select><label for="mpFocus">Primary market focus</label><select class="mp-select" id="mpFocus"><option value="crypto">Crypto</option><option value="macro">Macro / rates / dollar</option><option value="equities">Stocks & indices</option><option value="multi">Multi-asset</option></select><label for="mpLanguage">Preferred language</label><select class="mp-select" id="mpLanguage"><option>English</option><option>Roman Urdu</option><option>Urdu</option></select><div class="mp-row"><button class="mp-button primary" id="mpSaveProfile">Save preferences</button><button class="mp-button" id="mpExport">Export preferences</button></div><p class="mp-status" id="mpProfileStatus">Stored locally in this browser. This is not a login.</p></div><div class="mp-title">Secure sign-in</div><div class="mp-card"><strong style="font-size:12px">Secure sign-in is not enabled yet</strong><p class="mp-muted">This profile is saved only on this device. Real sign-in and cloud profiles need an identity provider and database setup. Do not enter a password here.</p><div class="mp-chip">Supabase Auth candidate</div> <div class="mp-chip">SQL database</div></div><div class="mp-title">AI service</div><div class="mp-card"><div class="mp-label">AI provider</div><div class="mp-value" style="font-size:13px" id="mpBackend">MarketPilot AI endpoint checking…</div><p class="mp-muted">Market data, history and news continue to use the existing Worker. AI answers use the configured AI endpoint. Provider limits apply; API keys never belong in frontend files.</p></div></div></section>';
+views.innerHTML='<section id="aiView" class="mp-view" hidden><div class="mp-page"><div class="mp-head"><div><h2>AI Assistant</h2><p>Ask research questions grounded in live public market data and the latest available macro readings.</p></div><span class="mp-chip">RESEARCH MODE</span></div><div class="mp-mentor"><div class="mp-avatar">'+avatar+'</div><div><h3>MarketPulse AI Financial Assistant</h3><p>Clear market context, cross-asset links and risk scenarios, grounded in available data.</p></div></div><form class="mp-chat-form mp-search-card" id="mpChatForm"><label class="mp-search-label" for="mpQuestion">ASK MARKETPULSE AI FINANCIAL ASSISTANT <span>· CROSS-ASSET RESEARCH</span></label><div class="mp-search-row"><span class="mp-search-icon" aria-hidden="true">⌕</span><input class="mp-input" id="mpQuestion" maxlength="1200" placeholder="Ask about the S&P 500, EUR/USD, gold, BTC…" required><button class="mp-button primary" id="mpSend" type="submit">Analyze ↗</button></div><p class="mp-search-hint">Try: “What could move gold this week?” or “Compare Nasdaq and Treasury yields.”</p></form><div class="mp-chat"><div class="mp-chat-head"><div class="mp-chat-brand"><span class="mp-live-indicator" aria-hidden="true"></span><div><strong>Research stream</strong><small>Source-aware market analysis</small></div></div><span class="mp-chat-controls" style="display:flex;align-items:center;gap:8px"><span id="mpChatState">Connecting AI…</span><button type="button" class="mp-clear-chat" id="mpClearChat">Clear chat</button></span></div><div class="mp-messages" id="mpMessages" aria-live="polite"><div class="mp-message"><small>MARKETPULSE RESEARCH · READY</small>Ask a question or select a market below. I will separate available data from analysis and uncertainty.</div></div></div><div class="mp-title">Explore markets</div><div class="mp-market-tabs" id="mpMarketTabs"><button type="button" class="mp-market-tab active" data-group="crypto">Crypto</button><button type="button" class="mp-market-tab" data-group="stocks">US indices</button><button type="button" class="mp-market-tab" data-group="forex">Forex</button><button type="button" class="mp-market-tab" data-group="commodities">Commodities</button></div><div id="mpCrossAssetPanel" class="mp-cross-assets"><p class="mp-status">Loading market quotes…</p></div><div class="mp-prompts" id="mpPrompts" hidden><button class="mp-prompt" data-q="Give me a BTC and ETH market snapshot with latest prices and 24-hour changes.">BTC / ETH snapshot</button><button class="mp-prompt" data-q="Explain how US Treasury yields and the broad US dollar can affect Bitcoin and equities. Separate facts from interpretation.">Macro → risk assets</button><button class="mp-prompt" data-q="Compare BTC, ETH, SOL, BNB and XRP by latest 24-hour change and quote volume. Include source and timestamp.">Most traded crypto</button><button class="mp-prompt" data-q="Build a bull case, bear case and invalidation checklist for the asset I name. Avoid guaranteed targets.">Bull / bear scenarios</button><button class="mp-prompt" data-q="Teach me a repeatable market analysis framework using price, volume, volatility and macro context.">Teach me analysis</button></div><div id="mpAssetPrompts"></div><p class="mp-status" id="mpChatStatus">Connecting to MarketPilot AI service…</p><div class="mp-note">Research and education only—not personalized financial advice, trade execution or a guarantee of returns. API providers impose limits.</div></div></section><section id="researchView" class="mp-view" hidden><div class="mp-page"><div class="mp-head"><div><h2>Daily Market Briefing</h2><p>Review active assets, macro conditions and competing market scenarios in one daily workspace.</p></div><span class="mp-chip">DAILY WORKSPACE</span></div><div class="mp-grid"><article class="mp-card"><div class="mp-label">Research date</div><div class="mp-value" id="mpDate">—</div><div class="mp-muted">Market timestamps can differ from your local date.</div></article><article class="mp-card"><div class="mp-label">Coverage</div><div class="mp-value">Cross-asset</div><div class="mp-muted">Crypto, US indices, major FX pairs and key commodities.</div></article></div><div class="mp-row"><button class="mp-button primary" id="mpGenerate">Generate daily brief</button><button class="mp-button" id="mpRefresh">Refresh market data</button></div><p class="mp-status" id="mpResearchStatus">Loading market data…</p><div class="mp-title">Live crypto snapshot</div><div class="mp-assets" id="mpAssets"></div><div class="mp-title">US indices · Forex · Commodities</div><div id="mpResearchCrossAsset" class="mp-cross-assets"><p class="mp-status">Loading cross-asset quotes…</p></div><div class="mp-title">Research report</div><div class="mp-brief" id="mpBrief"><section><h3>01 / Market regime</h3><p>Generate a brief to review trend, volatility and macro context from available observations.</p></section><section><h3>02 / Bull case vs bear case</h3><p>Separate evidence, assumptions and invalidation conditions.</p></section><section><h3>03 / Watchlist & events</h3><p>Verify market timestamps and upcoming economic releases from authoritative sources.</p></section></div><div class="mp-note">Briefs are on-demand in this first phase. Scheduled reports and cloud history need deployed services and database configuration.</div></div></section><section id="profileView" class="mp-view" hidden><div class="mp-page mp-profile"><div class="mp-head"><div><h2>Profile & Workspace</h2><p>Set analyst preferences for this device.</p></div><span class="mp-chip">WORKSPACE</span></div><div class="mp-card"><div class="mp-label">Current workspace</div><div class="mp-value" id="mpProfileTitle">Local workspace</div><label for="mpName">Display name</label><input class="mp-input" id="mpName" maxlength="60" placeholder="Your analyst name"><label for="mpLevel">Experience level</label><select class="mp-select" id="mpLevel"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select><label for="mpFocus">Primary market focus</label><select class="mp-select" id="mpFocus"><option value="crypto">Crypto</option><option value="macro">Macro / rates / dollar</option><option value="equities">Stocks & indices</option><option value="multi">Multi-asset</option></select><label for="mpLanguage">Preferred language</label><select class="mp-select" id="mpLanguage"><option>English</option><option>Roman Urdu</option><option>Urdu</option></select><div class="mp-row"><button class="mp-button primary" id="mpSaveProfile">Save preferences</button><button class="mp-button" id="mpExport">Export preferences</button></div><p class="mp-status" id="mpProfileStatus">Stored locally in this browser. This is not a login.</p></div><div class="mp-title">Secure sign-in</div><div class="mp-card"><strong style="font-size:12px">Secure sign-in is not enabled yet</strong><p class="mp-muted">This profile is saved only on this device. Real sign-in and cloud profiles need an identity provider and database setup. Do not enter a password here.</p><div class="mp-chip">Supabase Auth candidate</div> <div class="mp-chip">SQL database</div></div><div class="mp-title">AI service</div><div class="mp-card"><div class="mp-label">AI provider</div><div class="mp-value" style="font-size:13px" id="mpBackend">MarketPilot AI endpoint checking…</div><p class="mp-muted">Market data, history and news continue to use the existing Worker. AI answers use the configured AI endpoint. Provider limits apply; API keys never belong in frontend files.</p></div></div></section>';
 
 views.insertAdjacentHTML("beforeend", `
 <section id="historyView" class="mp-view" hidden><div class="mp-page"><div class="mp-head"><div><h2>Macro &amp; Market History</h2><p>Compare public equity indices, Treasury yields, FX pairs, commodity futures and crypto history against current conditions. OTC forwards, swaps and specific option contracts need a dedicated instrument-level data feed; correlations are clues, not proof.</p></div><span class="mp-chip">1Y / 5Y HISTORY</span></div><div class="mp-card"><div class="mp-label">Compare two markets</div><div class="mp-history-controls"><div><label for="mpHistoryA">Market A</label><select class="mp-select" id="mpHistoryA"><option value="^GSPC">S&P 500</option><option value="^IXIC">Nasdaq Composite</option><option value="^DJI">Dow Jones</option><option value="^TNX">US 10Y yield</option><option value="DX-Y.NYB">US Dollar Index proxy</option><option value="^VIX">VIX volatility</option><option value="GC=F">Gold futures</option><option value="SI=F">Silver futures</option><option value="CL=F">WTI crude oil futures</option><option value="NG=F">Natural gas futures</option><option value="EURUSD=X">EUR/USD</option><option value="GBPUSD=X">GBP/USD</option><option value="AUDUSD=X">AUD/USD</option><option value="USDJPY=X">USD/JPY</option><option value="BTC-USD">Bitcoin spot</option><option value="ETH-USD">Ethereum spot</option><option value="SOL-USD">Solana spot</option></select></div><div><label for="mpHistoryB">Market B</label><select class="mp-select" id="mpHistoryB"><option value="^TNX">US 10Y yield</option><option value="^GSPC">S&P 500</option><option value="^IXIC">Nasdaq Composite</option><option value="^DJI">Dow Jones</option><option value="DX-Y.NYB">US Dollar Index proxy</option><option value="^VIX">VIX volatility</option><option value="GC=F">Gold futures</option><option value="SI=F">Silver futures</option><option value="CL=F">WTI crude oil futures</option><option value="NG=F">Natural gas futures</option><option value="EURUSD=X">EUR/USD</option><option value="GBPUSD=X">GBP/USD</option><option value="AUDUSD=X">AUD/USD</option><option value="USDJPY=X">USD/JPY</option><option value="BTC-USD">Bitcoin spot</option><option value="ETH-USD">Ethereum spot</option><option value="SOL-USD">Solana spot</option></select></div><div><label for="mpHistoryRange">Period</label><select class="mp-select" id="mpHistoryRange"><option value="1y">1 year</option><option value="5y" selected>5 years</option></select></div><div style="display:flex;align-items:end"><button type="button" class="mp-button primary" id="mpLoadHistory" style="width:100%">Compare history</button></div></div><p class="mp-status" id="mpHistoryStatus">Choose two markets to load monthly history.</p><div class="mp-history-kpi" id="mpHistoryKpis"></div><div class="mp-title">Market A · normalized history</div><div class="mp-history-chart" id="mpHistoryChartA"></div><div class="mp-title">Market B · normalized history</div><div class="mp-history-chart" id="mpHistoryChartB"></div><div class="mp-title">Pattern interpretation</div><div class="mp-card"><p id="mpHistoryAnalysis" class="mp-answer-block mp-muted">Load history to calculate monthly co-movement. Then ask MarketPilot AI Financial Assistant to explain possible macro mechanisms and current divergences.</p><div class="mp-row"><button type="button" class="mp-button primary" id="mpAnalyzeHistory">Ask MarketPilot AI Financial Assistant to analyze the pattern</button></div></div></div></section>
@@ -146,8 +295,8 @@ for(const raw of lines){
 let chatGeneration=0;
 let chatHistory=[];
 function buildConversationQuestion(current){const recent=chatHistory.slice(-6).map(item=>(item.role==="user"?"USER: ":"ATLAS: ")+String(item.content||"").slice(0,500));return recent.length?"RECENT CONVERSATION (context only):\n"+recent.join("\n")+"\n\nCURRENT QUESTION:\n"+current:current;}
-function addMessage(role,text){const el=document.createElement("div");el.className="mp-message "+role;const label=document.createElement("small");label.textContent=role==="user"?"YOU":"FINANCIAL ASSISTANT";const body=document.createElement("div");if(role==="assistant")renderAnswer(body,text);else body.textContent=text;el.append(label,body);$("mpMessages").appendChild(el);$("mpMessages").scrollTop=$("mpMessages").scrollHeight;return el;}
-$("mpClearChat").addEventListener("click",()=>{if(!confirm("Clear this conversation? Your saved journal entries will remain unchanged."))return;chatGeneration++;chatHistory=[];$("mpMessages").innerHTML='<div class="mp-message assistant"><small>FINANCIAL ASSISTANT</small><div>New conversation. Ask a market question to begin.</div></div>';$("mpQuestion").value="";$("mpChatState").textContent="Ready";$("mpChatStatus").textContent="Conversation cleared. Your journal remains untouched.";});
+function addMessage(role,text){const el=document.createElement("div");el.className="mp-message "+role;const label=document.createElement("small");label.textContent=role==="user"?"YOU":"MARKET ANALYSIS";const body=document.createElement("div");if(role==="assistant")renderAnswer(body,text);else body.textContent=text;el.append(label,body);$("mpMessages").appendChild(el);$("mpMessages").scrollTop=$("mpMessages").scrollHeight;return el;}
+$("mpClearChat").addEventListener("click",()=>{if(!confirm("Clear this conversation? Your saved journal entries will remain unchanged."))return;chatGeneration++;chatHistory=[];$("mpMessages").innerHTML='<div class="mp-message assistant"><small>MARKET ANALYSIS</small><div>New conversation. Ask a market question to begin.</div></div>';$("mpQuestion").value="";$("mpChatState").textContent="Ready";$("mpChatStatus").textContent="Conversation cleared. Your journal remains untouched.";});
 async function getMacro(){try{const r=await fetch(MARKET_API,{cache:"no-store",signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error("HTTP "+r.status);const d=await r.json();return {provider:d.provider||"FRED",fetchedAt:d.fetchedAt||null,data:d.data||{}};}catch(e){return {error:e.message,data:{}};}}
 const symbols=[["BTC-USD","Bitcoin","BTC"],["ETH-USD","Ethereum","ETH"],["SOL-USD","Solana","SOL"],["BNB-USD","BNB","BNB"],["XRP-USD","XRP","XRP"]];let lastAssets=[],assetLoadPromise=null;
 async function fetchAssets(){if(assetLoadPromise)return assetLoadPromise;assetLoadPromise=(async()=>{const response=await fetch(API_BASE+"/api/markets?group=crypto",{cache:"no-store",signal:AbortSignal.timeout(10000)});const data=await response.json().catch(()=>({error:"Invalid crypto quote response"}));if(!response.ok)throw new Error(data.detail||data.error||"Crypto quotes unavailable (HTTP "+response.status+")");const bySymbol=new Map((data.assets||[]).map(item=>[item.symbol,item]));return symbols.map(([symbol,name,short])=>{const item=bySymbol.get(symbol);return item?{...item,source:item.source||"CoinPaprika",fetchedAt:item.fetchedAt||item.asOf||data.asOf||new Date().toISOString()}:{symbol,name,short,error:"Quote unavailable"};});
