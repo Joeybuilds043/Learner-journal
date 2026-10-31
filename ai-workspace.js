@@ -62,6 +62,7 @@ style.textContent += `
 @media(max-width:420px){.mp-brief-report-head,.mp-brief-summary,.mp-brief-block,.mp-brief-events{padding:10px}.mp-brief-headline{font-size:15px}}
 `;
 
+style.textContent += `
 /* Terminal UI polish: compact hierarchy, legible output and restrained market colors */
 .mp-mentor{
   position:relative;overflow:hidden;isolation:isolate;
@@ -208,6 +209,7 @@ style.textContent += `
   .mp-avatar .sh-illustration{animation:none!important}
 }
 
+`;
 document.head.appendChild(style);
 const nav=document.querySelector(".app-nav"), main=document.querySelector("main.app"), market=$("dashboardView"),journal=$("journalView");
 if(!nav||!main||$("aiView"))return;
