@@ -57,6 +57,13 @@
     .ms-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
     .ms-chartbox{margin-top:9px;border:1px solid #263a50;border-radius:12px;background:#0a1320;padding:10px;min-height:120px}
     .ms-chartbox{border-color:#314660;background:radial-gradient(ellipse at 10% 0%,#172842 0%,#0a1320 66%);box-shadow:inset 0 1px 0 #ffffff08}.ms-chartbox svg{display:block;width:100%;height:250px;overflow:visible}.ms-chartbox svg text{font-variant-numeric:tabular-nums}.ms-chartbox svg .ms-gridline{stroke:#24364b;stroke-dasharray:3 5}.ms-chartbox svg .ms-bar{opacity:.22;transition:opacity .18s}.ms-chartbox svg .ms-bar:hover{opacity:.58}.ms-chartbox svg .ms-data-point{cursor:crosshair;transition:r .15s}.ms-chartbox svg .ms-data-point:hover{r:5}.ms-chartbox .empty{font-size:10px;color:#8fa5bd;line-height:1.5}
+    .ms-metric-history{margin-top:10px;padding-top:9px;border-top:1px solid #26384d;min-width:0}
+    .ms-metric-history svg{display:block;width:100%;height:auto;aspect-ratio:340 / 82;overflow:visible}
+    .ms-metric-history-head{display:flex;justify-content:space-between;gap:8px;color:#859bb5;font-size:9px;line-height:1.4}
+    .ms-metric-trend{font-variant-numeric:tabular-nums;font-weight:800;white-space:nowrap}
+    .ms-metric-trend.up{color:#6bd2b6}.ms-metric-trend.down{color:#ef91a5}
+    .ms-chartbox svg{display:block;width:100%;height:auto;aspect-ratio:720 / 210;overflow:visible}
+    .ms-cpi-chart svg{display:block;width:100%;height:auto;aspect-ratio:720 / 210;overflow:visible}
     .ms-edit-note{font-size:9px;line-height:1.4;color:#8fa5bd;margin:8px 0 0}
     .ms-ai-cta{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px;padding:15px;border:1px solid #53658c;border-radius:15px;background:linear-gradient(115deg,#1c2b47,#18243b 55%,#282442);box-shadow:0 12px 28px #0003}.ms-ai-cta strong{display:block;font-size:13px;color:#f0f4ff}.ms-ai-cta p{margin:5px 0 0;color:#b4c4dc;font-size:10px;line-height:1.5}.ms-ai-kicker{display:block;margin-bottom:5px;color:#c1b3ff;font-size:9px;letter-spacing:1.4px;font-weight:900}.ms-ai-cta button{flex-shrink:0;padding:11px 13px;border:1px solid #c0caff;border-radius:10px;background:linear-gradient(135deg,#cbd5ff,#a6b8ff);color:#101729;font-size:11px;font-weight:900;box-shadow:0 5px 16px #7f9cff20}.ms-hidden{display:none!important}.ms-ai-cta-dashboard{margin:12px 0 18px}@media(max-width:480px){.ms-ai-cta{align-items:flex-start;flex-direction:column}.ms-ai-cta button{width:100%}}
     @media(min-width:560px){.ms-grid{grid-template-columns:1fr}}
@@ -94,20 +101,23 @@
     const valid=(points||[]).filter(p=>Number.isFinite(Number(p.value))&&p.date).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
     if(valid.length<2){historyChart.innerHTML='<div class="empty">Not enough dated observations for this range. Choose a longer period; no sample data is shown.</div>';return;}
     const values=valid.map(p=>Number(p.value)),min=Math.min(...values),max=Math.max(...values),span=max-min||Math.max(Math.abs(max)*.01,.01);
-    const W=720,H=220,L=56,R=18,T=22,B=35,plotW=W-L-R,plotH=H-T-B,baseY=H-B;
-    const pts=values.map((v,i)=>({x:L+i*plotW/(values.length-1),y:T+(max-v)/span*plotH,v,date:valid[i].date}));
-    let path="M "+pts[0].x.toFixed(2)+" "+pts[0].y.toFixed(2);
-    for(let i=1;i<pts.length;i++){const prev=pts[i-1],cur=pts[i],mx=(prev.x+cur.x)/2;path+=" Q "+prev.x.toFixed(2)+" "+prev.y.toFixed(2)+" "+mx.toFixed(2)+" "+((prev.y+cur.y)/2).toFixed(2);if(i===pts.length-1)path+=" T "+cur.x.toFixed(2)+" "+cur.y.toFixed(2);}
-    const area=path+" L "+pts[pts.length-1].x.toFixed(2)+" "+baseY+" L "+L+" "+baseY+" Z";
+    const W=720,H=210,L=54,R=16,T=18,B=28,plotW=W-L-R,plotH=H-T-B,baseY=H-B;
+    const coords=values.map((v,i)=>({x:L+i*plotW/(values.length-1),y:T+(max-v)/span*plotH,v,date:valid[i].date}));
+    let path="M "+coords[0].x.toFixed(2)+" "+coords[0].y.toFixed(2);
+    for(let i=1;i<coords.length;i++){
+      const prev=coords[i-1],cur=coords[i],midX=(prev.x+cur.x)/2,midY=(prev.y+cur.y)/2;
+      path+=" Q "+prev.x.toFixed(2)+" "+prev.y.toFixed(2)+" "+midX.toFixed(2)+" "+midY.toFixed(2);
+      if(i===coords.length-1)path+=" T "+cur.x.toFixed(2)+" "+cur.y.toFixed(2);
+    }
+    const area=path+" L "+coords[coords.length-1].x.toFixed(2)+" "+baseY+" L "+L+" "+baseY+" Z";
     const fmt=v=>Number(v).toLocaleString("en-US",{maximumFractionDigits:3});
-    const yTicks=[max,(max+min)/2,min],grid=yTicks.map((v,i)=>{const y=T+i*plotH/2;return '<line class="ms-gridline" x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'"/><text x="'+(L-9)+'" y="'+(y+4)+'" text-anchor="end" fill="#91a6c1" font-size="10">'+fmt(v)+(unit==="percent"?"%":"")+'</text>';}).join("");
-    const step=Math.max(1,Math.floor(pts.length/7));
-    const dots=pts.filter((p,i)=>i===0||i===pts.length-1||i%step===0).map(p=>'<circle class="ms-data-point" cx="'+p.x.toFixed(2)+'" cy="'+p.y.toFixed(2)+'" r="3" fill="#dce5ff" stroke="#8eaaff" stroke-width="2"><title>'+escapeHtml(p.date)+' · '+fmt(p.v)+(unit==="percent"?"%":"")+'</title></circle>').join("");
-    const first=valid[0].date,last=valid[valid.length-1].date;
-    const lineColor=label.toLowerCase().includes("inflation")?"#b18cff":label.toLowerCase().includes("yield")?"#8da2ff":"#579dff";
-    const barWidth=Math.max(1,Math.min(7,plotW/pts.length*.58));
-    const bars=pts.map(p=>{const h=Math.max(1,baseY-p.y),y=baseY-h;return '<rect class="ms-bar" x="'+(p.x-barWidth/2).toFixed(2)+'" y="'+y.toFixed(2)+'" width="'+barWidth.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="1.2" fill="'+lineColor+'"><title>'+escapeHtml(p.date)+' · '+fmt(p.v)+(unit==="percent"?"%":"")+'</title></rect>';}).join("");
-    historyChart.innerHTML='<div class="ms-date">'+escapeHtml(label)+' · '+valid.length+' observations · source: published historical data</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(label)+' historical chart" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="msAreaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+lineColor+'" stop-opacity=".34"/><stop offset="100%" stop-color="'+lineColor+'" stop-opacity=".015"/></linearGradient><linearGradient id="msStrokeGradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="'+lineColor+'"/><stop offset="100%" stop-color="#c5d2ff"/></linearGradient></defs>'+grid+bars+'<path d="'+area+'" fill="url(#msAreaGradient)"/><path d="'+path+'" stroke="url(#msStrokeGradient)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'<text x="'+L+'" y="'+(H-10)+'" fill="#8196b2" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end" fill="#8196b2" font-size="10">'+escapeHtml(last)+'</text></svg><div class="ms-chart-label"><span>Low '+fmt(min)+(unit==="percent"?"%":"")+'</span><span>Latest '+fmt(values[values.length-1])+(unit==="percent"?"%":"")+'</span></div>';
+    const ticks=[max,(max+min)/2,min];
+    const grid=ticks.map((v,i)=>{const y=T+i*plotH/2;return '<line class="ms-gridline" x1="'+L+'" y1="'+y.toFixed(1)+'" x2="'+(W-R)+'" y2="'+y.toFixed(1)+'"/><text x="'+(L-9)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" fill="#91a6c1" font-size="10">'+fmt(v)+(unit==="percent"?"%":"")+'</text>';}).join("");
+    const isUp=values[values.length-1]>=values[0];
+    const color=label.toLowerCase().includes("inflation")?"#b18cff":isUp?"#5cc8b1":"#e7839a";
+    const first=valid[0].date,last=valid[valid.length-1].date,latest=coords[coords.length-1];
+    const areaId="msHistoryArea",lineId="msHistoryLine";
+    historyChart.innerHTML='<div class="ms-date">'+escapeHtml(label)+' · '+valid.length+' observations · '+(isUp?"higher":"lower")+' than first reading · source: published historical data</div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(label)+' historical trend" preserveAspectRatio="none"><defs><linearGradient id="'+areaId+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+color+'" stop-opacity=".24"/><stop offset="100%" stop-color="'+color+'" stop-opacity=".015"/></linearGradient><linearGradient id="'+lineId+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="'+color+'" stop-opacity=".55"/><stop offset="100%" stop-color="'+color+'"/></linearGradient></defs>'+grid+'<path d="'+area+'" fill="url(#'+areaId+')"/><path d="'+path+'" stroke="url(#'+lineId+')" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="'+latest.x.toFixed(2)+'" cy="'+latest.y.toFixed(2)+'" r="4" fill="'+color+'" stroke="#0a1421" stroke-width="2"><title>'+escapeHtml(latest.date)+' · '+fmt(latest.v)+(unit==="percent"?"%":"")+'</title></circle><text x="'+L+'" y="'+(H-8)+'" fill="#8196b2" font-size="10">'+escapeHtml(first)+'</text><text x="'+(W-R)+'" y="'+(H-8)+'" text-anchor="end" fill="#8196b2" font-size="10">'+escapeHtml(last)+'</text></svg><div class="ms-chart-label"><span>Low '+fmt(min)+(unit==="percent"?"%":"")+'</span><span>Latest '+fmt(values[values.length-1])+(unit==="percent"?"%":"")+'</span></div>';
   }
   async function loadHistory(){
     const selected=seriesSelect.value,range=rangeSelect.value;
@@ -194,16 +204,16 @@
   }
   async function loadMetricCharts(){
     const configs=[
-      {series:"us10y",index:0,color:"#65c9e7",label:"US 10Y yield"},
-      {series:"dollar",index:1,color:"#8faaff",label:"Broad USD index"},
-      {series:"cpi",index:2,color:"#c3a3ff",label:"CPI inflation"},
-      {series:"ppi",index:3,color:"#f0b27a",label:"PPI index"}
+      {series:"us10y",index:0,label:"US 10Y yield"},
+      {series:"dollar",index:1,label:"Broad USD index"},
+      {series:"cpi",index:2,label:"CPI inflation"},
+      {series:"ppi",index:3,label:"PPI index"}
     ];
     await Promise.all(configs.map(async cfg=>{
       const cardEl=grid.children[cfg.index];if(!cardEl)return;
       let host=cardEl.querySelector(".ms-metric-history");
       if(!host){host=document.createElement("div");host.className="ms-metric-history";cardEl.appendChild(host);}
-      host.innerHTML='<div class="ms-date">Loading published history…</div>';
+      if(!host.querySelector("svg"))host.innerHTML='<div class="ms-date">Loading historical trend…</div>';
       try{
         const data=await getMacroJson(API_URL+"history?series="+encodeURIComponent(cfg.series)+"&range="+(cfg.series==="cpi"?"5y":"1y"));
         let points=(data.points||data.observations||[]).filter(p=>p&&p.date&&Number.isFinite(Number(p.value))).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
@@ -212,13 +222,29 @@
           points=points.map(p=>{const d=new Date(String(p.date)+"T00:00:00Z");d.setUTCMonth(d.getUTCMonth()-12);const prior=byMonth.get(d.toISOString().slice(0,7));return prior!==undefined&&prior!==0?{date:p.date,value:(Number(p.value)/prior-1)*100}:null;}).filter(Boolean);
         }
         if(points.length<3)throw new Error("Not enough dated observations");
-        points=points.slice(-24);const vals=points.map(p=>Number(p.value)),min=Math.min(...vals),max=Math.max(...vals),span=max-min||Math.max(Math.abs(max)*.01,.01),W=340,H=76,L=5,R=5,T=8,B=8,pw=W-L-R,ph=H-T-B,base=H-B;
-        const pts=vals.map((v,i)=>({x:L+i*pw/(vals.length-1),y:T+(max-v)/span*ph,v,date:points[i].date}));
-        let path="M "+pts[0].x.toFixed(1)+" "+pts[0].y.toFixed(1);for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],mx=(a.x+b.x)/2;path+=" Q "+a.x.toFixed(1)+" "+a.y.toFixed(1)+" "+mx.toFixed(1)+" "+((a.y+b.y)/2).toFixed(1);if(i===pts.length-1)path+=" T "+b.x.toFixed(1)+" "+b.y.toFixed(1);}
-        const area=path+" L "+pts[pts.length-1].x.toFixed(1)+" "+base+" L "+pts[0].x.toFixed(1)+" "+base+" Z",gid="msMetric"+cfg.index;
-        const bars=pts.map((p,i)=>{const bw=Math.max(2,pw/pts.length*.52),x=p.x-bw/2;return '<rect x="'+x.toFixed(1)+'" y="'+p.y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,base-p.y).toFixed(1)+'" rx="2" fill="'+cfg.color+'" opacity=".24"><title>'+escapeHtml(p.date)+" · "+fmt(p.v,2)+(cfg.series==="us10y"||cfg.series==="cpi"?"%":"")+'</title></rect>';}).join("");
-        host.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+cfg.label+' published history chart"><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+cfg.color+'" stop-opacity=".28"/><stop offset="100%" stop-color="'+cfg.color+'" stop-opacity=".01"/></linearGradient></defs><path d="M5 25H335 M5 50H335" stroke="#26384d" stroke-dasharray="3 5"/>'+bars+'<path d="'+area+'" fill="url(#'+gid+')"/><path d="'+path+'" fill="none" stroke="'+cfg.color+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="'+pts[pts.length-1].x.toFixed(1)+'" cy="'+pts[pts.length-1].y.toFixed(1)+'" r="3.2" fill="'+cfg.color+'"><title>'+escapeHtml(pts[pts.length-1].date)+' · '+fmt(pts[pts.length-1].v,2)+'</title></circle></svg><div class="ms-chart-label"><span>'+escapeHtml(points[0].date.slice(0,7))+'</span><span>Latest '+escapeHtml(points[points.length-1].date.slice(0,7))+'</span></div>';
-      }catch(e){host.innerHTML='<div class="ms-date">History unavailable · '+escapeHtml(e.message||"source error")+'</div>';}
+        points=points.slice(-24);
+        const vals=points.map(p=>Number(p.value)),min=Math.min(...vals),max=Math.max(...vals),span=max-min||Math.max(Math.abs(max)*.01,.01);
+        const W=340,H=82,L=4,R=5,T=7,B=6,pw=W-L-R,ph=H-T-B,base=H-B;
+        const coords=vals.map((v,i)=>({x:L+i*pw/(vals.length-1),y:T+(max-v)/span*ph,v,date:points[i].date}));
+        let path="M "+coords[0].x.toFixed(1)+" "+coords[0].y.toFixed(1);
+        for(let i=1;i<coords.length;i++){
+          const prev=coords[i-1],cur=coords[i],midX=(prev.x+cur.x)/2,midY=(prev.y+cur.y)/2;
+          path+=" Q "+prev.x.toFixed(1)+" "+prev.y.toFixed(1)+" "+midX.toFixed(1)+" "+midY.toFixed(1);
+          if(i===coords.length-1)path+=" T "+cur.x.toFixed(1)+" "+cur.y.toFixed(1);
+        }
+        const area=path+" L "+coords[coords.length-1].x.toFixed(1)+" "+base+" L "+coords[0].x.toFixed(1)+" "+base+" Z";
+        const up=vals[vals.length-1]>=vals[0],color=up?"#5bc8b0":"#e7839a",gid="msMetricArea"+cfg.index;
+        const last=coords[coords.length-1],firstDate=points[0].date.slice(0,7),lastDate=points[points.length-1].date.slice(0,7);
+        const delta=vals[vals.length-1]-vals[0],deltaPct=vals[0]!==0?delta/Math.abs(vals[0])*100:null;
+        const changeText=deltaPct===null?"":(deltaPct>0?"+":"")+deltaPct.toFixed(2)+"% over selected sample";
+        host.innerHTML='<div class="ms-metric-history-head"><span>'+escapeHtml(cfg.label)+' · 24 recent observations</span><span class="ms-metric-trend '+(up?"up":"down")+'">'+changeText+'</span></div><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escapeHtml(cfg.label)+' 24-observation trend" preserveAspectRatio="none"><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+color+'" stop-opacity=".25"/><stop offset="100%" stop-color="'+color+'" stop-opacity=".01"/></linearGradient></defs><path d="M4 26H336 M4 54H336" stroke="#26384d" stroke-dasharray="3 5" opacity=".55"/><path d="'+area+'" fill="url(#'+gid+')"/><path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="'+last.x.toFixed(1)+'" cy="'+last.y.toFixed(1)+'" r="3.3" fill="'+color+'" stroke="#0c1725" stroke-width="1.8"><title>'+escapeHtml(last.date)+' · '+fmt(last.v,2)+(cfg.series==="us10y"||cfg.series==="cpi"?"%":"")+'</title></circle></svg><div class="ms-chart-label"><span>'+escapeHtml(firstDate)+'</span><span>'+escapeHtml(lastDate)+'</span></div>';
+      }catch(e){
+        if(host.querySelector("svg")){
+          const note=document.createElement("div");note.className="ms-date";note.textContent="Latest history refresh unavailable; showing last successful chart.";host.appendChild(note);
+        }else{
+          host.innerHTML='<div class="ms-date">History unavailable · '+escapeHtml(e.message||"source error")+'</div>';
+        }
+      }
     }));
   }
   async function refresh(){
@@ -238,7 +264,7 @@
       status.textContent="Updated "+(result.fetchedAt?new Date(result.fetchedAt).toLocaleString():"now")+" · Observation dates shown on each card.";
       dataLoaded=true;
     }catch(e){grid.replaceChildren();["US 10Y TREASURY YIELD","BROAD US DOLLAR INDEX","PPI PRODUCER PRICE INDEX","VIX · IMPLIED VOLATILITY"].forEach(label=>grid.appendChild(card(label,null,"",null)));read.textContent="Macro data could not load. Refresh before drawing a conclusion.";status.textContent=/429|rate limit/i.test(e.message||"")?"FRED/source rate limit. Wait 60 seconds before retrying; repeated refreshes may extend the limit.":"Data unavailable: "+(e.message||"request failed");}
-    finally{button.disabled=false;if(dataLoaded)loadMetricCharts();}
+    finally{button.disabled=false;loadMetricCharts();}
   }
   button.addEventListener("click",()=>{refresh();loadHistory();loadCpiTrend()}); refresh(); loadHistory(); loadCpiTrend();
 })();
