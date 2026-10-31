@@ -63,7 +63,7 @@ jobs:
           if (!config.includes("MARKETPILOT_AI_API_BASE")) throw new Error("Optional AI endpoint setting missing");
           if (!ai.includes("function renderDailyBrief(report)") || !ai.includes("report.brief")) throw new Error("Structured analyst brief renderer missing");
           if (!ai.includes("getAllCrossAssetData(true)") || !ai.includes("lastAssets=await fetchAssets()")) throw new Error("Daily brief must refresh market snapshots");
-          if (!ai.includes(".ms-chartbox svg{height:168px!important}") || !ai.includes(".ms-cpi-chart svg{height:150px!important}") || !ai.includes(".mp-history-chart svg{height:138px!important}")) throw new Error("Compact chart sizing missing");
+          if (!ai.includes(".ms-chartbox svg{height:auto!important;aspect-ratio:720 / 210") || !ai.includes(".ms-cpi-chart svg{height:auto!important;aspect-ratio:720 / 210") || !ai.includes(".mp-history-chart svg{height:138px!important}")) throw new Error("Native chart aspect-ratio styling missing");
           console.log("Validated app shell, local journal key, API routing, navigation and inline JavaScript.");
           NODE
 
