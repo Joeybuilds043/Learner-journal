@@ -307,6 +307,9 @@ let source=extractText(value);
 if(!source)source="The AI service returned a structured response without readable final text. Please retry; if this continues, the provider response needs investigation.";
 source=source.replace(/\r\n?/g,"\n").replace(/\u00a0/g," ").trim();
 source=source.replace(/([^\n])\s+(#{1,6}\s+)/g,"$1\n$2");
+// Inline Markdown normalization also splits punctuation-delimited lists returned on one line.
+source=source.replace(/([.:;])\s+([*+•-])\s+/g,"$1\n$2 ");
+source=source.replace(/([.:;])\s+(\d+[.)]\s+)/g,"$1\n$2");
 const lines=source.split("\n");
 let list=null,listType="";
 for(const raw of lines){
