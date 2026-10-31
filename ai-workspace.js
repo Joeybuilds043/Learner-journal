@@ -54,8 +54,9 @@ style.textContent += `
 .mp-brief-invalidation{padding-top:7px!important;border-top:1px solid #293a50;color:#c9d5e6!important;font-size:10px!important}
 .mp-brief-legacy{padding:11px 13px;border:1px solid #293c54;border-radius:12px;background:#0d1827}
 .mp-history-chart svg{height:138px!important}
-.ms-chartbox svg{height:168px!important}
-.ms-cpi-chart svg{height:150px!important}
+.ms-chartbox svg{height:auto!important;aspect-ratio:720 / 210;max-height:none!important}
+.ms-cpi-chart svg{height:auto!important;aspect-ratio:720 / 210;max-height:none!important}
+.ms-metric-history svg{height:auto!important;aspect-ratio:340 / 82}
 .ms-chart svg{height:42px!important}
 @media(min-width:680px){.ms-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:679px){.ms-grid{grid-template-columns:1fr!important}.mp-brief-signal-grid,.mp-brief-scenario-grid{grid-template-columns:1fr}}
