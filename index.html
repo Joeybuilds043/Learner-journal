@@ -101,6 +101,18 @@
       flex-shrink: 0;
     }
 
+
+    .credit-line {
+      display: block;
+      max-width: 360px;
+      margin-top: 4px;
+      color: #8298b4;
+      font-size: 9px;
+      line-height: 1.35;
+      letter-spacing: .08px;
+      text-align: right;
+    }
+
     .date-box strong {
       display: block;
       color: var(--text);
@@ -497,6 +509,7 @@
     @media (max-width: 600px) {
       .app { width: min(100% - 20px, 1000px); padding-top: 17px; }
       .topbar { margin-bottom: 20px; }
+      .credit-line { max-width: 210px; font-size: 8px; }
       h1 { font-size: 19px; }
       .brand-sub { font-size: 9px; letter-spacing: .6px; }
       .logo { width: 42px; height: 42px; }
@@ -547,6 +560,7 @@
     <div class="date-box">
       YOUR LOCAL DATE
       <strong id="todayDate"></strong>
+      <small class="credit-line">Inspired by Saad Hashmani’s market insights and disciplined analytical approach.</small>
     </div>
   </header>
 
@@ -1069,7 +1083,7 @@
   // Register the existing service worker.
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=20261031-marketpulse-v31").catch(() => {
+      navigator.serviceWorker.register("./sw.js?v=20261031-marketpulse-v32").catch(() => {
         showStatus("Offline setup failed. Check the service worker file.");
       });
     });
@@ -1105,7 +1119,7 @@
 
   <script src="./macro-dashboard.js?v=20261031-marketpulse-v11" defer></script>
   <script src="./marketpilot-config.js?v=20261031-marketpulse-branding-v2" defer></script>
-  <script src="./ai-workspace.js?v=20261031-analyst-markdown-v13" defer></script>
+  <script src="./ai-workspace.js?v=20261031-history-clean-v14" defer></script>
 </body>
   </html>
 
