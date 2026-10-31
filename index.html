@@ -1083,7 +1083,7 @@
   // Register the existing service worker.
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=20261031-marketpulse-v32").catch(() => {
+      navigator.serviceWorker.register("./sw.js?v=20261031-marketpulse-v33").catch(() => {
         showStatus("Offline setup failed. Check the service worker file.");
       });
     });
@@ -1117,7 +1117,7 @@
 })();
 </script>
 
-  <script src="./macro-dashboard.js?v=20261031-marketpulse-v11" defer></script>
+  <script src="./macro-dashboard.js?v=20261031-marketpulse-v12" defer></script>
   <script src="./marketpilot-config.js?v=20261031-marketpulse-branding-v2" defer></script>
   <script src="./ai-workspace.js?v=20261031-history-clean-v14" defer></script>
 </body>
