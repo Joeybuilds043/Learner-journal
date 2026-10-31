@@ -84,7 +84,7 @@ jobs:
             "PWA name": manifest.short_name === "MarketPulse",
             "Structured daily desk brief": ai.includes("function renderDailyBrief(report)") && ai.includes("report.brief"),
             "Fresh cross-asset snapshots": ai.includes("getAllCrossAssetData(true)") && ai.includes("lastAssets=await fetchAssets()"),
-            "Compact charts": ai.includes(".ms-chartbox svg{height:168px!important}") && ai.includes(".ms-cpi-chart svg{height:150px!important}") && ai.includes(".mp-history-chart svg{height:138px!important}"),
+            "Compact native-ratio charts": ai.includes(".ms-chartbox svg{height:auto!important;aspect-ratio:720 / 210") && ai.includes(".ms-cpi-chart svg{height:auto!important;aspect-ratio:720 / 210") && ai.includes(".mp-history-chart svg{height:138px!important}"),
             "AI page is not duplicated on dashboard": ai.includes('$("aiView").hidden=name!=="ai"') && !ai.includes('$("aiView").hidden=!(name==="ai"||name==="markets")'),
             "Homepage AI analyst launch card": ai.includes("mpHomeAgent") && ai.includes("Illustrated senior investor analyst mascot") && ai.includes('setView("ai");$("mpQuestion").focus()'),
             "AI answer Markdown rendering": ai.includes("function appendInline(target,text)") && ai.includes('source.split("\\n")') && ai.includes('line.match(/^(#{1,6})\\s+(.+)$/)') && ai.includes('line.match(/^[-*+•]\\s+(.+)$/)'),
