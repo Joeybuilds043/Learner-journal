@@ -57,6 +57,7 @@
     .ms-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
     .ms-chartbox{margin-top:9px;border:1px solid #263a50;border-radius:12px;background:#0a1320;padding:10px;min-height:120px}
     .ms-chartbox{border-color:#314660;background:radial-gradient(ellipse at 10% 0%,#172842 0%,#0a1320 66%);box-shadow:inset 0 1px 0 #ffffff08}.ms-chartbox svg{display:block;width:100%;height:250px;overflow:visible}.ms-chartbox svg text{font-variant-numeric:tabular-nums}.ms-chartbox svg .ms-gridline{stroke:#24364b;stroke-dasharray:3 5}.ms-chartbox svg .ms-bar{opacity:.22;transition:opacity .18s}.ms-chartbox svg .ms-bar:hover{opacity:.58}.ms-chartbox svg .ms-data-point{cursor:crosshair;transition:r .15s}.ms-chartbox svg .ms-data-point:hover{r:5}.ms-chartbox .empty{font-size:10px;color:#8fa5bd;line-height:1.5}
+    .ms-card-warning{margin-top:5px;padding:6px 8px;border-left:2px solid #d99a72;border-radius:0 6px 6px 0;background:#35261d;color:#e3b99d;font-size:9px;line-height:1.4;overflow-wrap:anywhere}
     .ms-metric-history{margin-top:10px;padding-top:9px;border-top:1px solid #26384d;min-width:0}
     .ms-metric-history svg{display:block;width:100%;height:auto;aspect-ratio:340 / 82;overflow:visible}
     .ms-metric-history-head{display:flex;justify-content:space-between;gap:8px;color:#859bb5;font-size:9px;line-height:1.4}
@@ -195,7 +196,8 @@
     const el=document.createElement("article"); el.className="ms-card";
     const changeHtml=change===null || change===undefined ? "" : `<div class="ms-change ${change>0?"up":change<0?"down":"flat"}">${change>0?"+":""}${fmt(change,2)}${opts.changeSuffix||"%" } ${opts.changeLabel||"vs prior"}</div>`;
     const valHtml=value===null ? "—" : fmt(value,opts.decimals||2)+(opts.suffix||"");
-    el.innerHTML=`<div class="ms-card-top"><div class="ms-label">${escapeHtml(label)}</div><div class="ms-value">${valHtml}</div></div><div class="ms-date">${date ? "As of "+escapeHtml(date) : (value===null?"Not provided by data service":"Date unavailable")}</div>${changeHtml}${opts.chart||""}<div class="ms-card-extra">${opts.extra||""}</div>`;
+    const errorHtml=opts.error?`<div class="ms-card-warning">${escapeHtml(opts.error)}</div>`:"";
+el.innerHTML=`<div class="ms-card-top"><div class="ms-label">${escapeHtml(label)}</div><div class="ms-value">${valHtml}</div></div><div class="ms-date">${date ? "As of "+escapeHtml(date) : (value===null?"Not provided by data service":"Date unavailable")}</div>${changeHtml}${opts.chart||""}${errorHtml}<div class="ms-card-extra">${opts.extra||""}</div>`;
     return el;
   }
   function gauge(v) {
@@ -255,13 +257,13 @@
       const d=result.data||{};const dollar=num(d.dollar?.value),dollarPct=percentChange(d.dollar),dollarPrev=dollar!==null&&num(d.dollar?.change)!==null?dollar-num(d.dollar.change):null;
       const cpiYoY=num(d.cpiYearOverYear?.value)??latestCpiYoyValue,cpiChange=num(d.cpiYearOverYear?.change),ppiPct=percentChange(d.ppi);const yieldVal=num(d.us10y?.value),yieldCh=num(d.us10y?.change),vix=num(d.vix?.value);
       grid.replaceChildren();
-      grid.appendChild(card("US 10Y TREASURY YIELD",yieldVal,dateOf(d.us10y),yieldCh===null?null:yieldCh*100,{suffix:"%",changeSuffix:" bps",changeLabel:"change",}));
-      grid.appendChild(card("BROAD US DOLLAR INDEX",dollar,dateOf(d.dollar),dollarPct,{decimals:3,extra:'<div class="ms-date">Broad dollar index, not ICE DXY</div>'}));
-      grid.appendChild(card("PPI PRODUCER PRICE INDEX",num(d.ppi?.value),dateOf(d.ppi),ppiPct,{decimals:3,}));
-      grid.appendChild(card("VIX · IMPLIED VOLATILITY",vix,dateOf(d.vix),num(d.vix?.change),{changeSuffix:" pts",changeLabel:"change",extra:vix===null?"<div class=\"ms-date\">No current observation supplied</div>":gauge(vix)}));
+      grid.appendChild(card("US 10Y TREASURY YIELD",yieldVal,dateOf(d.us10y),yieldCh===null?null:yieldCh*100,{suffix:"%",changeSuffix:" bps",changeLabel:"change",error:d.us10y?.error}));
+      grid.appendChild(card("BROAD US DOLLAR INDEX",dollar,dateOf(d.dollar),dollarPct,{decimals:3,error:d.dollar?.error,extra:'<div class="ms-date">Broad dollar index, not ICE DXY</div>'}));
+      grid.appendChild(card("PPI PRODUCER PRICE INDEX",num(d.ppi?.value),dateOf(d.ppi),ppiPct,{decimals:3,error:d.ppi?.error}));
+      grid.appendChild(card("VIX · IMPLIED VOLATILITY",vix,dateOf(d.vix),num(d.vix?.change),{changeSuffix:" pts",changeLabel:"change",error:d.vix?.error,extra:vix===null?"<div class=\"ms-date\">No current observation supplied</div>":gauge(vix)}));
       const cpiLine=cpiYoY===null?"CPI inflation unavailable":"CPI inflation: "+fmt(cpiYoY)+"% year over year";const ppiLine=num(d.ppi?.value)===null?"PPI unavailable":"PPI index: "+fmt(d.ppi.value,3);const dollarLine=dollar===null?"Dollar index unavailable":"Broad USD index: "+fmt(dollar,3);
       read.textContent=[cpiLine,ppiLine,dollarLine,vix===null?"VIX unavailable":"VIX "+fmt(vix)+": "+(vix<15?"low":vix<25?"elevated":"high")+" expected volatility"].join(" · ")+". Compare release actuals with consensus and price action.";
-      status.textContent="Updated "+(result.fetchedAt?new Date(result.fetchedAt).toLocaleString():"now")+" · Observation dates shown on each card.";
+      const warnings=Array.isArray(result.warnings)?result.warnings:[];status.textContent=(warnings.length?"Partial update · ":"Updated ")+(result.fetchedAt?new Date(result.fetchedAt).toLocaleString():"now")+" · Observation dates shown on each card."+(warnings.length?" · "+warnings.length+" source(s) unavailable; successful series remain visible.":"");
       dataLoaded=true;
     }catch(e){grid.replaceChildren();["US 10Y TREASURY YIELD","BROAD US DOLLAR INDEX","PPI PRODUCER PRICE INDEX","VIX · IMPLIED VOLATILITY"].forEach(label=>grid.appendChild(card(label,null,"",null)));read.textContent="Macro data could not load. Refresh before drawing a conclusion.";status.textContent=/429|rate limit/i.test(e.message||"")?"FRED/source rate limit. Wait 60 seconds before retrying; repeated refreshes may extend the limit.":"Data unavailable: "+(e.message||"request failed");}
     finally{button.disabled=false;loadMetricCharts();}
